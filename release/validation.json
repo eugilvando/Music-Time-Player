@@ -1,0 +1,49 @@
+{
+  "version": "1.2.1+41",
+  "date": "2026-10-16",
+  "platform": "Windows x64",
+  "checks": {
+    "pubGet": "passed",
+    "dartAnalysis": "passed; no issues",
+    "baselineTests": {
+      "passed": 297,
+      "failed": 0,
+      "command": "flutter test --no-pub --concurrency=1"
+    },
+    "screenshotRendering": {
+      "passed": 1,
+      "images": 7,
+      "fixture": "isolated fictional catalog; actual application widgets"
+    },
+    "runtimeSource": "identical to validated current application",
+    "runtimeBundle": {
+      "binaryFilesIdentical": true,
+      "files": 38,
+      "packagingAdjustment": "Root native_assets.json uses the included portable manifest rather than developer-machine paths"
+    },
+    "installer": "Inno Setup 6 compilation passed; original validated binaries, portable native metadata and notices",
+    "relativeDocumentationLinks": "passed",
+    "personalPathsAndCredentialPatternScan": "no findings"
+  },
+  "priorBaselineNativeChecks": "Windows release build, playback, media/tray and data restart were validated before preparing this public snapshot; not rerun against the personal profile",
+  "applicationBinaries": [
+    {
+      "file": "music_time.exe",
+      "sha256": "d68b17556e47a4931a14655e88aaba2e47de77d3697ca1411ac0a18a6541c144"
+    },
+    {
+      "file": "data/app.so",
+      "sha256": "9911ba03e1a1620d5ef7caef72b9efd21541f0e8c327e6a200de935a666415fb"
+    },
+    {
+      "file": "libmpv-2.dll",
+      "sha256": "0a5a0b476866c91a639a4e511e8153968f8fa23564461b0aa09acdba816164a4"
+    }
+  ],
+  "installer": {
+    "file": "MusicTime-Setup-1.2.1.exe",
+    "bytes": 19523568,
+    "sha256": "40fdd6fd0bfc89a9f042b589a3acfcab5d8b164a9aab2a735e430c72c04e6dab"
+  },
+  "limits": "Controlled tests and rendered demo screenshots do not establish real-account or universal codec/device acceptance."
+}

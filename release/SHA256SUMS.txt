@@ -1,0 +1,2 @@
+40fdd6fd0bfc89a9f042b589a3acfcab5d8b164a9aab2a735e430c72c04e6dab  MusicTime-Setup-1.2.1.exe
+9e795b11aa06178ca1422f3e54347ccfd6fc4c2af4c1d7a26fd30dae876c5d66  validation.json
