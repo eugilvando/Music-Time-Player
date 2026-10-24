@@ -32,16 +32,23 @@ jobs:
         run: xvfb-run -a dbus-run-session -- bash scripts/smoke-ubuntu.sh
       - name: Package deb
         run: bash scripts/package-ubuntu.sh
+      - name: Install preview and test VM rendering modes
+        run: |
+          sudo apt-get install -y ./dist/ubuntu/*.deb
+          dpkg-query -W -f='${Version}\n' music-time-preview
+          for mode in compatibility software; do
+            MUSIC_TIME_RENDERER="$mode" MUSIC_TIME_SMOKE_BINARY=/usr/bin/music-time-preview xvfb-run -a dbus-run-session -- bash scripts/smoke-ubuntu.sh
+          done
       - name: Upload VM package
         uses: actions/upload-artifact@v4
         with:
-          name: music-time-ubuntu-24.04-amd64-preview
+          name: music-time-ubuntu-24.04-amd64-preview2
           path: dist/ubuntu/
           retention-days: 14
       - name: Upload Linux validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-preview-validation
+          name: ubuntu-preview2-validation
           path: build/ubuntu-smoke/
           if-no-files-found: ignore

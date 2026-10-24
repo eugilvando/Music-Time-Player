@@ -5,18 +5,14 @@ test "$(uname -m)" = x86_64
 bundle=build/linux/x64/release/bundle
 test -x "$bundle/music_time"
 test -f "$bundle/lib/libapp.so"
-version="$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)-0ubuntu1~preview1"
+version="$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)-0ubuntu1~preview2"
 stage="$(mktemp -d)"
 trap 'rm -rf -- "$stage"' EXIT
 install -d "$stage/DEBIAN" "$stage/opt/music-time-preview" "$stage/usr/bin" \
   "$stage/usr/share/applications" "$stage/usr/share/icons/hicolor/256x256/apps" \
   "$stage/usr/share/doc/music-time-preview" dist/ubuntu
 cp -a "$bundle/." "$stage/opt/music-time-preview/"
-cat > "$stage/usr/bin/music-time-preview" <<'LAUNCH'
-#!/bin/sh
-exec /opt/music-time-preview/music_time "$@"
-LAUNCH
-chmod 755 "$stage/usr/bin/music-time-preview"
+install -m 755 scripts/launch-ubuntu.sh "$stage/usr/bin/music-time-preview"
 install -m 644 assets/branding/icon.png "$stage/usr/share/icons/hicolor/256x256/apps/music-time-preview.png"
 install -m 644 docs/ubuntu-preview.md "$stage/usr/share/doc/music-time-preview/README.md"
 if test -f LICENSE; then install -m 644 LICENSE "$stage/usr/share/doc/music-time-preview/copyright"; fi

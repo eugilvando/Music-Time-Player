@@ -55,6 +55,14 @@ static void my_application_activate(GApplication* application) {
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
+  // Impeller can produce corrupt geometry with virtual GPU drivers. Keep the
+  // preview on Skia; its launcher chooses Mesa software GL or a CPU fallback.
+  fl_dart_project_set_enable_impeller(project, FALSE);
+  g_message("Music Time graphics: renderer=%s; impeller=disabled; software_gl=%s",
+            g_getenv("FLUTTER_LINUX_RENDERER") != nullptr
+                ? g_getenv("FLUTTER_LINUX_RENDERER") : "opengl",
+            g_getenv("LIBGL_ALWAYS_SOFTWARE") != nullptr
+                ? g_getenv("LIBGL_ALWAYS_SOFTWARE") : "unset");
   fl_dart_project_set_dart_entrypoint_arguments(
       project, self->dart_entrypoint_arguments);
 
