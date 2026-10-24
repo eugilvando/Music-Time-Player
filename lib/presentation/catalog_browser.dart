@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+import 'design_tokens.dart';
 import '../library/favorite_catalog.dart';
 import 'media_card_size.dart';
 import 'item_action_region.dart';
@@ -415,8 +417,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             children: [
               Text(
                 pageTracks.isEmpty
-                    ? (pageLoading ? 'Carregando músicas…' : '0 músicas')
-                    : '${loadedOffset + 1}–${loadedOffset + pageTracks.length} de $pageTotal',
+                    ? ui(
+                        context,
+                        pageLoading ? 'Carregando músicas…' : '0 músicas',
+                      )
+                    : uiFormat(
+                        context,
+                        '${loadedOffset + 1}–${loadedOffset + pageTracks.length} de $pageTotal',
+                        '${loadedOffset + 1}–${loadedOffset + pageTracks.length} of $pageTotal',
+                      ),
               ),
               IconButton(
                 tooltip: ui(context, 'Página anterior'),
@@ -432,7 +441,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                         );
                         loadPage();
                       },
-                icon: const Icon(Icons.chevron_left),
+                icon: const MtIcon(Icons.chevron_left),
               ),
               IconButton(
                 tooltip: ui(context, 'Próxima página'),
@@ -445,7 +454,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                         pageOffset += pageSize;
                         loadPage();
                       },
-                icon: const Icon(Icons.chevron_right),
+                icon: const MtIcon(Icons.chevron_right),
               ),
               const UiText('Por página: '),
               DropdownButton<int>(
@@ -1064,6 +1073,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   };
   Widget trackDetails(List<Track> values, {bool paged = false}) =>
       MediaDetailsTable(
+        onChooseColumns: chooseColumns,
+        columnKey: 'catalog_tracks',
         headers: [
           if (category == 'albums') '#',
           ui(context, 'Título'),
@@ -1116,11 +1127,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     if (view == 'compact_card') {
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 320 * MediaCardSizeScope.scale(context),
-          mainAxisExtent:
-              100 *
-              MediaQuery.textScalerOf(context).scale(1) *
-              MediaCardSizeScope.scale(context).clamp(1, 1.7),
+          maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
+          mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -1189,7 +1197,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                   isSelected: showSelection,
                   onPressed: () =>
                       setState(() => showSelection = !showSelection),
-                  icon: const Icon(Icons.checklist),
+                  icon: const MtIcon(Icons.checklist),
                 ),
                 Text(
                   uiFormat(
@@ -1247,7 +1255,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.library_music, size: 48),
+          const MtIcon(Icons.library_music, size: 48),
           const SizedBox(height: 16),
           Text(
             widget.tracks.isEmpty
@@ -1290,7 +1298,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           track:
               g.tracks.where((t) => t.hasArtwork).firstOrNull ?? g.tracks.first,
         )
-      : Icon(switch (type) {
+      : MtIcon(switch (type) {
           'genres' => Icons.piano,
           'years' || 'decades' => Icons.calendar_month,
           _ => Icons.folder,
@@ -1307,7 +1315,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         IconButton(
           tooltip: ui(context, 'Reproduzir'),
           onPressed: () => batch('play', ordered(group.tracks)),
-          icon: const Icon(Icons.play_arrow),
+          icon: const MtIcon(Icons.play_arrow),
         ),
       actions(group.tracks, collection: collectionKey(group, type)),
     ],
@@ -1322,6 +1330,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   );
   Widget groupDetails(List<CatalogGroup> values, String type) =>
       MediaDetailsTable(
+        columnKey: 'catalog_groups_$type',
         headers: [
           ui(context, 'Título'),
           ui(context, 'Artista'),
@@ -1367,11 +1376,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     if (smallCards) {
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 360 * MediaCardSizeScope.scale(context),
-          mainAxisExtent:
-              100 *
-              MediaQuery.textScalerOf(context).scale(1) *
-              MediaCardSizeScope.scale(context).clamp(1, 1.7),
+          maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
+          mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
         ),
@@ -1380,10 +1386,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       );
     }
     final grid = widget.settings.visualBool('${type}_grid');
-    final size = smallCards
-        ? 120.0
-        : widget.settings.visualNumber('catalog_cover_size', 180) *
-              MediaCardSizeScope.scale(context).toDouble();
+    final size = smallCards ? 120.0 : MediaCardSizeScope.cardWidth(context);
     final scale = MediaQuery.textScalerOf(context).scale(1);
     if (!grid) {
       return ListView.builder(
@@ -1414,8 +1417,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: size + 50,
         mainAxisExtent: size + 90 * scale,
-        crossAxisSpacing: 20,
-        mainAxisSpacing: 20,
+        crossAxisSpacing: 24,
+        mainAxisSpacing: 24,
       ),
       itemCount: values.length,
       itemBuilder: (context, i) {
@@ -1432,7 +1435,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     children: [
                       Positioned.fill(child: groupImage(g, type)),
                       Positioned(
-                        top: 0,
+                        bottom: 0,
                         right: 0,
                         child: actions(
                           g.tracks,
@@ -1441,9 +1444,9 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                       ),
                       if (g.tracks.every((t) => offline.contains(t.id)))
                         const Positioned(
-                          right: 8,
-                          bottom: 8,
-                          child: Icon(
+                          left: 4,
+                          bottom: 4,
+                          child: MtIcon(
                             Icons.offline_pin,
                             color: Color(0xff54cf9b),
                           ),
@@ -1456,7 +1459,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                   g.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
                   type == 'albums'
@@ -1532,7 +1535,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     TextButton.icon(
                       onPressed: () =>
                           setState(() => showSelection = !showSelection),
-                      icon: const Icon(Icons.checklist),
+                      icon: const MtIcon(Icons.checklist),
                       label: const UiText('Select'),
                     ),
                     TextButton(
@@ -1589,13 +1592,13 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     values = index.sortGroups(values, sort, descending);
     if (releaseOrder) values = chronologicalAlbums(values);
     final smallCards =
+        !compact &&
         widget.settings.visualChoice('${type}_view', '') == 'compact_card';
     final grid =
         compact || smallCards || widget.settings.visualBool('${type}_grid');
     final size = compact || smallCards
         ? 140.0
-        : widget.settings.visualNumber('catalog_cover_size', 180) *
-              MediaCardSizeScope.scale(context);
+        : MediaCardSizeScope.cardWidth(context);
     Widget tile(int i) {
       final group = values[i];
       if (smallCards) return compactGroup(group, type);
@@ -1626,7 +1629,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 IconButton(
                   tooltip: ui(context, 'Reproduzir'),
                   onPressed: () => batch('play', ordered(group.tracks)),
-                  icon: const Icon(Icons.play_arrow),
+                  icon: const MtIcon(Icons.play_arrow),
                 ),
                 actions(group.tracks, collection: collectionKey(group, type)),
               ],
@@ -1655,7 +1658,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                         child: IconButton.filled(
                           tooltip: ui(context, 'Reproduzir'),
                           onPressed: () => batch('play', ordered(group.tracks)),
-                          icon: const Icon(Icons.play_arrow),
+                          icon: const MtIcon(Icons.play_arrow),
                         ),
                       ),
                       Positioned(
@@ -1675,7 +1678,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 group.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               if (group.tracks.first.year != null)
                 Text(
@@ -1695,12 +1698,10 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         ? SliverGrid.builder(
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: smallCards
-                  ? 360 * MediaCardSizeScope.scale(context)
+                  ? MediaCardSizeScope.horizontalWidth(context)
                   : size + 40,
               mainAxisExtent: smallCards
-                  ? 100 *
-                        MediaQuery.textScalerOf(context).scale(1) *
-                        MediaCardSizeScope.scale(context).clamp(1, 1.7)
+                  ? MediaCardSizeScope.horizontalHeight(context)
                   : size + 90 * MediaQuery.textScalerOf(context).scale(1),
               crossAxisSpacing: 24,
               mainAxisSpacing: 24,
@@ -1718,6 +1719,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     final t = values[i];
     return ItemActionRegion(
       child: Card(
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () {
@@ -1732,11 +1735,13 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             child: Row(
               children: [
                 if (showSelection || selectedIds.isNotEmpty)
                   Checkbox(
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
                     value: selectedIds.contains(t.id),
                     onChanged: (_) => setState(() {
                       if (!selectedIds.remove(t.id)) {
@@ -1752,7 +1757,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     ),
                   ),
                 SizedBox.square(
-                  dimension: 52 * MediaCardSizeScope.scale(context),
+                  dimension: MediaCardSizeScope.horizontalArtwork(context),
                   child: TrackCover(track: t),
                 ),
                 const SizedBox(width: 12),
@@ -1765,10 +1770,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                         t.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         t.artist,
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(fontSize: 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1796,7 +1806,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 tooltip: ui(context, 'Selecionar faixas'),
                 isSelected: showSelection,
                 onPressed: () => setState(() => showSelection = !showSelection),
-                icon: const Icon(Icons.checklist),
+                icon: const MtIcon(Icons.checklist),
               ),
               Text('${values.length} ${ui(context, 'músicas')}'),
               TextButton(
@@ -1823,11 +1833,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     else if (view == 'compact_card')
       SliverGrid.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 320 * MediaCardSizeScope.scale(context),
-          mainAxisExtent:
-              100 *
-              MediaQuery.textScalerOf(context).scale(1) *
-              MediaCardSizeScope.scale(context).clamp(1, 1.7),
+          maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
+          mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -1924,7 +1931,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             children: [
               IconButton(
                 tooltip: ui(context, 'Voltar'),
-                icon: const Icon(Icons.arrow_back),
+                icon: const MtIcon(Icons.arrow_back),
                 onPressed: () => setState(() {
                   if (groupHistory.isNotEmpty) {
                     final previous = groupHistory.removeLast();
@@ -1939,15 +1946,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               ),
               SizedBox.square(
                 dimension:
-                    (constraints.maxWidth < 650 ? 112.0 : 220.0) *
+                    (constraints.maxWidth < 650 ? 96.0 : 256.0) *
                     (artist
-                        ? 1.2
+                        ? 1.0
                         : widget.settings
                               .visualNumber('cover_scale', 1)
                               .clamp(.7, 1.8)),
                 child: groupImage(original, category),
               ),
-              const SizedBox(width: 32),
+              const SizedBox(width: 24),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1957,7 +1964,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.headlineLarge
-                          ?.copyWith(fontWeight: FontWeight.w800, fontSize: 36),
+                          ?.copyWith(fontWeight: FontWeight.w700, fontSize: 32),
                     ),
                     if (album)
                       Wrap(
@@ -1993,25 +2000,26 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                                   'play',
                                   album ? ordered(values) : values,
                                 ),
-                          icon: const Icon(Icons.play_arrow),
+                          icon: const MtIcon(Icons.play_arrow),
                           label: const UiText('Reproduzir'),
                         ),
                         OutlinedButton.icon(
                           onPressed: values.isEmpty
                               ? null
                               : () => batch('shuffle', values),
-                          icon: const Icon(Icons.shuffle),
+                          icon: const MtIcon(Icons.shuffle),
                           label: const UiText('Aleatório'),
                         ),
                         if (collection != null)
                           IconButton(
+                            isSelected: favoriteCollection(collection, values),
                             tooltip: ui(
                               context,
                               favoriteCollection(collection, values)
                                   ? 'Remover favorito da coleção'
                                   : 'Favoritar coleção',
                             ),
-                            icon: Icon(
+                            icon: MtIcon(
                               favoriteCollection(collection, values)
                                   ? Icons.favorite
                                   : Icons.favorite_border,
@@ -2256,7 +2264,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       children: [
         for (final provider in providers)
           ExpansionTile(
-            leading: Icon(provider == 'local' ? Icons.computer : Icons.cloud),
+            leading: MtIcon(provider == 'local' ? Icons.computer : Icons.cloud),
             title: Text(provider == 'local' ? 'Arquivos locais' : provider),
             children: [
               for (final account
@@ -2281,7 +2289,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                           .toList(),
                     ))
                       ListTile(
-                        leading: const Icon(Icons.folder),
+                        leading: const MtIcon(Icons.folder),
                         title: Text(
                           trackFolder(g.tracks.first),
                           maxLines: 2,
@@ -2307,6 +2315,13 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, update) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Colunas da lista detalhada'),
           content: SizedBox(
             width: 420,
@@ -2316,7 +2331,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 const UiText('Capa e título sempre visíveis.'),
                 for (final e in catalogColumns.entries)
                   CheckboxListTile(
-                    title: Text(e.value),
+                    title: UiText(e.value),
                     value: selected.contains(e.key),
                     onChanged: (v) => update(() {
                       if (v == true) {
@@ -2359,6 +2374,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: DropdownButtonFormField<String>(
         isExpanded: true,
+        style: Theme.of(context).textTheme.bodyMedium,
         initialValue: options.containsKey(value) ? value : '',
         decoration: InputDecoration(labelText: ui(context, label)),
         items: [
@@ -2386,6 +2402,13 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, update) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: Text(
             '${ui(context, 'Filtros')} · ${ui(context, catalogCategories[category]!)}',
           ),
@@ -2393,6 +2416,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             width: 520,
             height: 420,
             child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               children: [
                 pick(
                   'Fonte',
@@ -2507,11 +2531,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         ? !{'songs', 'favorites', 'offline'}.contains(category)
         : {'artists', 'albumArtists'}.contains(category) &&
               artistTab == 'albums';
-    final cover = widget.settings.visualNumber('catalog_cover_size', 180);
+    final cover = MediaCardSizeScope.cardWidth(context);
     final selectedView = view == 'compact_card'
         ? view
         : collections && widget.settings.visualBool('${viewCategory}_grid')
-        ? 'grid:${[140, 180, 220, 320, 360].reduce((a, b) => (a - cover).abs() < (b - cover).abs() ? a : b)}'
+        ? 'grid:${[96, 144, 196, 256, 320].reduce((a, b) => (a - cover).abs() < (b - cover).abs() ? a : b)}'
         : view == 'detailed'
         ? 'detailed'
         : 'compact';
@@ -2575,7 +2599,9 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               context,
               descending ? 'Ordem decrescente' : 'Ordem crescente',
             ),
-            icon: Icon(descending ? Icons.arrow_downward : Icons.arrow_upward),
+            icon: MtIcon(
+              descending ? Icons.arrow_downward : Icons.arrow_upward,
+            ),
             onPressed: () {
               setState(() => descending = !descending);
               widget.settings.updateVisual('songs_descending', descending);
@@ -2595,11 +2621,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               },
               if (collections)
                 'grid': const {
-                  'grid:140': 'Small',
-                  'grid:180': 'Medium',
-                  'grid:220': 'Large',
+                  'grid:96': 'Extra Small',
+                  'grid:144': 'Small',
+                  'grid:196': 'Medium',
+                  'grid:256': 'Large',
                   'grid:320': 'Extra Large',
-                  'grid:360': 'Larger',
                 },
               'cards': const {'compact_card': 'Compact cards'},
             },
@@ -2622,6 +2648,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 grid || value == 'compact_card',
               );
               if (grid) {
+                final size = double.parse(value.split(':').last);
+                final label = mediaCardSizes.entries
+                    .firstWhere((e) => (e.value * 196 - size).abs() < .1)
+                    .key;
+                MediaCardSizeScope.change(
+                  widget.settings,
+                  'media_card_size',
+                  label,
+                );
                 widget.settings.updateVisual(
                   'catalog_cover_size',
                   double.parse(value.split(':').last),
@@ -2633,7 +2668,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           IconButton(
             tooltip: ui(context, 'Atualizar biblioteca e offline'),
             onPressed: refresh,
-            icon: const Icon(Icons.refresh),
+            icon: const MtIcon(Icons.refresh),
           ),
         ],
       ),
@@ -2765,14 +2800,14 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         if (i < artistCount) {
           if (i == 0) return heading('Artistas');
           return SizedBox(
-            height: 100 * MediaCardSizeScope.scale(context).clamp(1, 1.7),
+            height: MediaCardSizeScope.horizontalHeight(context),
             child: compactGroup(artists[i - 1], 'artists'),
           );
         }
         i -= artistCount;
         if (i == 0) return heading('Álbuns');
         return SizedBox(
-          height: 100 * MediaCardSizeScope.scale(context).clamp(1, 1.7),
+          height: MediaCardSizeScope.horizontalHeight(context),
           child: compactGroup(albums[i - 1], 'albums'),
         );
       },
@@ -2794,7 +2829,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             children: [
               for (final list in lists)
                 ListTile(
-                  leading: const Icon(Icons.playlist_play),
+                  leading: const MtIcon(Icons.playlist_play),
                   title: Text(list['name'] as String),
                   onTap: () => widget.onPlaylist(list['id'] as int),
                 ),
@@ -2824,7 +2859,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         ? folders(values)
         : groups(catalogGroups(values), category);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -2852,53 +2887,34 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                   if (favoritesPage)
                     Flexible(
                       flex: 4,
-                      fit: FlexFit.tight,
                       child: Align(
                         alignment: Alignment.centerRight,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 8,
-                            children: [
-                              for (final e in const {
-                                'all': 'All',
-                                'songs': 'Musics',
-                                'artists': 'Artists',
-                                'albums': 'Albums',
-                              }.entries)
-                                ChoiceChip(
-                                  key: ValueKey('favorites.${e.key}'),
-                                  label: UiText(e.value),
-                                  selected: favoriteTab == e.key,
-                                  onSelected: (_) =>
-                                      setState(() => favoriteTab = e.key),
-                                ),
-                            ],
-                          ),
+                        child: MtSegments<String>(
+                          value: favoriteTab,
+                          items: const {
+                            'all': 'All',
+                            'songs': 'Musics',
+                            'artists': 'Artists',
+                            'albums': 'Albums',
+                          },
+                          keyPrefix: 'favorites',
+                          onChanged: (value) =>
+                              setState(() => favoriteTab = value),
                         ),
                       ),
                     ),
-
                   if (!favoritesPage)
-                    PopupMenuButton<bool>(
-                      key: const ValueKey('catalog.quickFavorites'),
-                      tooltip: ui(context, 'All / Favorites'),
-                      icon: Icon(
-                        quickFavorites ? Icons.favorite : Icons.filter_list,
+                    Flexible(
+                      flex: 2,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: MtSegments<bool>(
+                          key: const ValueKey('catalog.quickFavorites'),
+                          value: quickFavorites,
+                          items: const {false: 'All', true: 'Favorites'},
+                          onChanged: setQuickFavorites,
+                        ),
                       ),
-                      onSelected: setQuickFavorites,
-                      itemBuilder: (_) => [
-                        for (final entry in const {
-                          false: 'All',
-                          true: 'Favorites',
-                        }.entries)
-                          CheckedPopupMenuItem(
-                            value: entry.key,
-                            checked: quickFavorites == entry.key,
-                            child: UiText(entry.value),
-                          ),
-                      ],
                     ),
                   if (controlsExpanded)
                     Flexible(flex: 3, fit: FlexFit.tight, child: toolbar()),
@@ -2908,7 +2924,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     isSelected: controlsExpanded,
                     onPressed: () =>
                         setState(() => controlsExpanded = !controlsExpanded),
-                    icon: Icon(
+                    icon: MtIcon(
                       controlsExpanded ? Icons.chevron_right : Icons.tune,
                     ),
                   ),
@@ -2916,7 +2932,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               ),
             ),
             if (filters.active && !favoritesPage) filtersBar(),
-            const SizedBox(height: 48),
+            const SizedBox(height: 24),
           ],
           if (widget.home)
             Expanded(
@@ -2927,6 +2943,28 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     ? () => showDialog<void>(
                         context: context,
                         builder: (context) => AlertDialog(
+                          insetPadding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 24,
+                          ),
+                          titlePadding: const EdgeInsets.fromLTRB(
+                            24,
+                            24,
+                            24,
+                            16,
+                          ),
+                          contentPadding: const EdgeInsets.fromLTRB(
+                            24,
+                            8,
+                            24,
+                            24,
+                          ),
+                          actionsPadding: const EdgeInsets.fromLTRB(
+                            24,
+                            0,
+                            24,
+                            24,
+                          ),
                           title: const UiText('Fontes'),
                           content: SizedBox(
                             width: 520,

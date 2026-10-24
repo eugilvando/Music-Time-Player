@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'ui_language.dart';
 
 import 'dart:convert';
@@ -94,6 +95,13 @@ class _EqualizerPanelState extends State<EqualizerPanel> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, update) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Salvar preset'),
           content: TextField(
             controller: field,
@@ -245,13 +253,13 @@ class _EqualizerPanelState extends State<EqualizerPanel> {
         children: [
           TextButton.icon(
             onPressed: busy ? null : savePreset,
-            icon: const Icon(Icons.save),
+            icon: const MtIcon(Icons.save),
             label: const UiText('Salvar preset'),
           ),
           if (selection.startsWith('custom:'))
             TextButton.icon(
               onPressed: busy ? null : deletePreset,
-              icon: const Icon(Icons.delete_outline),
+              icon: const MtIcon(Icons.delete_outline),
               label: const UiText('Excluir preset'),
             ),
         ],

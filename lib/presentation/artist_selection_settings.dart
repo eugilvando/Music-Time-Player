@@ -1,3 +1,6 @@
+import 'settings_card.dart';
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -30,9 +33,10 @@ class _ArtistSelectionSettingsState extends State<ArtistSelectionSettings> {
   }
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => SettingsCard(
+    padding: 0,
     child: Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       child: Form(
         key: form,
         child: Column(
@@ -101,7 +105,7 @@ class _ArtistSelectionSettingsState extends State<ArtistSelectionSettings> {
                           c.text = '40';
                         }
                       },
-                icon: const Icon(Icons.restore),
+                icon: const MtIcon(Icons.restore),
                 label: const UiText('Restore defaults'),
               ),
             ),

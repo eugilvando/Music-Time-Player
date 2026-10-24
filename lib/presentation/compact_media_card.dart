@@ -19,18 +19,24 @@ class CompactMediaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ItemActionRegion(
     child: Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Row(
             children: [
               SizedBox.square(
-                dimension: 52 * MediaCardSizeScope.scale(context),
+                dimension: MediaCardSizeScope.horizontalArtwork(context),
                 child: artwork,
               ),
-              const SizedBox(width: 12),
+              SizedBox(
+                width: MediaCardSizeScope.horizontalArtwork(context) <= 48
+                    ? 8
+                    : 12,
+              ),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -40,10 +46,17 @@ class CompactMediaCard extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize:
+                            MediaCardSizeScope.horizontalArtwork(context) <= 48
+                            ? 12
+                            : 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       subtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

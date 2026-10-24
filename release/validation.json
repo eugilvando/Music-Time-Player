@@ -1,39 +1,46 @@
 {
-  "version": "1.2.1+41",
-  "date": "2026-10-16",
+  "version": "2.0.0+44",
+  "date": "2026-10-24",
   "platform": "Windows x64",
   "checks": {
     "pubGet": "passed",
-    "dartAnalysis": "passed; no issues",
+    "dartAnalysis": "passed; private and public copies; no issues",
     "baselineTests": {
-      "passed": 297,
+      "passed": 314,
       "failed": 0,
-      "command": "flutter test --no-pub --concurrency=1"
+      "command": "flutter test --no-pub --concurrency=1",
+      "duration": "6m32s"
+    },
+    "finalBackupRegression": {
+      "passed": 4,
+      "failed": 0,
+      "note": "Overlaps the full suite; rerun after final backup selection guard"
     },
     "screenshotRendering": {
-      "passed": 1,
-      "images": 7,
-      "fixture": "isolated fictional catalog; actual application widgets"
+      "images": 32,
+      "fixture": "isolated fictional catalog; actual application widgets; capture included in full suite"
     },
-    "runtimeSource": "identical to validated current application",
+    "windowsIntegration": "passed; SMTC artwork/play/pause, accent, vault, tray hide/restore, preserved styles, clean exit",
+    "dataRestart": "passed; native backup/restore/reset in temporary profile; original fixture preserved",
+    "runtimeSource": {
+      "identical": true,
+      "files": 202
+    },
     "runtimeBundle": {
       "binaryFilesIdentical": true,
-      "files": 38,
-      "packagingAdjustment": "Root native_assets.json uses the included portable manifest rather than developer-machine paths"
+      "files": 48
     },
-    "installer": "Inno Setup 6 compilation passed; original validated binaries, portable native metadata and notices",
-    "relativeDocumentationLinks": "passed",
-    "personalPathsAndCredentialPatternScan": "no findings"
+    "installer": "Inno Setup 6 compilation passed",
+    "relativeDocumentationLinks": "passed"
   },
-  "priorBaselineNativeChecks": "Windows release build, playback, media/tray and data restart were validated before preparing this public snapshot; not rerun against the personal profile",
-  "applicationBinaries": [
+  "binaries": [
     {
       "file": "music_time.exe",
-      "sha256": "d68b17556e47a4931a14655e88aaba2e47de77d3697ca1411ac0a18a6541c144"
+      "sha256": "40f0a69d7f91c9a38b4473c9ede7fb13c7e97b414e2b844d4c4c2b5e792f1445"
     },
     {
       "file": "data/app.so",
-      "sha256": "9911ba03e1a1620d5ef7caef72b9efd21541f0e8c327e6a200de935a666415fb"
+      "sha256": "8c17bc1e2a41a1b3e25f087b8f8d8f726c18c1f4b2466bb7b4d699be69cb5770"
     },
     {
       "file": "libmpv-2.dll",
@@ -41,9 +48,9 @@
     }
   ],
   "installer": {
-    "file": "MusicTime-Setup-1.2.1.exe",
-    "bytes": 19523568,
-    "sha256": "40fdd6fd0bfc89a9f042b589a3acfcab5d8b164a9aab2a735e430c72c04e6dab"
+    "file": "MusicTime-Setup-2.0.0.exe",
+    "bytes": 20307184,
+    "sha256": "4ceff64d228ab23ac64153886c622b187e9a2085f25a54aa7323f1f2e0d68e12"
   },
-  "limits": "Controlled tests and rendered demo screenshots do not establish real-account or universal codec/device acceptance."
+  "limits": "Controlled tests and demo screenshots do not establish real-account acceptance or universal codec/device support. No personal profile is included."
 }

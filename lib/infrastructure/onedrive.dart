@@ -1,3 +1,5 @@
+import '../domain/onedrive_identity.dart';
+
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
@@ -117,8 +119,15 @@ class OneDriveClient implements MediaSourceResolver {
     }
   }
 
-  Future<Map<String, dynamic>> drive() =>
-      _get(Uri.parse('https://graph.microsoft.com/v1.0/me/drive'));
+  Future<Map<String, dynamic>> drive() async {
+    final result = await _get(
+      Uri.parse('https://graph.microsoft.com/v1.0/me/drive'),
+    );
+    if (result['id'] is String) {
+      result['id'] = oneDriveIdentity(result['id'] as String);
+    }
+    return result;
+  }
 
   Future<String?> lyrics(Track track) async {
     final drive = Uri.encodeComponent(track.driveId!);

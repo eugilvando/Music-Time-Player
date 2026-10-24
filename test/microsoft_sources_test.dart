@@ -1,3 +1,5 @@
+import 'package:crypto/crypto.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -143,60 +145,57 @@ void main() {
       '/B/song',
     );
   });
-  test(
-    'remover conta não afeta outra conta, catálogo, Last.fm ou download local',
-    () async {
-      final vault = MemoryVault();
-      await vault.write('microsoft.session', session('A'));
-      await vault.write('lastfm.session', 'fixture-lastfm');
-      final store = await LibraryStore.open(':memory:');
-      addTearDown(store.close);
-      final root = ProviderConnections(
-        await SharedPreferences.getInstance(),
-        store,
-        vault: vault,
-        client: transport(),
-      );
-      addTearDown(root.dispose);
-      final second = await root.createMicrosoftSource();
-      await vault.write(second.microsoftSessionKey, session('B'));
-      await second.selectFolder({
-        'id': 'music',
-        'name': 'Música',
-        'catalogPath': '/drive/root:/Música',
-        'parentReference': {'driveId': 'B'},
-      });
-      await second.importMicrosoft();
-      final track = (await store.loadTracks()).single;
-      final dir = await Directory.systemTemp.createTemp(
-        'music-time-source-offline-',
-      );
-      addTearDown(() => dir.delete(recursive: true));
-      final file = await File('${dir.path}/fixture.audio')
-          .writeAsBytes([1, 2, 3]);
-      await store.selectOffline('track:fixture', [track]);
-      await store.updateDownload(
-        track.id,
-        'complete',
-        path: file.path,
-        received: 3,
-        total: 3,
-      );
-      final downloads = DownloadManager(store, root);
-      addTearDown(downloads.dispose);
-      await second.removeMicrosoftSource();
-      expect(await vault.read('microsoft.session'), session('A'));
-      expect(await vault.read('lastfm.session'), 'fixture-lastfm');
-      expect(await vault.read(second.microsoftSessionKey), isNull);
-      expect(await store.loadTracks(), hasLength(1));
-      expect(await downloads.resolve(track), Uri.file(file.path));
-      await expectLater(
-        root.resolve(track),
-        throwsA(isA<MediaSourceFailure>()),
-      );
-      expect(root.microsoftSources, hasLength(1));
-    },
-  );
+  test('remover fonte apaga seu download e preserva sessões de outra conta e Last.fm', () async {
+    final vault = MemoryVault();
+    await vault.write('microsoft.session', session('A'));
+    await vault.write('lastfm.session', 'fixture-lastfm');
+    final store = await LibraryStore.open(':memory:');
+    addTearDown(store.close);
+    final root = ProviderConnections(
+      await SharedPreferences.getInstance(),
+      store,
+      vault: vault,
+      client: transport(),
+    );
+    addTearDown(root.dispose);
+    final second = await root.createMicrosoftSource();
+    await vault.write(second.microsoftSessionKey, session('B'));
+    await second.selectFolder({
+      'id': 'music',
+      'name': 'Música',
+      'catalogPath': '/drive/root:/Música',
+      'parentReference': {'driveId': 'B'},
+    });
+    await second.importMicrosoft();
+    final track = (await store.loadTracks()).single;
+    final dir = await Directory.systemTemp.createTemp(
+      'music-time-source-offline-',
+    );
+    addTearDown(() => dir.delete(recursive: true));
+    final file = await File(
+      '${dir.path}/${sha256.convert(utf8.encode(track.id))}.audio',
+    ).writeAsBytes([1, 2, 3]);
+    await store.selectOffline('track:fixture', [track]);
+    await store.updateDownload(
+      track.id,
+      'complete',
+      path: file.path,
+      received: 3,
+      total: 3,
+    );
+    final downloads = DownloadManager(store, root, directory: () async => dir);
+    store.beforeSourceRemoval = downloads.removeSourceTracks;
+    addTearDown(downloads.dispose);
+    await second.removeMicrosoftSource();
+    expect(await vault.read('microsoft.session'), session('A'));
+    expect(await vault.read('lastfm.session'), 'fixture-lastfm');
+    expect(await vault.read(second.microsoftSessionKey), isNull);
+    expect(await store.loadTracks(), isEmpty);
+    expect(await file.exists(), false);
+    expect(await store.database.query('cloud_sources'), isEmpty);
+    await expectLater(root.resolve(track), throwsA(isA<MediaSourceFailure>()));
+    expect(root.microsoftSources, hasLength(1));
+  });
   for (final mode in ['wrong-account', 'duplicate', 'success']) {
     test('login em staging: $mode não sobrescreve outra sessão', () async {
       final vault = MemoryVault();

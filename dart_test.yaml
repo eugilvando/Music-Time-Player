@@ -1,0 +1,3 @@
+# Native visual capture runs separately from the general regression suite.
+tags:
+  design-preview: {}

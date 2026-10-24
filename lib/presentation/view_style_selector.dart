@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'media_card_size.dart';
 
 import 'package:flutter/material.dart';
@@ -20,12 +21,19 @@ class ViewStyleButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
     tooltip: ui(context, 'Visualização'),
-    icon: const Icon(Icons.view_module_outlined),
+    icon: const MtIcon(Icons.view_module_outlined),
     onPressed: () async {
       final sizes = MediaCardSizeScope.of(context);
       final result = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Visualização'),
           content: SizedBox(
             width: 360,
@@ -57,7 +65,7 @@ class ViewStyleButton extends StatelessWidget {
                                   ? value
                                   : family.value.keys.first,
                             ),
-                            icon: Icon(ViewStyleSelector.icons[family.key]),
+                            icon: MtIcon(ViewStyleSelector.icons[family.key]),
                             label: UiText(
                               ViewStyleSelector.labels[family.key] ??
                                   family.key,
@@ -68,6 +76,7 @@ class ViewStyleButton extends StatelessWidget {
                         SizedBox(
                           width: 160,
                           child: DropdownButton<String>(
+                            style: Theme.of(context).textTheme.bodyMedium,
                             key: ValueKey('view.style.${family.key}'),
                             isExpanded: true,
                             value: family.value.containsKey(value)
@@ -163,7 +172,7 @@ class ViewStyleSelector extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   spacing: 12,
-                  children: [Icon(icons[key]), UiText(labels[key] ?? key)],
+                  children: [MtIcon(icons[key]), UiText(labels[key] ?? key)],
                 ),
               ),
           ],
@@ -177,9 +186,9 @@ class ViewStyleSelector extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: 8,
               children: [
-                Icon(icons[family], size: 20),
+                MtIcon(icons[family], size: 20),
                 UiText(labels[family] ?? family),
-                const Icon(Icons.expand_more, size: 18),
+                const MtIcon(Icons.expand_more, size: 18),
               ],
             ),
           ),

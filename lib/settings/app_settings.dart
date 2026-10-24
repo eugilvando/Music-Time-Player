@@ -26,6 +26,16 @@ class AppSettings extends ChangeNotifier {
   late ThemeMode mode;
   late int accent;
   int? systemAccent;
+  void refreshFromPreferences() {
+    mode = ThemeMode.values.firstWhere(
+      (v) => v.name == preferences.getString('theme'),
+      orElse: () => ThemeMode.dark,
+    );
+    final saved = preferences.getInt('accent');
+    accent = accents.containsKey(saved) ? saved! : accents.keys.first;
+    notifyListeners();
+  }
+
   int get effectiveAccent => visualBool('system_accent', fallback: false)
       ? systemAccent ?? accent
       : accent;
@@ -191,6 +201,35 @@ class AppSettings extends ChangeNotifier {
     'background_intensity',
     'show_queue',
     'additional_info',
+  });
+  Future<void> resetGeneral() async {
+    await resetVisualKeys({'system_accent', 'animations', 'reduce_motion'});
+    await update(theme: ThemeMode.dark, color: accents.keys.first);
+    await setLanguage('en');
+    await setWindowBehavior('windows.close_to_tray', true);
+    await setWindowBehavior('windows.minimize_to_tray', false);
+  }
+
+  Future<void> resetInterface() => resetVisualKeys({
+    'style',
+    'cover_shape',
+    'cover_position',
+    'cover_scale',
+    'background',
+    'background_intensity',
+    'show_queue',
+    'additional_info',
+    'font_title',
+    'font_body',
+    'font_secondary',
+    'font_navigation',
+    'lyrics_font',
+    'lyrics_spacing',
+    'lyrics_auto_scroll',
+    'bar_fields',
+    'bar_items',
+    'bar_item_order',
+    'bar_icon_spacing',
   });
   Future<void> resetVisualKeys(Set<String> keys) async {
     await _writeTail;

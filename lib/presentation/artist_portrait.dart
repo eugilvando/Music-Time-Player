@@ -1,4 +1,5 @@
 import 'media_indicators.dart';
+import 'artwork_placeholder.dart';
 import 'ui_language.dart';
 
 import 'dart:convert';
@@ -130,18 +131,7 @@ class ArtistPortrait extends StatelessWidget {
   final bool cachedOnly;
   Widget fallback(BuildContext context) => fallbackTrack?.hasArtwork == true
       ? TrackCover(track: fallbackTrack, circular: true, indicators: false)
-      : CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Text(
-            artist
-                .split(RegExp(r'\s+'))
-                .where((w) => w.isNotEmpty)
-                .take(2)
-                .map((w) => w.characters.first.toUpperCase())
-                .join(),
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-        );
+      : const ClipOval(child: ArtworkPlaceholder(artist: true));
   @override
   Widget build(BuildContext context) => Center(
     child: AspectRatio(
@@ -175,6 +165,9 @@ Future<bool> customizeArtistImage(BuildContext context, String artist) async {
   final source = await showDialog<String>(
     context: context,
     builder: (context) => SimpleDialog(
+      insetPadding: const EdgeInsets.all(24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
       title: const UiText('Imagem do artista'),
       children: [
         SimpleDialogOption(
@@ -228,6 +221,13 @@ Future<bool> customizeArtistImage(BuildContext context, String artist) async {
       final value = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Link da imagem'),
           content: TextField(
             controller: input,

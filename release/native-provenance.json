@@ -11,5 +11,5 @@
     "--disable-nonfree",
     "--enable-version3"
   ],
-  "dartPackageLicenseCount": 130
+  "dartPackageLicenseCount": 134
 }

@@ -23,6 +23,13 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> {
   late Future<List<Map<String, Object?>>> rows = widget.store.history();
+  String historyDate(BuildContext context, Object? value) {
+    final date = DateTime.tryParse(value?.toString() ?? '')?.toLocal();
+    if (date == null) return '';
+    final labels = MaterialLocalizations.of(context);
+    return '${labels.formatMediumDate(date)} · ${labels.formatTimeOfDay(TimeOfDay.fromDateTime(date))}';
+  }
+
   @override
   Widget build(BuildContext context) => FutureBuilder(
     future: rows,
@@ -45,17 +52,25 @@ class _HistoryPageState extends State<HistoryPage> {
         );
       }
       return ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         itemCount: data.length,
         itemBuilder: (context, i) {
           final track = widget.store.trackFromRow(data[i]);
           return ItemActionRegion(
             child: ListTile(
               leading: SizedBox.square(
-                dimension: 48,
+                dimension: 32,
                 child: TrackCover(track: track),
               ),
-              title: Text(track.title),
-              subtitle: Text('${track.artist} · ${data[i]['started_at']}'),
+              dense: true,
+              title: Text(
+                track.title,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              subtitle: Text(
+                '${track.artist} · ${historyDate(context, data[i]['started_at'])}',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               trailing: widget.trackActions(track),
               onTap: () => widget.onPlay([track], 0),
             ),

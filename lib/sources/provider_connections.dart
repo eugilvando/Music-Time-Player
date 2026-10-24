@@ -1,3 +1,5 @@
+import '../domain/onedrive_identity.dart';
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
@@ -134,29 +136,44 @@ class ProviderConnections extends ChangeNotifier
   }
 
   Future<void> removeMicrosoftSource() async {
-    if (busy) return;
-    await store.removeCloudSource('onedrive:$sourceId');
-    await store.clearCloudCheckpoint(microsoftSessionKey);
-    await disconnectMicrosoft();
-    if (error != null || sourceId == 'legacy') return;
     final root = microsoftAccountRoot;
-    final ids = root._microsoftSources.keys
-        .where((id) => id != sourceId)
-        .toList();
-    if (!await preferences.setStringList(microsoftSourcesPreference, ids)) {
-      throw StateError('Fonte não removida');
+    if (root.anyMicrosoftBusy || root.anyMicrosoftLoginPending) {
+      throw StateError('Wait for synchronization to finish.');
     }
-    for (final key
-        in preferences
-            .getKeys()
-            .where((key) => key.startsWith('microsoft.source.$sourceId.'))
-            .toList()) {
-      await preferences.remove(key);
+    busy = true;
+    _notify();
+    try {
+      await store.removeCloudSource('onedrive:$sourceId');
+      await store.clearCloudCheckpoint(microsoftSessionKey);
+      await _clearMicrosoftFolder();
+      await microsoft.disconnect();
+      _microsoft = null;
+      microsoftConnected = false;
+      microsoftDriveName = null;
+      _driveCache = null;
+      _driveSession = null;
+      if (sourceId == 'legacy') return;
+      final ids = root._microsoftSources.keys
+          .where((id) => id != sourceId)
+          .toList();
+      if (!await preferences.setStringList(microsoftSourcesPreference, ids)) {
+        throw StateError('Could not save source configuration.');
+      }
+      for (final key
+          in preferences
+              .getKeys()
+              .where((key) => key.startsWith('microsoft.source.$sourceId.'))
+              .toList()) {
+        await preferences.remove(key);
+      }
+      root._microsoftSources.remove(sourceId);
+      removeListener(root._notify);
+      dispose();
+    } finally {
+      busy = false;
+      _notify();
+      root._notify();
     }
-    root._microsoftSources.remove(sourceId);
-    removeListener(root._notify);
-    dispose();
-    root._notify();
   }
 
   bool busy = false, microsoftConnected = false, lastfmConnected = false;
@@ -304,7 +321,7 @@ class ProviderConnections extends ChangeNotifier
     final selectedDrive = preferences.getString(
       _sourceKey('microsoft.folder_drive_id'),
     );
-    if (selectedDrive != null && selectedDrive != driveId) {
+    if (selectedDrive != null && !sameOneDrive(selectedDrive, driveId)) {
       throw const MicrosoftAuthFailure(
         'A pasta selecionada pertence a outra conta. Escolha a pasta musical desta conta antes de sincronizar.',
         code: 'folder_account_mismatch',
@@ -379,7 +396,7 @@ class ProviderConnections extends ChangeNotifier
     if (drive == null || !microsoftFolderSelected) return;
     await store.saveCloudSource(
       'onedrive:$sourceId',
-      drive,
+      oneDriveIdentity(drive)!,
       preferences.getString(_sourceKey('microsoft.folder_path')) ?? '',
       microsoftSourceLabel,
       microsoftVisible,
@@ -535,7 +552,7 @@ class ProviderConnections extends ChangeNotifier
           stage: 'graph_drive',
         );
       }
-      if (expectedDrive != null && expectedDrive != id) {
+      if (expectedDrive != null && !sameOneDrive(expectedDrive, id)) {
         throw const MicrosoftAuthFailure(
           'Esta fonte pertence a outra conta. Reconecte a conta original ou use Adicionar fonte para uma nova conta.',
           code: 'account_mismatch',
@@ -588,7 +605,6 @@ class ProviderConnections extends ChangeNotifier
     microsoftDriveName = null;
     _driveCache = null;
     _driveSession = null;
-    await _clearMicrosoftFolder();
   });
   bool get microsoftFolderSelected =>
       preferences.getBool(_sourceKey('microsoft.folder_selected')) ??
@@ -630,7 +646,7 @@ class ProviderConnections extends ChangeNotifier
       );
     }
     final parentDrive = (metadata['parentReference'] as Map?)?['driveId'];
-    if (parentDrive != null && parentDrive != driveId) {
+    if (parentDrive != null && !sameOneDrive(parentDrive as String?, driveId)) {
       throw const MicrosoftAuthFailure(
         'A pasta não pertence ao OneDrive desta sessão. Escolha novamente a pasta musical.',
         code: 'folder_account_mismatch',
@@ -647,7 +663,7 @@ class ProviderConnections extends ChangeNotifier
         .where(
           (t) =>
               t.localPath == null &&
-              t.driveId == driveId &&
+              sameOneDrive(t.driveId, driveId) &&
               t.available &&
               (folder.isEmpty ||
                   t.sourcePath == folder ||
@@ -699,18 +715,28 @@ class ProviderConnections extends ChangeNotifier
             ...LibraryStore.metadataColumns,
             '(cover IS NOT NULL OR cover_hash IS NOT NULL) AS has_cover',
           ],
-          where: "json_extract(metadata,'\$.driveId')=?",
+          where: "lower(json_extract(metadata,'\$.driveId'))=lower(?)",
           whereArgs: [driveId],
         ))
           row['id'] as String: decodeTrackRow(row, applyUser: false),
       };
+      final existingByItem = <String, Track>{};
+      for (final track in existing.values) {
+        final item = track.itemId;
+        if (item != null &&
+            (!existingByItem.containsKey(item) ||
+                track.id == 'onedrive:$driveId:$item')) {
+          existingByItem[item] = track;
+        }
+      }
       final folder =
           preferences.getString(_sourceKey('microsoft.folder_path')) ?? '';
       if (!microsoftFolderSelected) throw StateError('Selecione uma pasta');
       final checkpointKey = microsoftSessionKey;
       var checkpoint = await store.cloudCheckpoint(checkpointKey);
       if (checkpoint != null &&
-          (checkpoint['drive'] != driveId || checkpoint['folder'] != folder)) {
+          (!sameOneDrive(checkpoint['drive'] as String?, driveId) ||
+              checkpoint['folder'] != folder)) {
         await store.clearCloudCheckpoint(checkpointKey);
         checkpoint = null;
       }
@@ -788,9 +814,12 @@ class ProviderConnections extends ChangeNotifier
                         (item['name'] as String? ?? '').toLowerCase() ==
                             coverName &&
                         item['remoteItem'] == null &&
-                        ((item['parentReference'] as Map?)?['driveId'] ??
-                                driveId) ==
-                            driveId,
+                        sameOneDrive(
+                          (item['parentReference'] as Map?)?['driveId']
+                                  as String? ??
+                              driveId,
+                          driveId,
+                        ),
                   )
                   .firstOrNull;
               if (coverItem != null) {
@@ -826,16 +855,19 @@ class ProviderConnections extends ChangeNotifier
                 ? '/drive/root:'
                 : current.path;
             if (cancelSync) throw StateError('Sincronização cancelada');
-            final drive = parent['driveId'] as String? ?? driveId;
+            final drive =
+                oneDriveIdentity(parent['driveId'] as String?) ?? driveId;
             if (drive != driveId || item['remoteItem'] != null) return;
             final id = item['id'] as String?;
             if (id == null) return;
-            final previous = existing['onedrive:$drive:$id'];
+            final previous = existingByItem[id];
             final revision = item['eTag'] as String? ?? '';
             syncCurrentFile = name;
             if (processed.length % 25 == 0) _notify();
             CloudTags? embedded;
-            if (previous?.cloudTagsVersion == 1 &&
+            if ((previous?.cloudTagsVersion == 2 ||
+                    previous?.cloudTagsVersion == 1 &&
+                        previous!.duration > Duration.zero) &&
                 revision.isNotEmpty &&
                 previous?.revision == revision) {
               embedded = CloudTags(
@@ -950,7 +982,7 @@ class ProviderConnections extends ChangeNotifier
             pageSeen.add('onedrive:$drive:$id');
             tracks.add(
               Track(
-                id: 'onedrive:$drive:$id',
+                id: previous?.id ?? 'onedrive:$drive:$id',
                 title: tag(
                   'title',
                   previous?.title ?? name.replaceFirst(RegExp(r'\.[^.]+$'), ''),
@@ -996,7 +1028,7 @@ class ProviderConnections extends ChangeNotifier
                 discNumber: positiveTag('disc', previous?.discNumber),
                 sourcePath: parentPath,
                 fileName: name,
-                cloudTagsVersion: embedded == null ? 0 : 1,
+                cloudTagsVersion: embedded == null ? 0 : 2,
                 cloudCoverEmbedded:
                     embedded?.cover != null ||
                     (previous?.cloudCoverEmbedded == true &&
@@ -1149,7 +1181,7 @@ class ProviderConnections extends ChangeNotifier
     final context = await _microsoftContext();
     final driveId = context.drive['id'] as String;
     final parentDrive = (folder?['parentReference'] as Map?)?['driveId'];
-    if (parentDrive != null && parentDrive != driveId) {
+    if (parentDrive != null && !sameOneDrive(parentDrive as String?, driveId)) {
       throw const MicrosoftAuthFailure(
         'Esta pasta pertence a outra conta. Abra o seletor novamente.',
         code: 'folder_account_mismatch',
@@ -1359,7 +1391,7 @@ class ProviderConnections extends ChangeNotifier
     if (accountRoot == null) {
       for (final source in microsoftSources) {
         final drive = await source.microsoft.boundDriveId();
-        if (drive == track.driveId) {
+        if (sameOneDrive(drive, track.driveId)) {
           return source._resolveMicrosoft(track);
         }
       }
@@ -1387,13 +1419,16 @@ class ProviderConnections extends ChangeNotifier
     if (preferences.getBool('visual.offline_only') ?? false) return null;
     if (accountRoot == null) {
       for (final source in microsoftSources) {
-        if (await source.microsoft.boundDriveId() == track.driveId) {
+        if (sameOneDrive(
+          await source.microsoft.boundDriveId(),
+          track.driveId,
+        )) {
           return source.lyrics(track);
         }
       }
     }
     final context = await _microsoftContext();
-    if (context.drive['id'] != track.driveId) {
+    if (!sameOneDrive(context.drive['id'] as String?, track.driveId)) {
       throw const MediaSourceFailure(
         'Reconnect the source account for this track.',
       );
@@ -1406,7 +1441,7 @@ class ProviderConnections extends ChangeNotifier
   Future<Uri> _resolveMicrosoft(Track track) async {
     try {
       final context = await _microsoftContext();
-      if (track.driveId != context.drive['id']) {
+      if (!sameOneDrive(track.driveId, context.drive['id'] as String?)) {
         throw const MicrosoftAuthFailure(
           'Esta música pertence a outra conta OneDrive. Conecte a conta correspondente para reproduzi-la; os downloads locais continuam disponíveis.',
           code: 'track_account_mismatch',

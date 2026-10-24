@@ -225,7 +225,7 @@ void main() {
   );
 
   testWidgets(
-    'Queue spans the content beside headers and settings footer matches player height',
+    'Queue spans content below topbar and the player spans the full window',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1600, 1000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -269,13 +269,14 @@ void main() {
           find.byKey(const ValueKey('queue.floating')),
         );
         final bar = tester.getRect(find.byType(PlayerBar));
-        expect(queue.top, closeTo(100, 2), reason: section);
-        expect(queue.bottom, closeTo(bar.top - 16, 2), reason: section);
+        expect(queue.top, closeTo(64, 2), reason: section);
+        expect(queue.bottom, closeTo(bar.top, 2), reason: section);
         final footer = tester.getRect(
           find.byKey(const ValueKey('navigation.settings.footer')),
         );
-        expect(footer.height, closeTo(bar.height, .1));
-        expect(footer.top, closeTo(bar.top, .1));
+        expect(footer.bottom, closeTo(bar.top, .1));
+        expect(bar.left, 0);
+        expect(bar.right, 1600);
         if (section == 'playlists') {
           final header = tester.getRect(
             find.byKey(const ValueKey('playlists.heading')),
@@ -297,7 +298,12 @@ void main() {
           await tester.pump();
           expect(
             tester.getCenter(find.byKey(const ValueKey('playlists.sort'))).dy,
-            closeTo(header.center.dy, 2),
+            closeTo(
+              tester
+                  .getCenter(find.byKey(const ValueKey('playlists.heading')))
+                  .dy,
+              2,
+            ),
           );
         }
         if (['library', 'artists', 'albums'].contains(section)) {
@@ -320,7 +326,7 @@ void main() {
         }
         if (section == 'favorites') {
           final headerRight =
-              tester.getRect(find.byType(CatalogBrowser)).right - 32;
+              tester.getRect(find.byType(CatalogBrowser)).right - 24;
           expect(
             tester
                 .getRect(find.byKey(const ValueKey('catalog.controls.toggle')))

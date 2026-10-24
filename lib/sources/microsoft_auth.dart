@@ -1,3 +1,5 @@
+import '../domain/onedrive_identity.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -86,7 +88,7 @@ class MicrosoftAuth implements RefreshableAccessTokenProvider {
               (data['access_token'] as String).isNotEmpty &&
               data['drive_id'] is String &&
               (data['drive_id'] as String).isNotEmpty
-          ? data['drive_id'] as String
+          ? oneDriveIdentity(data['drive_id'] as String)
           : null;
     } on MicrosoftAuthFailure {
       return null;
@@ -189,7 +191,8 @@ class MicrosoftAuth implements RefreshableAccessTokenProvider {
             stage: 'session',
           );
         }
-        if (data['drive_id'] != null && data['drive_id'] != driveId) {
+        if (data['drive_id'] != null &&
+            !sameOneDrive(data['drive_id'] as String, driveId)) {
           throw const MicrosoftAuthFailure(
             'O OneDrive retornado não corresponde à sessão salva. Reconecte a conta pelo navegador.',
             code: 'account_mismatch',
@@ -197,7 +200,7 @@ class MicrosoftAuth implements RefreshableAccessTokenProvider {
           );
         }
         data['session_id'] = expectedSession;
-        data['drive_id'] = driveId;
+        data['drive_id'] = oneDriveIdentity(driveId);
         await vault.write(sessionKey, jsonEncode(data));
       });
 

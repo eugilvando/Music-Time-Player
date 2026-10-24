@@ -41,6 +41,12 @@ Uint8List mp3Fixture(Uint8List image, {int version = 3}) {
     ...frame('APIC', [0, ...ascii.encode('image/png'), 0, 3, 0, ...image]),
     ...Uint8List(16),
   ];
+  final audio = Uint8List(1024)
+    ..setAll(0, [255, 251, 144, 0])
+    ..setAll(36, 'Xing'.codeUnits);
+  ByteData.sublistView(audio)
+    ..setUint32(40, 1)
+    ..setUint32(44, 7656);
   return Uint8List.fromList([
     ...ascii.encode('ID3'),
     version,
@@ -48,7 +54,7 @@ Uint8List mp3Fixture(Uint8List image, {int version = 3}) {
     0,
     ...syncsafe(body.length),
     ...body,
-    ...Uint8List(1024),
+    ...audio,
   ]);
 }
 
@@ -194,7 +200,7 @@ void main() {
     expect(tags!.artists, ['Artist']);
     expect(tags.album, 'Album');
     expect(tags.year, 1999);
-    expect(reader.received, 138);
+    expect(reader.received, 138 + 256);
   });
   test('tamanho ID3 fora do limite não provoca segunda requisição', () async {
     var requests = 0;
@@ -216,7 +222,7 @@ void main() {
   });
   for (final version in [3, 4]) {
     test(
-      'MP3 ID3v2.$version lê tags/capa sem ler áudio e separa artistas',
+      'MP3 ID3v2.$version lê tags/capa e somente 256 bytes do cabeçalho de áudio',
       () async {
         final image = await File('assets/branding/icon.png').readAsBytes();
         final file = mp3Fixture(image, version: version);
@@ -237,7 +243,8 @@ void main() {
         expect(tags.trackNumber, 3);
         expect(tags.discNumber, 2);
         expect(tags.cover, image);
-        expect(received, file.length - 1024);
+        expect(tags.duration!.inSeconds, 199);
+        expect(received, file.length - 1024 + 256);
       },
     );
   }
@@ -395,12 +402,13 @@ void main() {
       expect(track.albumArtist, 'Artista do álbum');
       expect(track.album, 'Álbum original');
       expect(track.cover, image);
-      expect(track.cloudTagsVersion, 1);
+      expect(track.cloudTagsVersion, 2);
+      expect(track.duration.inSeconds, 199);
       expect(track.fileName, '03 - Arquivo.mp3');
       expect(providers.syncSummary?['tagsRead'], 1);
       await providers.importMicrosoft();
       expect(providers.error, isNull);
-      expect(reads, 2);
+      expect(reads, 3);
       expect((await store.downloadTasks()), isEmpty);
     },
   );

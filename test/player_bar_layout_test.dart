@@ -50,7 +50,7 @@ void main() {
       final previous = tester.getRect(
         find.byKey(const ValueKey('player.item.previous')),
       );
-      expect(previous.left - info.right, lessThanOrEqualTo(1));
+      expect(previous.left - info.right, 4);
       expect(previous.left, greaterThan(info.left));
       final positions = icons
           .map((icon) => tester.getCenter(find.byIcon(icon)))
@@ -59,7 +59,9 @@ void main() {
       expect(positions[1].dx, lessThan(positions[2].dx));
       expect(positions.map((p) => p.dy).toSet().length, 1);
       final actions = tester.getCenter(find.byIcon(Icons.more_horiz));
-      final lastfm = tester.getCenter(find.byIcon(Icons.music_note));
+      final lastfm = tester.getCenter(
+        find.byKey(const ValueKey('player.lastfm')),
+      );
       expect(lastfm.dx, greaterThan(actions.dx));
       expect(lastfm.dx - actions.dx, lessThan(40));
       expect(lastfm.dy, actions.dy);
@@ -78,7 +80,7 @@ void main() {
       );
       expect(
         tester.getSize(find.byKey(const ValueKey('player.single-line'))).width,
-        1960,
+        1968,
       );
       tester.view.physicalSize = const Size(480, 600);
       await tester.pump();

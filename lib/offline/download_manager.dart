@@ -153,6 +153,52 @@ class DownloadManager extends ChangeNotifier
     _notify();
   }
 
+  Future<void> removeSourceTracks(List<String> ids) async {
+    if (ids.isEmpty) return;
+    final removing = ids.toSet();
+    if (running || maintaining || removing.contains(cache?.pinned)) {
+      throw StateError(
+        'Stop playback and wait for downloads before removing this source.',
+      );
+    }
+    final wasSuspended = suspended;
+    suspended = true;
+    try {
+      final tasks = await store.downloadTasks(includeCovers: false);
+      await cache?.removeSourceTracks(removing);
+      for (final row in tasks.where((r) => removing.contains(r['id']))) {
+        final id = row['id'] as String;
+        cancelled.add(id);
+        if (row['status'] == 'complete') await removePermanentTrack(id);
+        await store.removeOfflineTrackReferences(id);
+        await store.updateDownload(id, 'removed');
+      }
+      final root = path.normalize(path.absolute((await dataDirectory()).path));
+      if (await FileSystemEntity.type(root, followLinks: false) ==
+          FileSystemEntityType.directory) {
+        for (final id
+            in tasks.map((r) => r['id'] as String).where(removing.contains)) {
+          final part = path.join(
+            root,
+            '${sha256.convert(utf8.encode(id))}.audio.part',
+          );
+          final originals = await store.database.rawQuery(
+            "SELECT id FROM tracks WHERE lower(replace(path,char(92),'/'))=? LIMIT 1",
+            [part.replaceAll('\\', '/').toLowerCase()],
+          );
+          if (originals.isEmpty &&
+              await FileSystemEntity.type(part, followLinks: false) ==
+                  FileSystemEntityType.file) {
+            await File(part).delete();
+          }
+        }
+      }
+    } finally {
+      suspended = wasSuspended;
+      _notify();
+    }
+  }
+
   Future<void> process() async {
     if (_disposed || suspended || offlineOnly) return;
     if (running || maintaining) {

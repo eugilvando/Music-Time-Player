@@ -1,3 +1,6 @@
+import 'media_card_size.dart';
+import 'design_icon.dart';
+import 'ui_language.dart';
 import 'item_action_region.dart';
 
 import 'dart:math';
@@ -5,23 +8,122 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 /// Headers and lazy rows share the available width without horizontal scrolling.
-class MediaDetailsTable extends StatelessWidget {
+class MediaDetailsTable extends StatefulWidget {
   const MediaDetailsTable({
     super.key,
     required this.headers,
     required this.widths,
     required this.itemCount,
     required this.rowBuilder,
+    this.onChooseColumns,
+    this.columnKey,
   });
   final List<String> headers;
   final List<double> widths;
   final int itemCount;
   final List<Widget> Function(int) rowBuilder;
+  final VoidCallback? onChooseColumns;
+  final String? columnKey;
+  @override
+  State<MediaDetailsTable> createState() => _MediaDetailsTableState();
+}
+
+class _MediaDetailsTableState extends State<MediaDetailsTable> {
+  int get itemCount => widget.itemCount;
+  Future<void> chooseColumns(BuildContext context) async {
+    final scope = MediaCardSizeScope.of(context);
+    final key =
+        'details_columns_${widget.columnKey ?? scope?.contextKey ?? 'catalog'}_${widget.headers.length}';
+    final saved = scope?.settings?.visualList(
+      key,
+      List.generate(widget.headers.length, (i) => '$i'),
+    );
+    final selected = <int>{
+      for (var i = 0; i < widget.headers.length; i++)
+        if (saved == null || saved.contains('$i')) i,
+    };
+    final title = widget.headers.first == '#' ? 1 : 0;
+    selected.add(title);
+    final accepted = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => StatefulBuilder(
+        builder: (dialog, update) => AlertDialog(
+          insetPadding: const EdgeInsets.all(24),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          title: const UiText('Escolher colunas'),
+          contentPadding: const EdgeInsets.all(24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          content: SizedBox(
+            width: 360,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (var i = 0; i < widget.headers.length; i++)
+                    if (widget.headers[i].isNotEmpty &&
+                        widget.headers[i] != '#')
+                      CheckboxListTile(
+                        title: Text(widget.headers[i]),
+                        value: selected.contains(i),
+                        onChanged: i == title
+                            ? null
+                            : (v) => update(() {
+                                v == true
+                                    ? selected.add(i)
+                                    : selected.remove(i);
+                              }),
+                      ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialog, false),
+              child: const UiText('Cancelar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialog, true),
+              child: const UiText('Aplicar'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (accepted != true || !mounted) return;
+    await scope?.settings?.updateVisual(
+      key,
+      selected.map((v) => '$v').toList(),
+    );
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, size) {
+      final scope = MediaCardSizeScope.of(context);
+      final key =
+          'details_columns_${widget.columnKey ?? scope?.contextKey ?? 'catalog'}_${widget.headers.length}';
+      final saved = widget.onChooseColumns != null
+          ? null
+          : scope?.settings?.visualList(
+              key,
+              List.generate(widget.headers.length, (i) => '$i'),
+            );
+      final title = widget.headers.first == '#' ? 1 : 0;
+      final indices = [
+        for (var i = 0; i < widget.headers.length; i++)
+          if (i == title ||
+              widget.headers[i].isEmpty ||
+              widget.headers[i] == '#' ||
+              saved == null ||
+              saved.contains('$i'))
+            i,
+      ];
+      final headers = [for (final i in indices) widget.headers[i]];
+      final widths = [for (final i in indices) widget.widths[i]];
       final scale = MediaQuery.textScalerOf(context).scale(1);
-      final rowHeight = 72 * scale;
+      final rowHeight = 44 * scale;
       final width = size.maxWidth;
       final total = widths.reduce((a, b) => a + b);
       final fitted = widths.map((w) => w * width / total).toList();
@@ -65,7 +167,7 @@ class MediaDetailsTable extends StatelessWidget {
                 child: DefaultTextStyle.merge(
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  child: cells[i] is Text
+                  child: cells[i] is Text || cells[i] is IconButton
                       ? cells[i]
                       : ClipRect(
                           child: OverflowBox(
@@ -98,10 +200,21 @@ class MediaDetailsTable extends StatelessWidget {
                 height: 44 * scale,
                 child: row([
                   for (final label in headers)
-                    Text(
-                      label,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    if (label.isEmpty &&
+                        (scope?.settings != null ||
+                            widget.onChooseColumns != null))
+                      IconButton(
+                        tooltip: ui(context, 'Escolher colunas'),
+                        icon: const MtIcon(Icons.view_column, size: 16),
+                        onPressed:
+                            widget.onChooseColumns ??
+                            () => chooseColumns(context),
+                      )
+                    else
+                      Text(
+                        label,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                 ]),
               ),
               Expanded(
@@ -109,8 +222,12 @@ class MediaDetailsTable extends StatelessWidget {
                   primary: false,
                   itemExtent: rowHeight,
                   itemCount: itemCount,
-                  itemBuilder: (_, i) =>
-                      ItemActionRegion(child: row(rowBuilder(i))),
+                  itemBuilder: (_, i) {
+                    final cells = widget.rowBuilder(i);
+                    return ItemActionRegion(
+                      child: row([for (final index in indices) cells[index]]),
+                    );
+                  },
                 ),
               ),
             ],

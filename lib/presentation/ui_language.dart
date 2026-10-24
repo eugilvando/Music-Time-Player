@@ -129,6 +129,76 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Selecione biblioteca ou playlists para incluir capas.':
+      'Select library or playlists to include artwork.',
+  'Imagem compartilhada inválida.': 'Invalid shared artwork.',
+  'Backup excede 128 MB.': 'Backup exceeds 128 MB.',
+  'Duração desconhecida': 'Unknown duration',
+  'Faixas a adicionar': 'Tracks to add',
+  'Limite': 'Limit',
+  "Geral e aparência": "General and appearance",
+  "Cache e offline": "Cache and offline",
+  "Backup e avançado": "Backup and advanced",
+  "Restaurar configurações gerais": "Reset general settings",
+  "Restaurar interface e player": "Reset interface and player",
+  "Espaçamento dos ícones": "Icon spacing",
+  "Limpeza de cache": "Cache cleanup",
+  "Extrapequeno": "Extra Small",
+  'Faixas aguardando pré-carregamento': 'Preloaded tracks',
+  'Retenção': 'Retention',
+  '30 dias': '30 days',
+  "Fontes e IDs de aplicativo": "Sources and application IDs",
+  "Credenciais e sessões": "Credentials and sessions",
+  "Senha do backup": "Backup password",
+  "Confirmar senha": "Confirm password",
+  "Importar dados do backup": "Import backup data",
+  "Criptografar com senha": "Encrypt with password",
+  "Escolha o conteúdo. Músicas e downloads físicos não são incluídos.": "Choose the content. Music files and physical downloads are not included.",
+  "Os itens selecionados serão importados sem apagar os demais dados. Playlists serão adicionadas como cópias.": "Selected items will be imported without deleting other data. Playlists will be added as copies.",
+  "Capas são opcionais para reduzir o tamanho. Sessões podem expirar; reconexão pode ser necessária em outro computador.": "Artwork is optional to reduce size. Sessions may expire; another computer may require reconnection.",
+  "Use pelo menos 12 caracteres. A senha não é salva e não pode ser recuperada.": "Use at least 12 characters. The password is not saved and cannot be recovered.",
+  "Backup exportado. Guarde o arquivo e a senha em um local seguro.":
+      "Backup exported. Keep the file and password in a safe place.",
+  "Escolha biblioteca, playlists, favoritos, histórico, fila, preferências e fontes. Capas são opcionais. Credenciais exigem um backup criptografado com senha. Músicas e downloads físicos não são incluídos.": "Choose your library, playlists, favorites, history, queue, preferences and sources. Artwork is optional. Credentials require a password-encrypted backup. Music files and physical downloads are not included.",
+  "Credenciais exigem fontes e senha de pelo menos 12 caracteres.": "Credentials require source settings and a password of at least 12 characters.",
+  "Capas excedem 64 MB. Exporte sem capas; elas podem ser coletadas novamente.": "Artwork exceeds 64 MB. Export without artwork; images can be collected again.",
+  "Backup excede 128 MB. Exporte sem capas.":
+      "Backup exceeds 128 MB. Export without artwork.",
+  "Senha incorreta ou backup danificado.":
+      "Incorrect password or damaged backup.",
+  "Cabeçalho de backup inválido.": "Invalid backup header.",
+  "Backup expandido excede 128 MB.": "Expanded backup exceeds 128 MB.",
+  "Configuração de fonte inválida.": "Invalid source configuration.",
+  "Formato de backup inválido.": "Invalid backup format.",
+  "Restaure fontes junto com as credenciais.":
+      "Restore sources together with credentials.",
+  "Configuração de criptografia incompatível ou senha ausente.":
+      "Unsupported encrypted backup or missing password.",
+  "Credenciais inválidas ou sem criptografia.":
+      "Unencrypted or invalid credentials.",
+  "Seção de backup indisponível.": "Unavailable backup section.",
+  "Referências de backup inválidas.": "Invalid backup references.",
+
+  'Prévia de design': 'Design review',
+  'Perfil temporário com coleção de demonstração':
+      'Temporary profile with a demonstration collection',
+  'Todas as músicas': 'All music',
+  'Somente offline': 'Offline only',
+  "Remover esta fonte?": "Remove this source?",
+  "A remoção exclui as faixas da fonte do catálogo, seus favoritos, histórico, downloads e cache. As entradas das playlists ficam pendentes de correção. Faixas compartilhadas com outra fonte e arquivos originais são preservados.": "Removing this source deletes its catalog tracks, favorites, history, downloads and cache. Playlist entries become missing references. Tracks shared with another source and original music files are preserved.",
+  "Somente áudios da pasta selecionada e das subpastas serão analisados.":
+      "Only audio in the selected folder and its subfolders will be scanned.",
+  "Não foi possível carregar as pastas. Confira a conexão e tente novamente.":
+      "Could not load folders. Check the connection and retry.",
+  "Nenhuma subpasta. Você pode selecionar esta pasta.":
+      "No subfolders. You can select this folder.",
+  "Aguarde o fim da sincronização.": "Wait for synchronization to finish.",
+  "Selecione uma pasta musical.": "Select a music folder.",
+  "Pause a reprodução antes de remover esta fonte.":
+      "Pause playback before removing this source.",
+  "Pare a reprodução e aguarde os downloads antes de remover esta fonte.":
+      "Stop playback and wait for downloads before removing this source.",
+  'Meu Drive': 'My Drive',
   'Mix de artista': 'Artist mix',
   'Rádio do artista': 'Artist radio',
   'Mixes e rádios': 'Mixes and radios',
@@ -675,6 +745,9 @@ const englishLabels = <String, String>{
       'Could not read the Last.fm session from the vault',
   'Last.fm não conectado': 'Last.fm is not connected',
   'Filtros': 'Filters',
+  'Fonte': 'Source',
+  'Conta': 'Account',
+  'Pasta (inclui subpastas)': 'Folder (including subfolders)',
   'Pré-carregamento automático': 'Automatic preloading',
   'Cache automático · 30 dias': 'Automatic cache · 30 days',
   'Remover seleção offline': 'Remove offline selection',

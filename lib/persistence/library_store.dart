@@ -281,7 +281,97 @@ class LibraryStore {
     'active': active ? 1 : 0,
   }, conflictAlgorithm: ConflictAlgorithm.replace);
   Future<void> removeCloudSource(String id) async {
-    await database.delete('cloud_sources', where: 'id=?', whereArgs: [id]);
+    final ids = await removableSourceTracks(id);
+    await beforeSourceRemoval?.call(ids);
+    await database.transaction((txn) async {
+      await _deleteSourceTracks(txn, ids);
+      await txn.delete('cloud_sources', where: 'id=?', whereArgs: [id]);
+    });
+  }
+
+  /// Installed by the application so managed audio is removed before its rows.
+  Future<void> Function(List<String>)? beforeSourceRemoval;
+
+  Future<List<String>> removableSourceTracks(
+    String id, {
+    bool local = false,
+  }) async {
+    final rows = local
+        ? await database.rawQuery(
+            'SELECT track_id AS id FROM local_source_tracks m WHERE source_id=? AND NOT EXISTS(SELECT 1 FROM local_source_tracks other JOIN local_sources s ON s.id=other.source_id WHERE other.track_id=m.track_id AND other.source_id!=? AND s.active=1)',
+            [id, id],
+          )
+        : await database.rawQuery(
+            "SELECT c.track_id AS id FROM catalog_search c JOIN cloud_sources s ON s.id=? AND ${cloudAccountMatch('c.account', 's.account')} AND (c.folder=s.folder OR substr(c.folder,1,length(s.folder)+1)=s.folder||'/') WHERE NOT EXISTS(SELECT 1 FROM cloud_sources other WHERE other.id!=s.id AND ${cloudAccountMatch('other.account', 'c.account')} AND (c.folder=other.folder OR substr(c.folder,1,length(other.folder)+1)=other.folder||'/'))",
+            [id],
+          );
+    return rows.map((r) => r['id'] as String).toList();
+  }
+
+  Future<void> _deleteSourceTracks(Transaction txn, List<String> ids) async {
+    if (ids.isEmpty) return;
+    final encoded = jsonEncode(ids);
+    const matches = 'IN (SELECT value FROM json_each(?))';
+    // Keep playlist occurrences as repairable references; never delete playlists.
+    await txn.rawUpdate(
+      "UPDATE playlist_entries SET original_reference=COALESCE(original_reference,(SELECT CASE WHEN json_extract(metadata,'\$.driveId') IS NULL THEN path ELSE COALESCE(json_extract(metadata,'\$.sourcePath'),'')||'/'||COALESCE(NULLIF(json_extract(metadata,'\$.fileName'),''),title) END FROM tracks WHERE tracks.id=playlist_entries.track_id)), reference_drive=COALESCE(reference_drive,(SELECT json_extract(metadata,'\$.driveId') FROM tracks WHERE id=track_id)), import_title=COALESCE(import_title,(SELECT title FROM tracks WHERE id=track_id)), import_artist=COALESCE(import_artist,(SELECT artist FROM tracks WHERE id=track_id)), resolution_reason='missing', track_id=NULL WHERE track_id $matches",
+      [encoded],
+    );
+    final queue = await txn.query('queue', orderBy: 'ordinal');
+    final playback = (await txn.query('playback')).firstOrNull;
+    final removed = ids.toSet();
+    final oldIndex = playback?['current_index'] as int? ?? 0;
+    final retained = queue
+        .where((r) => !removed.contains(r['track_id']))
+        .toList();
+    final index = queue
+        .take(oldIndex)
+        .where((r) => !removed.contains(r['track_id']))
+        .length;
+    await txn.delete('queue');
+    for (var i = 0; i < retained.length; i++) {
+      await txn.insert('queue', {
+        'ordinal': i,
+        'track_id': retained[i]['track_id'],
+      });
+    }
+    if (playback != null) {
+      await txn.update('playback', {
+        'current_index': retained.isEmpty
+            ? -1
+            : index.clamp(0, retained.length - 1),
+        if (oldIndex >= 0 &&
+            oldIndex < queue.length &&
+            removed.contains(queue[oldIndex]['track_id']))
+          'position_ms': 0,
+      });
+    }
+    for (final table in [
+      'downloads',
+      'media_cache',
+      'offline_memberships',
+      'history',
+      'favorites',
+      'scrobble_outbox',
+      'local_source_tracks',
+      'cloud_sync_seen',
+    ]) {
+      await txn.delete(table, where: 'track_id $matches', whereArgs: [encoded]);
+    }
+    // Keep hidden local identities as protection for original files, including
+    // originals deliberately stored inside a managed directory. Reset uses them.
+    await txn.rawUpdate(
+      "UPDATE tracks SET metadata=json_set(metadata,'\$.catalogExcluded',json('true')) WHERE id $matches AND json_extract(metadata,'\$.driveId') IS NULL",
+      [encoded],
+    );
+    await txn.delete(
+      'tracks',
+      where: "id $matches AND json_extract(metadata,'\$.driveId') IS NOT NULL",
+      whereArgs: [encoded],
+    );
+    await txn.rawDelete(
+      'DELETE FROM artworks WHERE NOT EXISTS(SELECT 1 FROM tracks WHERE cover_hash=artworks.hash)',
+    );
   }
 
   Future<Map<String, dynamic>?> cloudCheckpoint(String source) async {
@@ -494,6 +584,10 @@ class LibraryStore {
           whereArgs: [id],
         );
         for (final trackId in ids) {
+          await txn.rawUpdate(
+            "UPDATE tracks SET metadata=json_remove(metadata,'\$.catalogExcluded') WHERE id=?",
+            [trackId],
+          );
           await txn.insert('local_source_tracks', {
             'source_id': id,
             'track_id': trackId,
@@ -501,12 +595,17 @@ class LibraryStore {
         }
       });
   Future<void> removeLocalSource(String id) async {
-    await database.update(
-      'local_sources',
-      {'active': 0},
-      where: 'id=?',
-      whereArgs: [id],
-    );
+    final ids = await removableSourceTracks(id, local: true);
+    await beforeSourceRemoval?.call(ids);
+    await database.transaction((txn) async {
+      await _deleteSourceTracks(txn, ids);
+      await txn.delete(
+        'local_source_tracks',
+        where: 'source_id=?',
+        whereArgs: [id],
+      );
+      await txn.delete('local_sources', where: 'id=?', whereArgs: [id]);
+    });
   }
 
   Future<int> importPlaylist(String name, List<String> trackIds) async {
@@ -989,7 +1088,7 @@ class LibraryStore {
       result.putIfAbsent(row['track_id'] as String, () => []).add(row);
     }
     for (final row in await database.rawQuery(
-      "SELECT c.track_id, s.id, s.label FROM catalog_search c JOIN cloud_sources s ON c.account=s.account AND (c.folder=s.folder OR substr(c.folder,1,length(s.folder)+1)=s.folder||'/') WHERE s.active=1",
+      "SELECT c.track_id, s.id, s.label FROM catalog_search c JOIN cloud_sources s ON ${cloudAccountMatch('c.account', 's.account')} AND (c.folder=s.folder OR substr(c.folder,1,length(s.folder)+1)=s.folder||'/') WHERE s.active=1",
     )) {
       result.putIfAbsent(row['track_id'] as String, () => []).add(row);
     }

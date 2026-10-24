@@ -23,6 +23,6 @@ The library is a separate replaceable DLL; the application does not add a restri
 
 ## Windows runtime and fonts
 
-Windows builds include Microsoft Visual C++ runtime files redistributed under Microsoft's applicable terms, not MIT. Windows itself and system fonts are not bundled as source assets. Demo screenshots render Segoe UI from the Windows system; no Segoe font files are included in the repository.
+Windows builds include Microsoft Visual C++ runtime files redistributed under Microsoft's applicable terms, not MIT. Windows itself and system fonts are not bundled as source assets. The interface now bundles Inter and Bricolage Grotesque under their SIL Open Font Licenses, and Material Symbols Rounded under its Apache license. License texts are included in assets/fonts and LICENSES. No Segoe font files are included.
 
 The generated artwork and fictional catalog used in screenshots were created for this project and are not an included commercial music library. Provider and server names identify their respective third-party products; this project is not an official Google, Microsoft, Last.fm, Jellyfin or Emby client endorsed by those providers.

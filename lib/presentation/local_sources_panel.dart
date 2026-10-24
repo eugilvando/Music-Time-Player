@@ -1,4 +1,6 @@
+import 'design_icon.dart';
 import 'ui_language.dart';
+import 'additional_source_settings.dart' show sourceRemovalWarning;
 
 import 'package:flutter/material.dart';
 
@@ -54,9 +56,13 @@ class _LocalSourcesPanelState extends State<LocalSourcesPanel> {
       if (syncing && widget.sync.error != null) error = widget.sync.error;
       await refresh();
       await widget.onChanged();
-    } catch (_) {
+    } catch (failure) {
       if (mounted) {
-        setState(() => error = 'Não foi possível atualizar as fontes.');
+        setState(
+          () => error = failure is StateError
+              ? failure.message.toString()
+              : 'Não foi possível atualizar as fontes.',
+        );
       }
     } finally {
       if (mounted) setState(() => busy = false);
@@ -67,10 +73,12 @@ class _LocalSourcesPanelState extends State<LocalSourcesPanel> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Remover fonte local?'),
-        content: const UiText(
-          'As faixas desta fonte sairão da biblioteca. Arquivos originais, favoritos e referências em playlists serão preservados.',
-        ),
+        content: const UiText(sourceRemovalWarning),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -114,7 +122,7 @@ class _LocalSourcesPanelState extends State<LocalSourcesPanel> {
         for (final source in sources)
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.folder),
+            leading: const MtIcon(Icons.folder),
             title: Text(
               source['label'] as String,
               maxLines: 2,

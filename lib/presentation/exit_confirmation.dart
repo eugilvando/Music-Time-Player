@@ -11,6 +11,13 @@ Future<bool> showExitConfirmation(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: UiText(
             unsaved
                 ? 'Não foi possível concluir o salvamento'

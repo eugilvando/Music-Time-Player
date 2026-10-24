@@ -110,6 +110,23 @@ class MediaCache extends ChangeNotifier {
     _notify();
   }
 
+  Future<void> removeSourceTracks(Set<String> ids) async {
+    if (ids.contains(pinned)) throw StateError('Faixa em reprodução');
+    _clearing = true;
+    _epoch++;
+    _cancelActive();
+    try {
+      await _tail;
+      for (final row in (await rows()).where(
+        (r) => ids.contains(r['track_id']),
+      )) {
+        await remove(row['track_id'] as String);
+      }
+    } finally {
+      _clearing = false;
+    }
+  }
+
   Future<File?> valid(Track track) async {
     final rows = await store.database.query(
       'media_cache',

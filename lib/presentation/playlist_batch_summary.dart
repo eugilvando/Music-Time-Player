@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import '../library/playlist_batch_import.dart';
@@ -9,6 +11,10 @@ Future<void> showPlaylistBatchSummary(
 ) => showDialog<void>(
   context: context,
   builder: (context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     title: const UiText('Import summary'),
     content: SizedBox(
       width: 600,
@@ -26,7 +32,7 @@ Future<void> showPlaylistBatchSummary(
           ),
           for (final r in results)
             ListTile(
-              leading: Icon(
+              leading: MtIcon(
                 r.failure != null
                     ? Icons.error_outline
                     : r.pending > 0

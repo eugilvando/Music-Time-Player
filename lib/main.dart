@@ -1,3 +1,7 @@
+import 'presentation/design_preview.dart';
+
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+
 import 'dart:io';
 
 import 'presentation/startup_gate.dart';
@@ -20,6 +24,12 @@ import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (arguments.contains('--design-preview')) {
+    PathProviderPlatform.instance = DesignPreviewPaths(
+      path.join(Directory.systemTemp.path, 'music_time_design_review_1_3'),
+    );
+    SharedPreferences.setPrefix('flutter.music_time.design_review.');
+  }
   // Select the validation namespace before StartupGate reads the language.
   if (arguments.contains('--validation-profile')) {
     SharedPreferences.setPrefix('flutter.music_time.validation.');
@@ -47,18 +57,26 @@ Future<Widget> initializeMusicTime(
     await windowManager.setMinimumSize(const Size(480, 600));
   }
   final validation = arguments.contains('--validation-profile');
+  final designPreview = arguments.contains('--design-preview');
   progress('Carregando preferências…');
   final preferences = await SharedPreferences.getInstance();
   if (!validation && preferences.getBool('language_v6_migrated') != true) {
     await preferences.setString('visual.language', 'en');
     await preferences.setBool('language_v6_migrated', true);
   }
-  final directory = validation
+  final directory = designPreview
+      ? Directory(
+          path.join(Directory.systemTemp.path, 'music_time_design_review_1_3'),
+        )
+      : validation
       ? Directory(
           path.join(Directory.systemTemp.path, 'music_time_validation_profile'),
         )
       : await getApplicationSupportDirectory();
   await directory.create(recursive: true);
+  if (designPreview) {
+    PathProviderPlatform.instance = DesignPreviewPaths(directory.path);
+  }
   final startupClock = Stopwatch()..start();
   Future<void> log(String event) async {
     try {
@@ -131,7 +149,9 @@ Future<Widget> initializeMusicTime(
       directory,
       store,
       preferences,
-      validation
+      designPreview
+          ? const SystemVault(prefix: 'music_time.design_review.')
+          : validation
           ? const SystemVault(prefix: 'music_time.validation.')
           : const SystemVault(),
     );
@@ -144,6 +164,9 @@ Future<Widget> initializeMusicTime(
         .writeAsString(maintenanceSucceeded ? 'ok' : 'failed', flush: true);
   }
   if (validation) await preferences.setBool('windows.close_to_tray', false);
+  if (designPreview) {
+    await prepareDesignPreview(directory, store, preferences);
+  }
   final settings = AppSettings(preferences);
   if (!validation) await settings.migrateHomeLayout();
   progress('Abrindo sua biblioteca…');
@@ -151,7 +174,8 @@ Future<Widget> initializeMusicTime(
     settings: settings,
     store: store,
     startupNotice: startupNotice,
-    nativeIntegration: Platform.isWindows,
+    nativeIntegration: Platform.isWindows && !designPreview,
+    designPreview: designPreview,
     validation: validation,
     smokeAudio: validation
         ? arguments
@@ -178,12 +202,14 @@ class MusicTimeApp extends StatelessWidget {
     required this.store,
     this.nativeIntegration = false,
     this.validation = false,
+    this.designPreview = false,
     this.smokeAudio,
     this.startupNotice,
   });
   final AppSettings settings;
   final LibraryStore store;
   final bool nativeIntegration, validation;
+  final bool designPreview;
   final String? smokeAudio, startupNotice;
 
   @override
@@ -230,6 +256,7 @@ class MusicTimeApp extends StatelessWidget {
         store: store,
         nativeIntegration: nativeIntegration,
         validation: validation,
+        designPreview: designPreview,
         smokeAudio: smokeAudio,
         startupNotice: startupNotice,
       ),
@@ -245,8 +272,10 @@ ThemeData musicTimeTheme(
   final dark = brightness == Brightness.dark;
   final primary = dark ? accent : Color.lerp(accent, Colors.black, .24)!;
   final surface = dark ? const Color(0xff111516) : const Color(0xfff7f7f5);
-  final card = dark ? const Color(0xff1c2223) : Colors.white;
-  final border = dark ? const Color(0xff333b3c) : const Color(0xffd9dedd);
+  final card = dark ? const Color(0xff16191a) : Colors.white;
+  final border = dark
+      ? const Color(0xff717878).withValues(alpha: .20)
+      : const Color(0xffd9dedd);
   final scheme = ColorScheme.fromSeed(seedColor: accent, brightness: brightness)
       .copyWith(
         primary: primary,
@@ -256,6 +285,11 @@ ThemeData musicTimeTheme(
         secondaryContainer: primary.withValues(alpha: .14),
         onSecondaryContainer: primary,
         surface: surface,
+        onSurface: dark ? const Color(0xfff2f4f3) : const Color(0xff111516),
+        onSurfaceVariant: dark
+            ? const Color(0xffb5bbba)
+            : const Color(0xff505857),
+        surfaceContainerHigh: dark ? const Color(0xff16191a) : Colors.white,
         surfaceContainer: card,
         surfaceContainerHighest: dark
             ? const Color(0xff292f30)
@@ -264,25 +298,35 @@ ThemeData musicTimeTheme(
   return ThemeData(
     useMaterial3: true,
     textTheme: TextTheme(
-      titleMedium: TextStyle(
+      headlineLarge: TextStyle(
+        fontFamily: 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
-        fontSize: settings?.visualNumber('font_body', 14) ?? 14,
+        fontSize: settings?.visualNumber('font_title', 32) ?? 32,
+      ),
+      titleMedium: TextStyle(
+        fontFamily: 'Bricolage Grotesque',
+        fontWeight: FontWeight.bold,
+        fontSize: (settings?.visualNumber('font_body', 14) ?? 14) * 16 / 14,
       ),
       titleSmall: TextStyle(
+        fontFamily: 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_body', 14) ?? 14,
       ),
       titleLarge: TextStyle(
+        fontFamily: 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_title', 22) ?? 22,
       ),
       headlineSmall: TextStyle(
+        fontFamily: 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
-        fontSize: settings?.visualNumber('font_title', 22) ?? 22,
+        fontSize: settings?.visualNumber('font_title', 32) ?? 32,
       ),
       headlineMedium: TextStyle(
+        fontFamily: 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
-        fontSize: settings?.visualNumber('font_title', 28) ?? 28,
+        fontSize: settings?.visualNumber('font_title', 32) ?? 32,
       ),
       bodyLarge: TextStyle(
         fontSize: settings?.visualNumber('font_body', 14) ?? 14,
@@ -294,7 +338,8 @@ ThemeData musicTimeTheme(
         fontSize: settings?.visualNumber('font_secondary', 12) ?? 12,
       ),
     ),
-    fontFamily: 'Segoe UI',
+    fontFamily: 'Inter',
+    visualDensity: VisualDensity.compact,
     brightness: brightness,
     colorScheme: scheme,
     scaffoldBackgroundColor: surface,
@@ -304,10 +349,23 @@ ThemeData musicTimeTheme(
       elevation: 0,
       scrolledUnderElevation: 0,
     ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: card,
+      surfaceTintColor: Colors.transparent,
+      elevation: 12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+    ),
+    expansionTileTheme: ExpansionTileThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      collapsedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
     inputDecorationTheme: InputDecorationTheme(
+      isDense: true,
       filled: true,
       fillColor: card,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(24),
         borderSide: BorderSide(color: border),
@@ -329,12 +387,52 @@ ThemeData musicTimeTheme(
         side: BorderSide(color: border),
       ),
     ),
+    iconButtonTheme: IconButtonThemeData(
+      style:
+          IconButton.styleFrom(
+            foregroundColor: scheme.onSurfaceVariant,
+            iconSize: 20,
+            visualDensity: VisualDensity.standard,
+            minimumSize: const Size(36, 36),
+            padding: const EdgeInsets.all(8),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ).copyWith(
+            foregroundColor: WidgetStateProperty.resolveWith(
+              (states) => states.contains(WidgetState.disabled)
+                  ? scheme.onSurface.withValues(alpha: .38)
+                  : states.contains(WidgetState.selected)
+                  ? primary
+                  : scheme.onSurfaceVariant,
+            ),
+          ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        visualDensity: VisualDensity.standard,
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: const StadiumBorder(),
+        textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        visualDensity: VisualDensity.standard,
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: const StadiumBorder(),
+      ),
+    ),
     listTileTheme: ListTileThemeData(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+      minVerticalPadding: 4,
       selectedColor: primary,
       selectedTileColor: scheme.secondaryContainer,
     ),
     sliderTheme: const SliderThemeData(
-      trackHeight: 3,
+      trackHeight: 6,
       thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
     ),
     chipTheme: ChipThemeData(
@@ -342,10 +440,15 @@ ThemeData musicTimeTheme(
       selectedColor: scheme.primaryContainer,
       side: BorderSide(color: border),
       shape: const StadiumBorder(),
+      showCheckmark: false,
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        visualDensity: VisualDensity.standard,
+        minimumSize: const Size(0, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: const StadiumBorder(),
       ),
     ),
   );

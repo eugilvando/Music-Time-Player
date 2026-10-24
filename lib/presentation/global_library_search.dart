@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -178,7 +180,7 @@ class _GlobalLibrarySearchState extends State<GlobalLibrarySearch> {
       leading: SizedBox.square(dimension: 44, child: cover),
       title: Text(title),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.arrow_forward),
+      trailing: const MtIcon(Icons.arrow_forward),
       onTap: open,
     );
     return ListView(
@@ -223,7 +225,7 @@ class _GlobalLibrarySearchState extends State<GlobalLibrarySearch> {
           link(
             playlist['name'] as String,
             ui(context, 'Abrir na biblioteca'),
-            const Icon(Icons.queue_music),
+            const MtIcon(Icons.queue_music),
             () => widget.onPlaylist(playlist['id'] as int),
           ),
       ],

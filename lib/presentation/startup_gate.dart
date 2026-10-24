@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -95,7 +97,11 @@ class _StartupGateState extends State<StartupGate> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.album, size: 56, color: Color(0xffff7668)),
+                    const MtIcon(
+                      Icons.album,
+                      size: 56,
+                      color: Color(0xffff7668),
+                    ),
                     const SizedBox(height: 24),
                     UiText(
                       failed

@@ -24,11 +24,15 @@ Editing metadata, merging catalog entities, hiding a source and removing playlis
 
 ## Backups
 
-The versioned JSON backup supports catalog data, embedded/shared artwork representation, manual metadata, playlists, favorites, listening history, queue/position and approved preferences, up to **128 MB**. It excludes credentials, provider-private configuration, physical music, audio downloads/cache and some separate artwork files. It cannot reconnect a provider or recover an original audio file by itself.
+The new .mtbackup archive lets you choose library data, playlists, favorites, history, queue/position, preferences, artwork and source application IDs. Import merges selected data; playlist imports add copies and preserve order/repetitions. Missing or ambiguous references stay available for review. Legacy JSON files remain readable.
 
-Restore replaces the supported data and preserves current provider credentials/configuration according to the app's contract. Reset clears recognized application-managed data, preserving originals. Filesystem, SQLite and secure storage are not one universal transaction. Keep your own copies of original music and export a backup before destructive maintenance.
+Credentials and sessions are optional and require source settings plus a password of at least 12 characters. Encryption uses AES-256-GCM with a random nonce/salt, authenticated header and PBKDF2-HMAC-SHA256 (600,000 iterations). Passwords are not saved or recoverable. Decrypted credentials are not staged in temporary files; imported sessions are stored in the system vault. A source can still require reconnection after expiration or on another machine. Restart after importing source/session settings.
 
-The current database/backup schema is **16**. Older executables may not understand it. Do not run an older version against the only copy of a newer profile. For an offline physical profile snapshot, exit from the tray first and preserve the complete relevant profile and database auxiliary files consistently; a full snapshot restoration also reverts later changes.
+Music files, audio downloads/cache and separate custom-artwork files are not included. Artwork is omitted by default; select it explicitly when needed (64 MiB preflight cap, including legacy images). The decompressed archive limit is 128 MiB. See [backup instructions](backup.md).
+
+Reset still requires three confirmations and preserves original music. SQLite, preferences, secure storage and filesystem are not one universal transaction. Keep separate copies of original music.
+
+The current database/inner document schema is **16**, and the new archive format is **2**. Older executables may not understand it. Do not run an older version against the only copy of a newer profile. For an offline physical profile snapshot, exit from the tray first and preserve the complete relevant profile and database auxiliary files consistently; a full snapshot restoration also reverts later changes.
 
 ## Reporting an issue
 

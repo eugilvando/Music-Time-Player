@@ -1,3 +1,6 @@
+import 'design_icon.dart';
+import 'media_details_table.dart';
+
 import 'package:flutter/material.dart';
 
 import '../domain/track.dart';
@@ -127,7 +130,7 @@ class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
   @override
   Widget build(BuildContext context) => Padding(
     key: const ValueKey('home.section.favorite_playlists'),
-    padding: const EdgeInsets.only(top: 48),
+    padding: const EdgeInsets.only(top: 24),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -156,13 +159,32 @@ class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
                 'Favorite playlists in Playlists to show them here.',
               );
             }
+            if (widget.mode == 'detailed') {
+              return MediaDetailsTable(
+                columnKey: 'home_favorite_playlists',
+                headers: [ui(context, 'Título'), ui(context, 'Músicas'), ''],
+                widths: const [340, 140, 80],
+                itemCount: rows.length,
+                rowBuilder: (i) {
+                  final item = rows[i], id = rows[i].row['id'] as int;
+                  return [
+                    InkWell(
+                      onTap: () => widget.onOpen?.call(id),
+                      child: Text(item.row['name'] as String),
+                    ),
+                    Text('${item.tracks.length}'),
+                    actions(id, item.tracks),
+                  ];
+                },
+              );
+            }
             final items = rows.map((item) {
               final id = item.row['id'] as int;
               final title = item.row['name'] as String;
               final subtitle =
                   '${item.tracks.length} ${ui(context, 'available tracks')}';
               final artwork = widget.store == null
-                  ? const Icon(Icons.playlist_play)
+                  ? const MtIcon(Icons.playlist_play)
                   : PlaylistArtwork(
                       store: widget.store!,
                       id: id,
@@ -203,7 +225,7 @@ class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
                         children: [
                           Positioned.fill(child: artwork),
                           Positioned(
-                            top: 0,
+                            bottom: 0,
                             right: 0,
                             child: actions(id, item.tracks),
                           ),
@@ -215,7 +237,7 @@ class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(
                       subtitle,

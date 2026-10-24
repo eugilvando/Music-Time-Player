@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import '../sources/provider_connections.dart';
@@ -81,7 +83,7 @@ class _LastFmInsightsState extends State<LastFmInsights> {
                 ),
                 trailing: IconButton(
                   tooltip: ui(context, 'Tentar novamente'),
-                  icon: const Icon(Icons.refresh),
+                  icon: const MtIcon(Icons.refresh),
                   onPressed: () => setState(() => data = load()),
                 ),
               );

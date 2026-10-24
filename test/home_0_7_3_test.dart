@@ -175,7 +175,7 @@ void main() {
   );
 
   testWidgets(
-    'all twelve sections appear in order, with a prominent resume cover',
+    'all twelve sections remain in order with the compact Figma resume card',
     (tester) async {
       tester.view.physicalSize = const Size(1200, 900);
       tester.view.devicePixelRatio = 1;
@@ -221,7 +221,7 @@ void main() {
       final resume = find.byKey(const ValueKey('home.section.continue'));
       await tester.ensureVisible(resume);
       await tester.pumpAndSettle();
-      expect(tester.getSize(resume).height, greaterThanOrEqualTo(248));
+      expect(tester.getSize(resume).height, inInclusiveRange(136, 180));
       await tester.tap(
         find.descendant(of: resume, matching: find.byType(FilledButton)),
       );

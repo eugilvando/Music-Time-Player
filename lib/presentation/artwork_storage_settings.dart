@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import '../persistence/library_store.dart';
@@ -28,6 +30,10 @@ class _ArtworkStorageSettingsState extends State<ArtworkStorageSettings> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Otimizar armazenamento das capas?'),
         content: const UiText(
           'Capas idênticas serão compartilhadas sem perder qualidade. A conversão é feita em lotes e pode ser interrompida. Ao final, a compactação reduz o arquivo do banco e precisa de espaço temporário em disco, que pode chegar a duas vezes o tamanho do banco atual. Músicas originais e preferências são preservadas.',
@@ -113,7 +119,7 @@ class _ArtworkStorageSettingsState extends State<ArtworkStorageSettings> {
                 alignment: Alignment.centerLeft,
                 child: FilledButton.tonalIcon(
                   onPressed: optimize,
-                  icon: const Icon(Icons.photo_library_outlined),
+                  icon: const MtIcon(Icons.photo_library_outlined),
                   label: const UiText('Otimizar capas e compactar banco'),
                 ),
               ),

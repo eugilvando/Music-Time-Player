@@ -79,9 +79,9 @@ void main() {
         ),
       ),
     );
-    expect(find.byKey(const ValueKey('settings.appearance')), findsOneWidget);
+    expect(find.byKey(const ValueKey('settings.general')), findsOneWidget);
 
-    await tester.tap(find.byKey(const ValueKey('settings.appearance')));
+    await tester.tap(find.byKey(const ValueKey('settings.general')));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('Escuro'));
     await tester.pumpAndSettle();

@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'settings_card.dart';
 import 'ui_language.dart';
 import 'additional_source_settings.dart';
@@ -21,6 +22,7 @@ class ProviderSettingsPage extends StatefulWidget {
     this.onAddFolder,
     this.onAddFiles,
     this.sourceOnly = false,
+    this.shrinkWrap = false,
   });
   final VoidCallback? onAddFolder, onAddFiles;
   final Widget? localSources;
@@ -28,6 +30,7 @@ class ProviderSettingsPage extends StatefulWidget {
   final VoidCallback onImported;
   final bool onlyMicrosoft;
   final bool sourceOnly;
+  final bool shrinkWrap;
   @override
   State<ProviderSettingsPage> createState() => _ProviderSettingsPageState();
 }
@@ -89,6 +92,10 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     final result = await showDialog<Object>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Selecionar pasta musical'),
         content: SizedBox(
           width: 480,
@@ -116,7 +123,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                           selected: widget.providers.folderIsSelected(
                             folders[index],
                           ),
-                          leading: Icon(
+                          leading: MtIcon(
                             widget.providers.folderIsSelected(folders[index])
                                 ? Icons.check_circle
                                 : widget.providers.folderIsIncluded(
@@ -134,7 +141,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                                 )
                               ? const UiText('Subpasta incluída na seleção')
                               : null,
-                          trailing: const Icon(Icons.chevron_right),
+                          trailing: const MtIcon(Icons.chevron_right),
                           onTap: () => Navigator.pop(context, folders[index]),
                         ),
                       ),
@@ -184,6 +191,10 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Envios Last.fm'),
         content: SizedBox(
           width: 520,
@@ -227,6 +238,10 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     final value = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Nome da fonte OneDrive'),
         content: TextField(
           controller: controller,
@@ -302,22 +317,40 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                       }
                       await connect();
                     },
-              icon: const Icon(Icons.login),
+              icon: const MtIcon(Icons.login),
               label: const UiText('Conectar pelo navegador'),
             ),
             TextButton(
               onPressed:
-                  p.busy || (!p.microsoftConnected && p.sourceId == 'legacy')
+                  p.busy ||
+                      (!p.microsoftConnected &&
+                          !p.microsoftFolderSelected &&
+                          p.sourceId == 'legacy')
                   ? null
                   : () async {
-                      await p.removeMicrosoftSource();
-                      widget.onImported();
+                      if (!await confirmSourceRemoval(context)) return;
+                      try {
+                        await p.removeMicrosoftSource();
+                        widget.onImported();
+                      } catch (failure) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: UiText(
+                                failure is StateError
+                                    ? failure.message.toString()
+                                    : 'Source unavailable. Check its status and retry.',
+                              ),
+                            ),
+                          );
+                        }
+                      }
                     },
               child: const UiText('Remover fonte'),
             ),
             TextButton.icon(
               onPressed: p.busy ? null : renameSource,
-              icon: const Icon(Icons.edit),
+              icon: const MtIcon(Icons.edit),
               label: const UiText('Renomear fonte'),
             ),
           ],
@@ -356,7 +389,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
           children: [
             TextButton.icon(
               onPressed: p.busy || !p.microsoftConnected ? null : chooseFolder,
-              icon: const Icon(Icons.folder),
+              icon: const MtIcon(Icons.folder),
               label: const UiText('Escolher pasta'),
             ),
             FilledButton.icon(
@@ -367,7 +400,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                       await p.importMicrosoft();
                       if (p.error == null) widget.onImported();
                     },
-              icon: const Icon(Icons.sync),
+              icon: const MtIcon(Icons.sync),
               label: const UiText('Sincronizar músicas'),
             ),
           ],
@@ -375,7 +408,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
         if (p.microsoftConnected)
           TextButton.icon(
             onPressed: p.busy ? null : p.checkMicrosoftConnection,
-            icon: const Icon(Icons.cloud_done),
+            icon: const MtIcon(Icons.cloud_done),
             label: const UiText('Verificar conexão, pasta e leitura'),
           ),
         if (p.microsoftChecks.isNotEmpty) ...[
@@ -505,6 +538,13 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
       final accepted = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Importar dados do Last.fm?'),
           content: Text(
             loved
@@ -666,7 +706,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             ),
           ),
         TextButton.icon(
-          icon: const Icon(Icons.sync),
+          icon: const MtIcon(Icons.sync),
           label: UiText(
             p.profileIndex.running
                 ? 'Atualizando índices'
@@ -761,7 +801,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
               spacing: 8,
               children: [
                 TextButton.icon(
-                  icon: const Icon(Icons.open_in_new),
+                  icon: const MtIcon(Icons.open_in_new),
                   label: const UiText('Obter chave da API Last.fm'),
                   onPressed: p.busy
                       ? null
@@ -790,6 +830,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             const SizedBox(height: 16),
             TextField(
               controller: apiKey,
+              obscureText: true,
               decoration: InputDecoration(
                 labelText: ui(context, 'API key Last.fm'),
                 helperText: ui(
@@ -813,6 +854,33 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     );
   }
 
+  List<Widget> lastfmCards() {
+    final groups = <List<Widget>>[[]];
+    for (final child in (lastfmContent() as Column).children) {
+      if (child is Divider) {
+        groups.add([]);
+      } else {
+        groups.last.add(child);
+      }
+    }
+    if (groups.length != 7) {
+      return settingsSections((lastfmContent() as Column).children);
+    }
+    Widget card(List<Widget> items) => SettingsCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: items,
+      ),
+    );
+    return [
+      card(groups[0]),
+      card([...groups[1], const SizedBox(height: 16), ...groups[3]]),
+      card(groups[2]),
+      card([...groups[4], const SizedBox(height: 16), ...groups[5]]),
+      card(groups[6]),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: widget.providers,
@@ -829,7 +897,11 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             ],
           )
         : ListView(
-            padding: const EdgeInsets.all(32),
+            shrinkWrap: widget.shrinkWrap,
+            physics: widget.shrinkWrap
+                ? const NeverScrollableScrollPhysics()
+                : null,
+            padding: EdgeInsets.zero,
             children: [
               SizedBox(
                 height: widget.providers.busy ? 4 : 0,
@@ -847,10 +919,82 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
               const SizedBox(height: 12),
               if (widget.onlyMicrosoft)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 48),
-                  child: UiText(
-                    'Active sources',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: UiText(
+                          'Active sources',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      KeyedSubtree(
+                        key: const ValueKey('sources.add'),
+                        child: PopupMenuButton<String>(
+                          tooltip: ui(context, 'Adicionar fonte'),
+                          enabled: !widget.providers.anyMicrosoftBusy,
+                          onSelected: (value) async {
+                            if (value == 'local') {
+                              widget.onAddFolder?.call();
+                            } else if (value == 'files') {
+                              widget.onAddFiles?.call();
+                            } else if (additionalSourceTypes.containsKey(
+                              value,
+                            )) {
+                              await addAdditionalSource(
+                                context,
+                                widget.providers.additional,
+                                value,
+                                widget.onImported,
+                              );
+                            } else {
+                              if (!widget.providers.microsoftConnected &&
+                                  widget.providers.microsoftSources.length ==
+                                      1) {
+                                setState(() => addingMicrosoft = true);
+                              } else {
+                                await widget.providers.run(() async {
+                                  await widget.providers
+                                      .createMicrosoftSource();
+                                });
+                              }
+                            }
+                          },
+                          itemBuilder: (_) => [
+                            for (final type in additionalSourceTypes.entries)
+                              PopupMenuItem(
+                                value: type.key,
+                                child: Text(type.value),
+                              ),
+                            if (widget.onAddFolder != null)
+                              const PopupMenuItem(
+                                value: 'local',
+                                child: UiText('Pasta deste computador'),
+                              ),
+                            if (widget.onAddFiles != null)
+                              const PopupMenuItem(
+                                value: 'files',
+                                child: UiText('Arquivos deste computador'),
+                              ),
+                            const PopupMenuItem(
+                              value: 'onedrive',
+                              child: UiText('OneDrive pessoal'),
+                            ),
+                          ],
+                          child: const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                MtIcon(Icons.add),
+                                SizedBox(width: 8),
+                                UiText('Adicionar fonte'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               if (widget.onlyMicrosoft && widget.localSources != null)
@@ -868,13 +1012,12 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                       padding: 0,
                       child: ExpansionTile(
                         key: ValueKey(source.sourceId),
-                        leading: const Icon(Icons.cloud),
+                        leading: const MtIcon(Icons.cloud),
                         title: Text(source.microsoftSourceLabel),
                         subtitle: Text(
                           '${ui(context, source.microsoftConnected ? "Conectado" : "Reconectar conta")} · ${uiSourceFolder(context, source.selectedFolderLabel)}',
                         ),
-                        initiallyExpanded:
-                            widget.providers.microsoftSources.length == 1,
+                        initiallyExpanded: false,
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(16),
@@ -889,75 +1032,10 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                       ),
                     ),
                 const SizedBox(height: 24),
-                SettingsCard(
-                  child: Align(
-                    key: const ValueKey('sources.add'),
-                    alignment: Alignment.centerLeft,
-                    child: PopupMenuButton<String>(
-                      tooltip: ui(context, 'Adicionar fonte'),
-                      enabled: !widget.providers.anyMicrosoftBusy,
-                      onSelected: (value) async {
-                        if (value == 'local') {
-                          widget.onAddFolder?.call();
-                        } else if (value == 'files') {
-                          widget.onAddFiles?.call();
-                        } else if (additionalSourceTypes.containsKey(value)) {
-                          await addAdditionalSource(
-                            context,
-                            widget.providers.additional,
-                            value,
-                            widget.onImported,
-                          );
-                        } else {
-                          if (!widget.providers.microsoftConnected &&
-                              widget.providers.microsoftSources.length == 1) {
-                            setState(() => addingMicrosoft = true);
-                          } else {
-                            await widget.providers.run(() async {
-                              await widget.providers.createMicrosoftSource();
-                            });
-                          }
-                        }
-                      },
-                      itemBuilder: (_) => [
-                        for (final type in additionalSourceTypes.entries)
-                          PopupMenuItem(
-                            value: type.key,
-                            child: Text(type.value),
-                          ),
-                        if (widget.onAddFolder != null)
-                          const PopupMenuItem(
-                            value: 'local',
-                            child: UiText('Pasta deste computador'),
-                          ),
-                        if (widget.onAddFiles != null)
-                          const PopupMenuItem(
-                            value: 'files',
-                            child: UiText('Arquivos deste computador'),
-                          ),
-                        const PopupMenuItem(
-                          value: 'onedrive',
-                          child: UiText('OneDrive pessoal'),
-                        ),
-                      ],
-                      child: const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.add),
-                            SizedBox(width: 8),
-                            UiText('Adicionar fonte'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
                 if (!widget.providers.microsoftConnected && addingMicrosoft)
                   SettingsCard(child: microsoftContent()),
               ] else
-                ...settingsSections((lastfmContent() as Column).children),
+                ...lastfmCards(),
             ],
           ),
   );

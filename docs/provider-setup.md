@@ -2,7 +2,7 @@
 
 [Back to README](../README.md)
 
-Music Time 1.2.1 does not ship a shared Google or Microsoft application registration. **Each user must register an application and enter its Client ID** before connecting Google Drive or OneDrive. Local files, WebDAV, Jellyfin, Emby and Windows SMB do not require a Google/Microsoft registration.
+Music Time 2.0.0 does not ship a shared Google or Microsoft application registration. **Each user must register an application and enter its Client ID** before connecting Google Drive or OneDrive. Local files, WebDAV, Jellyfin, Emby and Windows SMB do not require a Google/Microsoft registration.
 
 A Client ID identifies an OAuth application; it is not your account password, an API access token or a one-time login code. Enter provider passwords only on the provider's website, and server credentials only in the app. Do not paste passwords, tokens or client secrets into issues.
 
@@ -34,7 +34,7 @@ Official references: [desktop registration](https://learn.microsoft.com/en-us/en
 3. Create OAuth credentials with application type **Desktop app**. A web, Android or service-account credential is not interchangeable with this connector.
 4. Copy the Client ID ending in `.apps.googleusercontent.com`. Keep the desktop client secret available if Google requires it for your credential; do not publish the downloaded credential JSON.
 5. Open **Settings → Music sources → Add source → Google Drive**. Enter a source name, **Desktop OAuth client ID**, optional required desktop secret, and optionally the music folder ID.
-6. A folder ID is the identifier after `/folders/` in the folder's Google Drive URL. Leave it empty to use My Drive. The connector currently has no visual Google folder picker.
+6. After connecting, use **Select music folder** to browse My Drive and choose a folder explicitly. The browser lists folders with pagination and includes subfolders when scanning. A folder ID can also be entered in advanced configuration.
 7. Authorize in the system browser and return to the app. The app uses Authorization Code + PKCE and an ephemeral loopback callback shaped like `http://127.0.0.1:<port>/oauth`; do not configure it as a fixed web-server callback.
 8. Synchronize and test a small authorized music folder, then playback/seeking and renewal.
 
@@ -67,3 +67,7 @@ HTTP is disabled by default for server connectors. Enabling it explicitly sends 
 Last.fm requires your [own API configuration](https://www.last.fm/api/account/create), and scrobbling requires browser authorization. Public profile reads need the API key and username; API secret/session are used for the authorization flow. The outbox does not promise exactly-once delivery after an unknown server response.
 
 Artist portraits/biographies, similar artists and optional LRCLIB lyrics contact external providers. Their metadata availability and name matching are not guaranteed. See [privacy and data](privacy-and-data.md) for the information these features use.
+
+## Folder selection and reconnecting
+
+Google Drive now provides a paginated visual folder browser. Select the folder explicitly before scanning. OneDrive personal hexadecimal drive identifiers are normalized when reconnecting, preserving existing item identity. Disconnecting retains a source definition for reconnection; **Remove source** confirms deletion of its exclusive catalog records and managed downloads/cache, preserving original music and tracks shared with another source.

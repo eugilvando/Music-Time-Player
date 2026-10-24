@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -117,7 +119,7 @@ class _TrackAvailabilityButtonState extends State<TrackAvailabilityButton> {
   Widget build(BuildContext context) => IconButton(
     key: const ValueKey('player.availability'),
     tooltip: ui(context, status),
-    icon: Icon(
+    icon: MtIcon(
       statuses.isEmpty
           ? Icons.cloud_outlined
           : statuses.contains('permanent')
@@ -135,6 +137,13 @@ class _TrackAvailabilityButtonState extends State<TrackAvailabilityButton> {
             await showDialog<void>(
               context: context,
               builder: (dialog) => AlertDialog(
+                insetPadding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 24,
+                ),
+                titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 title: const UiText('Disponibilidade da faixa'),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -149,7 +158,7 @@ class _TrackAvailabilityButtonState extends State<TrackAvailabilityButton> {
                     }.entries)
                       ListTile(
                         dense: true,
-                        leading: Icon(
+                        leading: MtIcon(
                           statuses.contains(item.key)
                               ? Icons.check_circle
                               : Icons.remove_circle_outline,

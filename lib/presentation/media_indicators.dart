@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import '../library/local_metadata.dart' show albumKey, legacyAlbumKey;
 
 import 'package:flutter/foundation.dart';
@@ -66,13 +67,13 @@ class MediaBadges extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: .76),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(small ? 2 : 5),
-                        child: Icon(
+                        padding: EdgeInsets.all(2),
+                        child: MtIcon(
                           icon,
-                          size: small ? 12 : 18,
+                          size: small ? 12 : 16,
                           color: icon == Icons.favorite
                               ? Theme.of(context).colorScheme.primary
                               : Colors.white,
@@ -86,7 +87,7 @@ class MediaBadges extends StatelessWidget {
                     if (favorite)
                       Positioned(
                         top: 2,
-                        left: 2,
+                        right: 4,
                         child: badge(Icons.favorite, 'Favorito'),
                       ),
                     if (playing)

@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'settings_card.dart';
 
 import 'package:flutter/material.dart';
@@ -106,6 +107,10 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
   Future<bool> confirm(String message) => showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       title: const UiText('Remover arquivos gerenciados?'),
       content: UiText(message),
       actions: [
@@ -182,20 +187,20 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
     trailing: row['status'] == 'downloading'
         ? IconButton(
             tooltip: ui(context, 'Pausar download'),
-            icon: const Icon(Icons.pause),
+            icon: const MtIcon(Icons.pause),
             onPressed: () => manager.pause(row['id'] as String),
           )
         : {'failed', 'paused'}.contains(row['status'])
         ? IconButton(
             tooltip: ui(context, 'Tentar novamente'),
-            icon: const Icon(Icons.refresh),
+            icon: const MtIcon(Icons.refresh),
             onPressed: () => manager.retry(row['id'] as String),
           )
         : row['status'] == 'complete'
         ? IconButton(
             key: ValueKey('download.remove.${row['id']}'),
             tooltip: ui(context, 'Remover download desta faixa'),
-            icon: const Icon(Icons.delete_outline),
+            icon: const MtIcon(Icons.delete_outline),
             onPressed: manager.cache?.pinned == row['id']
                 ? null
                 : () async {
@@ -228,7 +233,7 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
     ),
     trailing: IconButton(
       tooltip: ui(context, 'Remover do cache'),
-      icon: const Icon(Icons.delete_outline),
+      icon: const MtIcon(Icons.delete_outline),
       onPressed: manager.cache?.pinned == row['track_id']
           ? null
           : () async {
@@ -266,35 +271,79 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
         .where((r) => {'failed', 'paused'}.contains(r['status']))
         .toList();
     final items = <Object>[
-      InformationCards(
-        values: {
-          'Active downloads': '${active.length}',
-          'Available downloads': '${complete.length}',
-          'Download size': storageSize(
-            complete.fold<int>(
-              0,
-              (sum, row) => sum + (row['received'] as num).toInt(),
+      if (!widget.overviewOnly && widget.fixedCacheTab == null)
+        DefaultTabController(
+          length: 2,
+          initialIndex: cacheTab ? 1 : 0,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SegmentedButton<bool>(
+                key: const ValueKey('downloads.tabs'),
+                showSelectedIcon: false,
+                selected: {cacheTab},
+                onSelectionChanged: (v) => setState(() => cacheTab = v.single),
+                style: ButtonStyle(
+                  minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
+                  side: const WidgetStatePropertyAll(BorderSide.none),
+                  backgroundColor: WidgetStateProperty.resolveWith(
+                    (states) => states.contains(WidgetState.selected)
+                        ? Theme.of(context).colorScheme.secondaryContainer
+                        : Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                ),
+                segments: const [
+                  ButtonSegment(
+                    value: false,
+                    label: UiText('Permanent downloads'),
+                  ),
+                  ButtonSegment(value: true, label: UiText('Automatic cache')),
+                ],
+              ),
             ),
           ),
-          'Cached tracks':
-              '${cache.where((r) => valid.contains('cache:${r['track_id']}')).length}',
-          'Cache size': storageSize(
-            cache
-                .where((r) => valid.contains('cache:${r['track_id']}'))
-                .fold<int>(
-                  0,
-                  (sum, row) => sum + (row['bytes'] as num).toInt(),
-                ),
-          ),
-          'Paused or failed': '${others.length}',
+        ),
+      const SizedBox(height: 20),
+      InformationCards(
+        values: {
+          if (!cacheTab || widget.overviewOnly)
+            'Active downloads': '${active.length}',
+          if (!cacheTab || widget.overviewOnly)
+            'Available downloads': '${complete.length}',
+          if (!cacheTab && !widget.overviewOnly)
+            'Download size': storageSize(
+              complete.fold<int>(
+                0,
+                (sum, row) => sum + (row['received'] as num).toInt(),
+              ),
+            ),
+          if (cacheTab || widget.overviewOnly)
+            'Cached tracks':
+                '${cache.where((r) => valid.contains('cache:${r['track_id']}')).length}',
+          if (cacheTab || widget.overviewOnly)
+            'Cache size': storageSize(
+              cache
+                  .where((r) => valid.contains('cache:${r['track_id']}'))
+                  .fold<int>(
+                    0,
+                    (sum, row) => sum + (row['bytes'] as num).toInt(),
+                  ),
+            ),
+          if (!cacheTab && !widget.overviewOnly)
+            'Paused or failed': '${others.length}',
+          if (cacheTab && !widget.overviewOnly)
+            'Preloaded tracks': '${manager.cache?.pending.length ?? 0}',
+          if (cacheTab && !widget.overviewOnly)
+            'Retention': ui(context, '30 dias'),
         },
       ),
-      const SizedBox(height: 48),
+      const SizedBox(height: 20),
       if (error != null) UiText(error!),
       if (active.isNotEmpty || manager.cache?.current != null) ...[
         const ListTile(
           title: UiText('Downloads ativos'),
-          leading: Icon(Icons.downloading),
+          leading: MtIcon(Icons.downloading),
         ),
         ...active,
         if (manager.cache?.current != null)
@@ -305,19 +354,6 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
             ),
           ),
       ],
-      if (!widget.overviewOnly && widget.fixedCacheTab == null)
-        DefaultTabController(
-          length: 2,
-          initialIndex: cacheTab ? 1 : 0,
-          child: TabBar(
-            key: const ValueKey('downloads.tabs'),
-            onTap: (index) => setState(() => cacheTab = index == 1),
-            tabs: const [
-              Tab(text: 'Permanent downloads'),
-              Tab(text: 'Automatic cache'),
-            ],
-          ),
-        ),
       const SizedBox(height: 24),
       if (!widget.overviewOnly && !cacheTab) ...[
         filesCard(
@@ -339,7 +375,7 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
                 subtitle: Text('${row['count']} ${ui(context, 'faixas')}'),
                 trailing: IconButton(
                   tooltip: ui(context, 'Remover seleção offline'),
-                  icon: const Icon(Icons.delete_outline),
+                  icon: const MtIcon(Icons.delete_outline),
                   onPressed: () async {
                     if (await confirm(
                       'Remove a seleção. Arquivos usados por outra seleção, cache automático e músicas originais são preservados.',
@@ -361,7 +397,7 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
           subtitle: Text(
             '${cache.where((r) => valid.contains('cache:${r['track_id']}')).length} ${ui(context, 'arquivos completos. Removidos após 30 dias sem uso ou ao atingir o limite.')}',
           ),
-          leading: const Icon(Icons.cached),
+          leading: const MtIcon(Icons.cached),
           trailing: TextButton(
             onPressed: clearCache,
             child: const UiText('Limpar'),
@@ -379,7 +415,7 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
     return ListView.builder(
       shrinkWrap: widget.shrinkWrap,
       physics: widget.shrinkWrap ? const NeverScrollableScrollPhysics() : null,
-      padding: const EdgeInsets.all(32),
+      padding: widget.embedded ? EdgeInsets.zero : const EdgeInsets.all(24),
       itemCount: items.length,
       itemBuilder: (context, i) {
         final item = items[i];
@@ -406,6 +442,13 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
   Widget build(BuildContext context) => widget.embedded
       ? body()
       : AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Downloads'),
           content: SizedBox(width: 660, height: 560, child: body()),
           actions: [

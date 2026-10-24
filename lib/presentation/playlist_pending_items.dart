@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import '../domain/track.dart';
@@ -48,7 +50,9 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
         key: ValueKey(row['id']),
         child: ListTile(
           dense: true,
-          leading: Icon(track == null ? Icons.warning_amber : Icons.music_note),
+          leading: MtIcon(
+            track == null ? Icons.warning_amber : Icons.music_note,
+          ),
           title: Text(
             track?.title ??
                 (title.isEmpty ? ui(context, 'Unresolved item') : title),
@@ -103,6 +107,28 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
                       await showDialog<void>(
                         context: context,
                         builder: (context) => AlertDialog(
+                          insetPadding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 24,
+                          ),
+                          titlePadding: const EdgeInsets.fromLTRB(
+                            24,
+                            24,
+                            24,
+                            16,
+                          ),
+                          contentPadding: const EdgeInsets.fromLTRB(
+                            24,
+                            8,
+                            24,
+                            24,
+                          ),
+                          actionsPadding: const EdgeInsets.fromLTRB(
+                            24,
+                            0,
+                            24,
+                            24,
+                          ),
                           title: const UiText('Original reference'),
                           content: SelectableText(
                             '${row['original_reference'] ?? ''}',
@@ -176,7 +202,7 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
                           catalog,
                         );
                       }),
-                icon: const Icon(Icons.refresh),
+                icon: const MtIcon(Icons.refresh),
                 label: const UiText('Retry resolution'),
               ),
             ],
@@ -221,7 +247,7 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
 Widget playlistPendingBadge(BuildContext context, int count) => Row(
   mainAxisSize: MainAxisSize.min,
   children: [
-    Icon(
+    MtIcon(
       Icons.warning_amber,
       size: 18,
       color: Theme.of(context).colorScheme.error,

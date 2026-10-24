@@ -41,6 +41,10 @@ Future<bool> editCatalogMetadata(
   final action = await showDialog<String>(
     context: context,
     builder: (context) => AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       scrollable: true,
       title: const UiText('Editar informações no Music Time'),
       content: SizedBox(
@@ -186,6 +190,10 @@ Future<bool> mergeCatalogCollection(
     context: context,
     builder: (context) => StatefulBuilder(
       builder: (context, update) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: Text(
           album ? 'Mesclar com outro álbum' : 'Mesclar com outro artista',
         ),
@@ -251,6 +259,10 @@ Future<bool> mergeCatalogCollection(
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       title: const UiText('Confirmar mesclagem no catálogo?'),
       content: Text(
         uiFormat(

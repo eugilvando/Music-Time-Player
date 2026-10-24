@@ -21,11 +21,12 @@ flutter doctor
 flutter pub get
 dart analyze --fatal-infos
 flutter build windows --release
+Copy-Item build/windows/x64/runner/Release/data/flutter_assets/NativeAssetsManifest.json build/windows/x64/runner/Release/native_assets.json -Force
 $env:MUSIC_TIME_LIBMPV = Join-Path $PWD 'build/windows/x64/runner/Release/libmpv-2.dll'
 flutter test --no-pub --concurrency=1
 ```
 
-The default test suite contains 297 baseline cases. `MUSIC_TIME_LIBMPV` selects the built playback library for native tests; build it first. Test fixtures use temporary or in-memory data. Material-icon test fonts are resolved from this checkout's active Flutter SDK rather than a developer-specific absolute path.
+Current validation results are listed in the release manifest. `MUSIC_TIME_LIBMPV` selects the built playback library for native tests; build it first. Test fixtures use temporary or in-memory data. Material-icon test fonts are resolved from this checkout's active Flutter SDK rather than a developer-specific absolute path.
 
 Optional native checks use temporary validation profiles:
 
@@ -42,7 +43,7 @@ Do not use an active personal profile for reset/restore tests. Do not interpret 
 .\scripts\build-installer.ps1 -FlutterSdk 'C:\path\to\flutter'
 ```
 
-The script checks formatting and analysis, builds Windows, runs tests/native checks, copies the C++ runtime, prepares notices and calls Inno Setup. Output: `dist/MusicTime-Setup-1.2.1.exe`.
+The script checks formatting and analysis, builds Windows, runs tests/native checks, copies the C++ runtime, prepares notices and calls Inno Setup. Output: `dist/MusicTime-Setup-2.0.0.exe`.
 
 Application binaries live in `build/windows/x64/runner/Release/`. Distribute the complete bundle or the installer, not only `music_time.exe`. Keep third-party licenses/notices with the binaries. See [third-party notices](../THIRD_PARTY_NOTICES.md) and `LICENSES/`.
 
@@ -52,10 +53,10 @@ You do not need to embed provider IDs when building. The installed UI accepts ea
 
 ```powershell
 $env:MUSIC_TIME_LIBMPV = Join-Path $PWD 'build/windows/x64/runner/Release/libmpv-2.dll'
-flutter test --no-pub tool/capture_screenshots_test.dart
+flutter test --no-pub test/figma_review_test.dart
 ```
 
-This renders the real application widgets with a fictional catalog, generated artwork and in-memory application data. It writes `docs/images/*.png` and does not open a personal database or connect a provider. Windows Segoe UI is used only at rendering time. The artwork/lyrics are demo fixtures; the screenshots do not prove server connectivity.
+This renders the real application widgets with a fictional catalog, generated artwork and in-memory application data. It writes `build/figma-review/*.png` and does not open a personal database or connect a provider. Inter, Bricolage Grotesque and rounded symbols are loaded from the included assets. The artwork/lyrics are demo fixtures; the screenshots do not prove server connectivity.
 
 ## Structure
 

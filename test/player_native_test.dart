@@ -162,7 +162,7 @@ void main() {
     }
     await tester.tap(find.byKey(const ValueKey('navigation.settings')));
     await tester.pump(const Duration(milliseconds: 350));
-    await tester.tap(find.byKey(const ValueKey('settings.appearance')));
+    await tester.tap(find.byKey(const ValueKey('settings.general')));
     await tester.pump(const Duration(milliseconds: 350));
     await tester.ensureVisible(find.text('Dark'));
     await tester.pumpAndSettle();

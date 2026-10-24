@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import '../offline/download_manager.dart';
 import 'artist_portrait.dart';
 import 'ui_language.dart';
-import 'information_cards.dart';
 
 String storageSize(int bytes) {
   if (bytes < 1024) return '$bytes B';
@@ -129,6 +128,10 @@ class _StorageSettingsState extends State<StorageSettings> {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: UiText(
           photos
               ? 'Limpar fotos de artistas?'
@@ -179,9 +182,8 @@ class _StorageSettingsState extends State<StorageSettings> {
   }
 
   @override
-  Widget build(BuildContext context) => ExpansionTile(
-    title: const UiText('Armazenamento e cache'),
-    initiallyExpanded: MediaQuery.sizeOf(context).height > 650,
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       TextButton(
         onPressed: busy ? null : refresh,
@@ -190,18 +192,11 @@ class _StorageSettingsState extends State<StorageSettings> {
       if (error != null) UiText(error!),
       if (sizes == null && error == null) const LinearProgressIndicator(),
       if (sizes != null && widget.showOverview) ...[
-        InformationCards(
-          values: {
-            for (final entry in sizes!.entries)
-              ui(context, entry.key): storageSize(entry.value),
-          },
-        ),
-        const SizedBox(height: 48),
         for (final entry in sizes!.entries.where(
           (e) => e.key != 'Capas no catálogo',
         ))
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -211,7 +206,7 @@ class _StorageSettingsState extends State<StorageSettings> {
                   label: ui(context, entry.key),
                   value: storageSize(entry.value),
                   child: LinearProgressIndicator(
-                    minHeight: 12,
+                    minHeight: 6,
                     borderRadius: BorderRadius.circular(6),
                     value:
                         entry.value /
@@ -241,6 +236,28 @@ class _StorageSettingsState extends State<StorageSettings> {
                         final accepted = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
+                            insetPadding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 24,
+                            ),
+                            titlePadding: const EdgeInsets.fromLTRB(
+                              24,
+                              24,
+                              24,
+                              16,
+                            ),
+                            contentPadding: const EdgeInsets.fromLTRB(
+                              24,
+                              8,
+                              24,
+                              24,
+                            ),
+                            actionsPadding: const EdgeInsets.fromLTRB(
+                              24,
+                              0,
+                              24,
+                              24,
+                            ),
                             title: const UiText('Limpar cache de áudio?'),
                             content: const UiText(
                               'Downloads explícitos, músicas originais e faixa em reprodução são preservados.',

@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'dart:math' as math;
 
 import 'ui_language.dart';
@@ -85,12 +87,12 @@ class NowPlayingPage extends StatelessWidget {
             tooltip: ui(context, favorite ? 'Remover favorito' : 'Favoritar'),
             isSelected: favorite,
             onPressed: controller.current == null ? null : onFavorite,
-            icon: Icon(Icons.favorite),
+            icon: MtIcon(Icons.favorite),
           ),
           IconButton(
             tooltip: ui(context, 'Ações da faixa'),
             onPressed: controller.current == null ? null : onDetails,
-            icon: const Icon(Icons.more_horiz),
+            icon: const MtIcon(Icons.more_horiz),
           ),
         ],
       ),
@@ -185,7 +187,7 @@ class NowPlayingPage extends StatelessWidget {
                         IconButton(
                           tooltip: ui(context, 'Alternar tela cheia'),
                           onPressed: onFullscreen,
-                          icon: const Icon(Icons.fullscreen),
+                          icon: const MtIcon(Icons.fullscreen),
                         ),
                     ],
                   ),
@@ -252,17 +254,23 @@ class NowPlayingPage extends StatelessWidget {
                                               maxWidth: 1200,
                                             ),
                                             child: Padding(
-                                              padding: const EdgeInsets.all(40),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: space.maxWidth < 740
+                                                    ? 24
+                                                    : 48,
+                                                vertical: 24,
+                                              ),
                                               child: composition(
                                                 context,
                                                 artwork,
-                                                (space.maxWidth - 80).clamp(
-                                                  120.0,
-                                                  1120.0,
-                                                ),
+                                                (space.maxWidth -
+                                                        (space.maxWidth < 740
+                                                            ? 48
+                                                            : 96))
+                                                    .clamp(120.0, 1120.0),
                                                 math.max(
                                                   120,
-                                                  space.maxHeight - 80,
+                                                  space.maxHeight - 48,
                                                 ),
                                               ),
                                             ),

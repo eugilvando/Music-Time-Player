@@ -97,7 +97,7 @@ void main() {
       );
       expect(offline.dx, lessThan(sources.dx));
       expect(sources.dx, lessThan(customize.dx));
-      expect(find.text('Activate Available Offline'), findsOneWidget);
+      expect(find.text('All music'), findsOneWidget);
       await tester.tap(find.text('Original song title'));
       expect(opened, 1);
       expect(resumed, 0);

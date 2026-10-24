@@ -76,7 +76,7 @@ void main() {
     );
     await render('grid');
     final normal = tester.getSize(find.byKey(const ValueKey(0))).width;
-    expect(tester.getTopLeft(find.byKey(const ValueKey(4))).dy, greaterThan(0));
+    expect(tester.getTopLeft(find.byKey(const ValueKey(5))).dy, greaterThan(0));
     await render('compact_grid');
     expect(
       tester.getSize(find.byKey(const ValueKey(0))).width,

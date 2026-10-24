@@ -182,6 +182,18 @@ void main() {
         () => Directory.systemTemp.createTemp('music-time-design-'),
       ))!;
       final wave = (await tester.runAsync(() => demoWave(directory)))!;
+      for (final font in {
+        'Inter': 'Inter',
+        'Bricolage Grotesque': 'BricolageGrotesque',
+      }.entries) {
+        await tester.runAsync(() async {
+          final bytes = await File('assets/fonts/${font.value}.ttf')
+              .readAsBytes();
+          await (FontLoader(
+            font.key,
+          )..addFont(Future.value(ByteData.sublistView(bytes)))).load();
+        });
+      }
       final windows = Platform.environment['WINDIR'];
       if (windows != null) {
         final font = File('$windows/Fonts/segoeui.ttf');
@@ -453,7 +465,7 @@ void main() {
       }
       await tester.runAsync(() => settings.setLanguage('en'));
       await settle();
-      expect(find.text('General'), findsWidgets);
+      expect(find.text('General and appearance'), findsWidgets);
       expect(find.text('Settings'), findsWidgets);
       await capture('settings-english');
       for (final section in ['data', 'lastfm', 'onedrive', 'downloads']) {

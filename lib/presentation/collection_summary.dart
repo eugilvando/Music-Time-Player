@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'ui_language.dart';
 
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class _CollectionSummaryState extends State<CollectionSummary> {
   Future<Map<String, String>> load() async {
     final db = widget.store.database;
     final base = (await db.rawQuery(
-      'SELECT COUNT(*) AS tracks, COUNT(DISTINCT album_identity) AS albums, COALESCE(SUM(duration_ms),0) AS duration FROM catalog_search',
+      'SELECT COUNT(*) AS tracks, COUNT(DISTINCT album_identity) AS albums, COALESCE(SUM(duration_ms),0) AS duration, SUM(CASE WHEN duration_ms<=0 THEN 1 ELSE 0 END) AS unknown_duration FROM catalog_search',
     )).single;
     final artists = (await db.rawQuery(
       'SELECT COUNT(DISTINCT lower(j.value)) AS count FROM catalog_search c,json_each(c.artists) j',
@@ -37,6 +38,7 @@ class _CollectionSummaryState extends State<CollectionSummary> {
       'Playlists': '$lists',
       'Favorite tracks': '$favorites',
       'Total duration': '${duration.inHours} h ${duration.inMinutes % 60} min',
+      'Unknown duration': '${base['unknown_duration'] ?? 0}',
     };
   }
 
@@ -55,7 +57,7 @@ class _CollectionSummaryState extends State<CollectionSummary> {
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             onPressed: () => setState(() => data = load()),
-            icon: const Icon(Icons.refresh),
+            icon: const MtIcon(Icons.refresh),
             label: const UiText('Refresh summary'),
           ),
         ),

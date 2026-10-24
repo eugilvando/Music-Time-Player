@@ -28,7 +28,10 @@ void main() {
     expect((await store.localSources()).single['id'], 'legacy');
     await store.removeLocalSource('legacy');
     expect(await store.loadTracks(), isEmpty);
-    expect((await store.playlistEntries(playlist)).single['id'], track.id);
+    expect(
+      (await store.playlistOccurrences(playlist)).single['track_id'],
+      isNull,
+    );
   });
   test('remoção de fonte preserva playlist e fonte sobreposta', () async {
     final store = await LibraryStore.open(':memory:');
@@ -41,7 +44,7 @@ void main() {
     expect((await store.loadTracks()).length, 1);
     await store.removeLocalSource('b');
     expect(await store.loadTracks(), isEmpty);
-    expect((await store.playlistEntries(playlist)).length, 2);
+    expect((await store.playlistOccurrences(playlist)).length, 2);
     await store.registerLocalSource('a', 'A', [track.id]);
     expect((await store.loadTracks()).single.id, track.id);
   });

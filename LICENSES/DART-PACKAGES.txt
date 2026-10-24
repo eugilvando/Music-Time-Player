@@ -1,8 +1,4 @@
-Third-party Dart package licenses for Music Time 1.2.1
-
-
-========================================================================
-archive
+Package: archive
 https://pub.dev/packages/archive
 
 The MIT License
@@ -29,7 +25,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ========================================================================
-args
+
+Package: args
 https://pub.dev/packages/args
 
 Copyright 2013, the Dart project authors. 
@@ -62,7 +59,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-async
+
+Package: async
 https://pub.dev/packages/async
 
 Copyright 2015, the Dart project authors. 
@@ -95,7 +93,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-audio_metadata_reader
+
+Package: audio_metadata_reader
 https://pub.dev/packages/audio_metadata_reader
 
 MIT License
@@ -122,7 +121,8 @@ SOFTWARE.
 
 
 ========================================================================
-boolean_selector
+
+Package: boolean_selector
 https://pub.dev/packages/boolean_selector
 
 Copyright 2016, the Dart project authors.
@@ -155,7 +155,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-characters
+
+Package: characters
 https://pub.dev/packages/characters
 
 Copyright 2019, the Dart project authors. 
@@ -188,7 +189,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-charset
+
+Package: charset
 https://pub.dev/packages/charset
 
                                  Apache License
@@ -395,7 +397,8 @@ https://pub.dev/packages/charset
 
 
 ========================================================================
-clock
+
+Package: clock
 https://pub.dev/packages/clock
 
 
@@ -602,7 +605,8 @@ https://pub.dev/packages/clock
    limitations under the License.
 
 ========================================================================
-cnativeapi
+
+Package: cnativeapi
 https://pub.dev/packages/cnativeapi
 
 MIT License
@@ -629,7 +633,8 @@ SOFTWARE.
 
 
 ========================================================================
-code_assets
+
+Package: code_assets
 https://pub.dev/packages/code_assets
 
 Copyright 2025, the Dart project authors.
@@ -662,7 +667,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-collection
+
+Package: collection
 https://pub.dev/packages/collection
 
 Copyright 2015, the Dart project authors. 
@@ -695,7 +701,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-cross_file
+
+Package: cross_file
 https://pub.dev/packages/cross_file
 
 Copyright 2013 The Flutter Authors
@@ -726,7 +733,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-crypto
+
+Package: crypto
 https://pub.dev/packages/crypto
 
 Copyright 2015, the Dart project authors.
@@ -759,7 +767,190 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-fake_async
+
+Package: cryptography
+https://pub.dev/packages/cryptography
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+========================================================================
+
+Package: fake_async
 https://pub.dev/packages/fake_async
 
 
@@ -966,7 +1157,8 @@ https://pub.dev/packages/fake_async
    limitations under the License.
 
 ========================================================================
-ffi
+
+Package: ffi
 https://pub.dev/packages/ffi
 
 Copyright 2019, the Dart project authors. 
@@ -999,7 +1191,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-ffi_leak_tracker
+
+Package: ffi_leak_tracker
 https://pub.dev/packages/ffi_leak_tracker
 
 BSD 3-Clause License
@@ -1033,7 +1226,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file
+
+Package: file
 https://pub.dev/packages/file
 
 Copyright 2017, the Dart project authors. All rights reserved.
@@ -1064,7 +1258,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-file_selector
+
+Package: file_selector
 https://pub.dev/packages/file_selector
 
 Copyright 2013 The Flutter Authors
@@ -1095,7 +1290,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file_selector_android
+
+Package: file_selector_android
 https://pub.dev/packages/file_selector_android
 
 Copyright 2013 The Flutter Authors
@@ -1331,7 +1527,8 @@ aFileChooser
 
 
 ========================================================================
-file_selector_ios
+
+Package: file_selector_ios
 https://pub.dev/packages/file_selector_ios
 
 Copyright 2013 The Flutter Authors
@@ -1362,7 +1559,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file_selector_linux
+
+Package: file_selector_linux
 https://pub.dev/packages/file_selector_linux
 
 Copyright 2013 The Flutter Authors
@@ -1393,7 +1591,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file_selector_macos
+
+Package: file_selector_macos
 https://pub.dev/packages/file_selector_macos
 
 Copyright 2013 The Flutter Authors
@@ -1424,7 +1623,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file_selector_platform_interface
+
+Package: file_selector_platform_interface
 https://pub.dev/packages/file_selector_platform_interface
 
 Copyright 2013 The Flutter Authors
@@ -1455,7 +1655,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file_selector_web
+
+Package: file_selector_web
 https://pub.dev/packages/file_selector_web
 
 Copyright 2013 The Flutter Authors
@@ -1486,7 +1687,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-file_selector_windows
+
+Package: file_selector_windows
 https://pub.dev/packages/file_selector_windows
 
 Copyright 2013 The Flutter Authors
@@ -1517,7 +1719,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-fixnum
+
+Package: fixnum
 https://pub.dev/packages/fixnum
 
 Copyright 2014, the Dart project authors.
@@ -1550,7 +1753,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-flutter
+
+Package: flutter
 https://pub.dev/packages/flutter
 
 Copyright 2014 The Flutter Authors. All rights reserved.
@@ -1581,7 +1785,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-flutter_lints
+
+Package: flutter_lints
 https://pub.dev/packages/flutter_lints
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -1612,7 +1817,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-flutter_media_session
+
+Package: flutter_localizations
+https://pub.dev/packages/flutter_localizations
+
+Copyright 2014 The Flutter Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+========================================================================
+
+Package: flutter_media_session
 https://pub.dev/packages/flutter_media_session
 
 MIT License
@@ -1638,7 +1876,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-flutter_secure_storage
+
+Package: flutter_secure_storage
 https://pub.dev/packages/flutter_secure_storage
 
 BSD 3-Clause License
@@ -1672,7 +1911,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-flutter_secure_storage_darwin
+
+Package: flutter_secure_storage_darwin
 https://pub.dev/packages/flutter_secure_storage_darwin
 
 BSD 3-Clause License
@@ -1706,7 +1946,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-flutter_secure_storage_linux
+
+Package: flutter_secure_storage_linux
 https://pub.dev/packages/flutter_secure_storage_linux
 
 BSD 3-Clause License
@@ -1740,7 +1981,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-flutter_secure_storage_platform_interface
+
+Package: flutter_secure_storage_platform_interface
 https://pub.dev/packages/flutter_secure_storage_platform_interface
 
 BSD 3-Clause License
@@ -1774,7 +2016,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-flutter_secure_storage_web
+
+Package: flutter_secure_storage_web
 https://pub.dev/packages/flutter_secure_storage_web
 
 BSD 3-Clause License
@@ -1808,7 +2051,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-flutter_secure_storage_windows
+
+Package: flutter_secure_storage_windows
 https://pub.dev/packages/flutter_secure_storage_windows
 
 BSD 3-Clause License
@@ -1842,7 +2086,8 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-flutter_svg
+
+Package: flutter_svg
 https://pub.dev/packages/flutter_svg
 
 Copyright (c) 2018 Dan Field
@@ -1866,7 +2111,72 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-glob
+
+Package: flutter_test
+https://pub.dev/packages/flutter_test
+
+Copyright 2014 The Flutter Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+========================================================================
+
+Package: flutter_web_plugins
+https://pub.dev/packages/flutter_web_plugins
+
+Copyright 2014 The Flutter Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+========================================================================
+
+Package: glob
 https://pub.dev/packages/glob
 
 Copyright 2014, the Dart project authors. 
@@ -1899,7 +2209,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-hooks
+
+Package: hooks
 https://pub.dev/packages/hooks
 
 Copyright 2025, the Dart project authors.
@@ -1932,7 +2243,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-http
+
+Package: http
 https://pub.dev/packages/http
 
 Copyright 2014, the Dart project authors. 
@@ -1965,7 +2277,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-http_parser
+
+Package: http_parser
 https://pub.dev/packages/http_parser
 
 Copyright 2014, the Dart project authors. 
@@ -1998,7 +2311,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-image
+
+Package: image
 https://pub.dev/packages/image
 
 The MIT License
@@ -2025,7 +2339,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ========================================================================
-intl
+
+Package: intl
 https://pub.dev/packages/intl
 
 Copyright 2013, the Dart project authors.
@@ -2058,7 +2373,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-jni
+
+Package: jni
 https://pub.dev/packages/jni
 
 Copyright 2022, the Dart project authors.
@@ -2091,7 +2407,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-jni_flutter
+
+Package: jni_flutter
 https://pub.dev/packages/jni_flutter
 
 Copyright 2026, the Dart project authors.
@@ -2124,7 +2441,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-jni_util
+
+Package: jni_util
 https://pub.dev/packages/jni_util
 
 Copyright 2026, the Dart project authors.
@@ -2157,7 +2475,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-json_annotation
+
+Package: json_annotation
 https://pub.dev/packages/json_annotation
 
 Copyright 2017, the Dart project authors. All rights reserved.
@@ -2189,7 +2508,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-leak_tracker
+
+Package: leak_tracker
 https://pub.dev/packages/leak_tracker
 
 Copyright 2022, the Dart project authors.
@@ -2222,7 +2542,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-leak_tracker_flutter_testing
+
+Package: leak_tracker_flutter_testing
 https://pub.dev/packages/leak_tracker_flutter_testing
 
 Copyright 2022, the Dart project authors.
@@ -2255,7 +2576,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-leak_tracker_testing
+
+Package: leak_tracker_testing
 https://pub.dev/packages/leak_tracker_testing
 
 Copyright 2022, the Dart project authors.
@@ -2288,7 +2610,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-lints
+
+Package: lints
 https://pub.dev/packages/lints
 
 Copyright 2021, the Dart project authors.
@@ -2321,7 +2644,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-logging
+
+Package: logging
 https://pub.dev/packages/logging
 
 Copyright 2013, the Dart project authors. 
@@ -2354,7 +2678,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-matcher
+
+Package: matcher
 https://pub.dev/packages/matcher
 
 Copyright 2014, the Dart project authors. 
@@ -2387,7 +2712,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-material_color_utilities
+
+Package: material_color_utilities
 https://pub.dev/packages/material_color_utilities
 
 
@@ -2595,7 +2921,8 @@ https://pub.dev/packages/material_color_utilities
 
 
 ========================================================================
-media_kit
+
+Package: media_kit
 https://pub.dev/packages/media_kit
 
 MIT License
@@ -2622,7 +2949,8 @@ SOFTWARE.
 
 
 ========================================================================
-media_kit_libs_android_audio
+
+Package: media_kit_libs_android_audio
 https://pub.dev/packages/media_kit_libs_android_audio
 
 MIT License
@@ -2649,7 +2977,8 @@ SOFTWARE.
 
 
 ========================================================================
-media_kit_libs_audio
+
+Package: media_kit_libs_audio
 https://pub.dev/packages/media_kit_libs_audio
 
 MIT License
@@ -2676,7 +3005,8 @@ SOFTWARE.
 
 
 ========================================================================
-media_kit_libs_ios_audio
+
+Package: media_kit_libs_ios_audio
 https://pub.dev/packages/media_kit_libs_ios_audio
 
 MIT License
@@ -2703,7 +3033,8 @@ SOFTWARE.
 
 
 ========================================================================
-media_kit_libs_linux
+
+Package: media_kit_libs_linux
 https://pub.dev/packages/media_kit_libs_linux
 
 MIT License
@@ -2730,7 +3061,8 @@ SOFTWARE.
 
 
 ========================================================================
-media_kit_libs_macos_audio
+
+Package: media_kit_libs_macos_audio
 https://pub.dev/packages/media_kit_libs_macos_audio
 
 MIT License
@@ -2757,7 +3089,8 @@ SOFTWARE.
 
 
 ========================================================================
-media_kit_libs_windows_audio
+
+Package: media_kit_libs_windows_audio
 https://pub.dev/packages/media_kit_libs_windows_audio
 
 MIT License
@@ -2784,7 +3117,8 @@ SOFTWARE.
 
 
 ========================================================================
-meta
+
+Package: meta
 https://pub.dev/packages/meta
 
 Copyright 2016, the Dart project authors.
@@ -2817,7 +3151,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-mime
+
+Package: mime
 https://pub.dev/packages/mime
 
 Copyright 2015, the Dart project authors. 
@@ -2850,7 +3185,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-native_toolchain_c
+
+Package: native_toolchain_c
 https://pub.dev/packages/native_toolchain_c
 
 Copyright 2023, the Dart project authors.
@@ -2883,7 +3219,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-nativeapi
+
+Package: nativeapi
 https://pub.dev/packages/nativeapi
 
 MIT License
@@ -2910,7 +3247,8 @@ SOFTWARE.
 
 
 ========================================================================
-nativeapi_flutter
+
+Package: nativeapi_flutter
 https://pub.dev/packages/nativeapi_flutter
 
 MIT License
@@ -2937,7 +3275,8 @@ SOFTWARE.
 
 
 ========================================================================
-objective_c
+
+Package: objective_c
 https://pub.dev/packages/objective_c
 
 Copyright 2024, the Dart project authors.
@@ -2970,7 +3309,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-package_config
+
+Package: package_config
 https://pub.dev/packages/package_config
 
 Copyright 2019, the Dart project authors. 
@@ -3003,7 +3343,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path
+
+Package: path
 https://pub.dev/packages/path
 
 Copyright 2014, the Dart project authors. 
@@ -3036,7 +3377,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path_parsing
+
+Package: path_parsing
 https://pub.dev/packages/path_parsing
 
 Copyright (c) 2018 Dan Field
@@ -3061,7 +3403,8 @@ SOFTWARE.
 
 
 ========================================================================
-path_provider
+
+Package: path_provider
 https://pub.dev/packages/path_provider
 
 Copyright 2013 The Flutter Authors
@@ -3092,7 +3435,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path_provider_android
+
+Package: path_provider_android
 https://pub.dev/packages/path_provider_android
 
 Copyright 2013 The Flutter Authors
@@ -3123,7 +3467,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path_provider_foundation
+
+Package: path_provider_foundation
 https://pub.dev/packages/path_provider_foundation
 
 Copyright 2013 The Flutter Authors
@@ -3154,7 +3499,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path_provider_linux
+
+Package: path_provider_linux
 https://pub.dev/packages/path_provider_linux
 
 Copyright 2013 The Flutter Authors
@@ -3185,7 +3531,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path_provider_platform_interface
+
+Package: path_provider_platform_interface
 https://pub.dev/packages/path_provider_platform_interface
 
 Copyright 2013 The Flutter Authors
@@ -3216,7 +3563,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-path_provider_windows
+
+Package: path_provider_windows
 https://pub.dev/packages/path_provider_windows
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -3247,7 +3595,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-petitparser
+
+Package: petitparser
 https://pub.dev/packages/petitparser
 
 The MIT License
@@ -3275,7 +3624,8 @@ THE SOFTWARE.
 
 
 ========================================================================
-platform
+
+Package: platform
 https://pub.dev/packages/platform
 
 Copyright 2017, the Dart project authors. All rights reserved.
@@ -3307,7 +3657,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-plugin_platform_interface
+
+Package: plugin_platform_interface
 https://pub.dev/packages/plugin_platform_interface
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -3338,7 +3689,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-posix
+
+Package: posix
 https://pub.dev/packages/posix
 
 MIT License
@@ -3365,7 +3717,8 @@ SOFTWARE.
 
 
 ========================================================================
-process
+
+Package: process
 https://pub.dev/packages/process
 
 Copyright 2013, the Dart project authors.
@@ -3397,7 +3750,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================
-pub_semver
+
+Package: pub_semver
 https://pub.dev/packages/pub_semver
 
 Copyright 2014, the Dart project authors. 
@@ -3430,7 +3784,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-record_use
+
+Package: record_use
 https://pub.dev/packages/record_use
 
 Copyright 2024, the Dart project authors.
@@ -3463,7 +3818,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-safe_local_storage
+
+Package: safe_local_storage
 https://pub.dev/packages/safe_local_storage
 
 MIT License
@@ -3490,7 +3846,8 @@ SOFTWARE.
 
 
 ========================================================================
-screen_retriever
+
+Package: screen_retriever
 https://pub.dev/packages/screen_retriever
 
 MIT License
@@ -3516,7 +3873,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-screen_retriever_linux
+
+Package: screen_retriever_linux
 https://pub.dev/packages/screen_retriever_linux
 
 MIT License
@@ -3542,7 +3900,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-screen_retriever_macos
+
+Package: screen_retriever_macos
 https://pub.dev/packages/screen_retriever_macos
 
 MIT License
@@ -3568,7 +3927,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-screen_retriever_platform_interface
+
+Package: screen_retriever_platform_interface
 https://pub.dev/packages/screen_retriever_platform_interface
 
 MIT License
@@ -3594,7 +3954,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-screen_retriever_windows
+
+Package: screen_retriever_windows
 https://pub.dev/packages/screen_retriever_windows
 
 MIT License
@@ -3620,7 +3981,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-shared_preferences
+
+Package: shared_preferences
 https://pub.dev/packages/shared_preferences
 
 Copyright 2013 The Flutter Authors
@@ -3651,7 +4013,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-shared_preferences_android
+
+Package: shared_preferences_android
 https://pub.dev/packages/shared_preferences_android
 
 Copyright 2013 The Flutter Authors
@@ -3682,7 +4045,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-shared_preferences_foundation
+
+Package: shared_preferences_foundation
 https://pub.dev/packages/shared_preferences_foundation
 
 Copyright 2013 The Flutter Authors
@@ -3713,7 +4077,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-shared_preferences_linux
+
+Package: shared_preferences_linux
 https://pub.dev/packages/shared_preferences_linux
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -3744,7 +4109,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-shared_preferences_platform_interface
+
+Package: shared_preferences_platform_interface
 https://pub.dev/packages/shared_preferences_platform_interface
 
 Copyright 2013 The Flutter Authors
@@ -3775,7 +4141,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-shared_preferences_web
+
+Package: shared_preferences_web
 https://pub.dev/packages/shared_preferences_web
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -3806,7 +4173,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-shared_preferences_windows
+
+Package: shared_preferences_windows
 https://pub.dev/packages/shared_preferences_windows
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -3837,7 +4205,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-sky_engine
+
+Package: sky_engine
 https://pub.dev/packages/sky_engine
 
 vulkan-validation-layers
@@ -33687,7 +34056,8 @@ Google, and others. All Rights Reserved.
 
 
 ========================================================================
-source_span
+
+Package: source_span
 https://pub.dev/packages/source_span
 
 Copyright 2014, the Dart project authors. 
@@ -33720,7 +34090,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-sqflite_common
+
+Package: sqflite_common
 https://pub.dev/packages/sqflite_common
 
 BSD 2-Clause License
@@ -33751,7 +34122,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-sqflite_common_ffi
+
+Package: sqflite_common_ffi
 https://pub.dev/packages/sqflite_common_ffi
 
 BSD 2-Clause License
@@ -33782,7 +34154,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-sqlite3
+
+Package: sqlite3
 https://pub.dev/packages/sqlite3
 
 MIT License
@@ -33808,7 +34181,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-stack_trace
+
+Package: stack_trace
 https://pub.dev/packages/stack_trace
 
 Copyright 2014, the Dart project authors.
@@ -33841,7 +34215,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-stream_channel
+
+Package: stream_channel
 https://pub.dev/packages/stream_channel
 
 Copyright 2015, the Dart project authors. 
@@ -33874,7 +34249,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-string_scanner
+
+Package: string_scanner
 https://pub.dev/packages/string_scanner
 
 Copyright 2014, the Dart project authors. 
@@ -33907,7 +34283,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-synchronized
+
+Package: synchronized
 https://pub.dev/packages/synchronized
 
 MIT License
@@ -33933,7 +34310,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-term_glyph
+
+Package: term_glyph
 https://pub.dev/packages/term_glyph
 
 Copyright 2017, the Dart project authors. 
@@ -33966,7 +34344,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-test_api
+
+Package: test_api
 https://pub.dev/packages/test_api
 
 Copyright 2018, the Dart project authors. 
@@ -33999,7 +34378,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-tray_manager
+
+Package: tray_manager
 https://pub.dev/packages/tray_manager
 
 MIT License
@@ -34025,7 +34405,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-typed_data
+
+Package: typed_data
 https://pub.dev/packages/typed_data
 
 Copyright 2015, the Dart project authors. 
@@ -34058,7 +34439,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-universal_platform
+
+Package: universal_platform
 https://pub.dev/packages/universal_platform
 
 MIT License
@@ -34072,7 +34454,8 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ========================================================================
-uri_parser
+
+Package: uri_parser
 https://pub.dev/packages/uri_parser
 
 MIT License
@@ -34099,7 +34482,8 @@ SOFTWARE.
 
 
 ========================================================================
-url_launcher
+
+Package: url_launcher
 https://pub.dev/packages/url_launcher
 
 Copyright 2013 The Flutter Authors
@@ -34130,7 +34514,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_android
+
+Package: url_launcher_android
 https://pub.dev/packages/url_launcher_android
 
 Copyright 2013 The Flutter Authors
@@ -34161,7 +34546,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_ios
+
+Package: url_launcher_ios
 https://pub.dev/packages/url_launcher_ios
 
 Copyright 2013 The Flutter Authors
@@ -34192,7 +34578,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_linux
+
+Package: url_launcher_linux
 https://pub.dev/packages/url_launcher_linux
 
 Copyright 2013 The Flutter Authors
@@ -34223,7 +34610,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_macos
+
+Package: url_launcher_macos
 https://pub.dev/packages/url_launcher_macos
 
 Copyright 2013 The Flutter Authors
@@ -34254,7 +34642,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_platform_interface
+
+Package: url_launcher_platform_interface
 https://pub.dev/packages/url_launcher_platform_interface
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -34285,7 +34674,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_web
+
+Package: url_launcher_web
 https://pub.dev/packages/url_launcher_web
 
 Copyright 2013 The Flutter Authors
@@ -34316,7 +34706,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-url_launcher_windows
+
+Package: url_launcher_windows
 https://pub.dev/packages/url_launcher_windows
 
 Copyright 2013 The Flutter Authors
@@ -34347,7 +34738,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-uuid
+
+Package: uuid
 https://pub.dev/packages/uuid
 
 Copyright (c) 2021 Yulian Kuncheff
@@ -34359,7 +34751,8 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ========================================================================
-vector_graphics
+
+Package: vector_graphics
 https://pub.dev/packages/vector_graphics
 
 Copyright 2013 The Flutter Authors
@@ -34390,7 +34783,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-vector_graphics_codec
+
+Package: vector_graphics_codec
 https://pub.dev/packages/vector_graphics_codec
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -34421,7 +34815,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-vector_graphics_compiler
+
+Package: vector_graphics_compiler
 https://pub.dev/packages/vector_graphics_compiler
 
 Copyright 2013 The Flutter Authors
@@ -34452,7 +34847,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-vector_math
+
+Package: vector_math
 https://pub.dev/packages/vector_math
 
 Copyright 2013 The Flutter Authors
@@ -34483,7 +34879,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-vm_service
+
+Package: vm_service
 https://pub.dev/packages/vm_service
 
 Copyright 2015, the Dart project authors.
@@ -34516,7 +34913,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-web
+
+Package: web
 https://pub.dev/packages/web
 
 Copyright 2023, the Dart project authors.
@@ -34548,7 +34946,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-win32
+
+Package: win32
 https://pub.dev/packages/win32
 
 BSD 3-Clause License
@@ -34582,7 +34981,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-window_manager
+
+Package: window_manager
 https://pub.dev/packages/window_manager
 
 MIT License
@@ -34608,7 +35008,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-xdg_directories
+
+Package: xdg_directories
 https://pub.dev/packages/xdg_directories
 
 Copyright 2013 The Flutter Authors. All rights reserved.
@@ -34639,7 +35040,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 ========================================================================
-xml
+
+Package: xml
 https://pub.dev/packages/xml
 
 The MIT License
@@ -34667,7 +35069,8 @@ THE SOFTWARE.
 
 
 ========================================================================
-yaml
+
+Package: yaml
 https://pub.dev/packages/yaml
 
 Copyright (c) 2014, the Dart project authors.
@@ -34690,4 +35093,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-

@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'mix_artist_picker.dart';
 import 'media_card_size.dart';
 import 'item_action_region.dart';
@@ -105,21 +106,13 @@ class HomeCardGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final factor = MediaCardSizeScope.scale(context);
-      final columns = factor != 1
-          ? max(
-              1,
-              ((constraints.maxWidth + 16) / ((compact ? 152 : 210) * factor))
-                  .floor(),
-            )
-          : compact
-          ? max(1, ((constraints.maxWidth + 12) / 152).floor())
-          : constraints.maxWidth >= 640
-          ? 4
-          : constraints.maxWidth >= 340
-          ? 2
-          : 1;
       final gap = compact ? 12.0 : 16.0;
+      final preferred =
+          MediaCardSizeScope.cardWidth(context) * (compact ? .75 : 1);
+      final columns = max(
+        1,
+        ((constraints.maxWidth + gap) / (preferred + gap)).floor(),
+      );
       final width = (constraints.maxWidth - (columns - 1) * gap) / columns;
       final scale = MediaQuery.textScalerOf(context).scale(1);
       final scaledFont = MediaQuery.textScalerOf(context)
@@ -133,7 +126,7 @@ class HomeCardGrid extends StatelessWidget {
               width: width,
               height: covers
                   ? width + 12 * scale + scaledFont * 3.2
-                  : 108 + scaledFont * 5.6,
+                  : 120 + scaledFont * 2.8,
               child: ItemActionRegion(child: child),
             ),
         ],
@@ -204,8 +197,12 @@ class HomeCardLayout extends StatelessWidget {
     if (homeCompactItem(mode)) {
       return LayoutBuilder(
         builder: (context, size) {
-          final factor = MediaCardSizeScope.scale(context);
-          final columns = max(1, (size.maxWidth / (320 * factor)).floor());
+          final columns = max(
+            1,
+            ((size.maxWidth + 12) /
+                    (MediaCardSizeScope.horizontalWidth(context) + 12))
+                .floor(),
+          );
           final width = (size.maxWidth - (columns - 1) * 12) / columns;
           return Wrap(
             spacing: 12,
@@ -214,10 +211,7 @@ class HomeCardLayout extends StatelessWidget {
               for (final child in children)
                 SizedBox(
                   width: width,
-                  height:
-                      100 *
-                      MediaQuery.textScalerOf(context).scale(1) *
-                      MediaCardSizeScope.scale(context).clamp(1, 1.7),
+                  height: MediaCardSizeScope.horizontalHeight(context),
                   child: child,
                 ),
             ],
@@ -281,13 +275,12 @@ class _HomeCarouselState extends State<HomeCarousel> {
     final compact = homeCompactItem(widget.mode);
     final small = widget.mode == 'carousel_small';
     final factor = MediaCardSizeScope.scale(context);
-    final itemHeight =
-        (compact
-            ? 100 * scale.scale(1)
-            : widget.covers
-            ? (small ? 120 : 180) + 24 * scale.scale(1) + font * 3.2
-            : (small ? 96 : 120) + font * 5.6) *
-        factor.clamp(1, 1.7);
+    final itemHeight = compact
+        ? MediaCardSizeScope.horizontalHeight(context)
+        : (widget.covers
+                  ? (small ? 120 : 180) + 24 * scale.scale(1) + font * 3.2
+                  : (small ? 96 : 120) + font * 5.6) *
+              factor.clamp(1, 1.7);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -297,12 +290,12 @@ class _HomeCarouselState extends State<HomeCarousel> {
             IconButton(
               tooltip: ui(context, 'Anterior'),
               onPressed: () => move(-1),
-              icon: const Icon(Icons.chevron_left),
+              icon: const MtIcon(Icons.chevron_left),
             ),
             IconButton(
               tooltip: ui(context, 'Próxima'),
               onPressed: () => move(1),
-              icon: const Icon(Icons.chevron_right),
+              icon: const MtIcon(Icons.chevron_right),
             ),
           ],
         ),
@@ -317,13 +310,12 @@ class _HomeCarouselState extends State<HomeCarousel> {
               padding: const EdgeInsets.only(bottom: 12),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: rows,
-                mainAxisExtent:
-                    (compact
-                        ? 320
-                        : widget.covers
-                        ? (small ? 120 : 180)
-                        : (small ? 180 : 264)) *
-                    factor,
+                mainAxisExtent: compact
+                    ? MediaCardSizeScope.horizontalWidth(context)
+                    : (widget.covers
+                              ? (small ? 120 : 180)
+                              : (small ? 180 : 264)) *
+                          factor,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 12,
               ),
@@ -400,7 +392,7 @@ Future<void> customizeHome(BuildContext context, AppSettings settings) {
                               ),
                               trailing: IconButton(
                                 tooltip: ui(context, 'Fechar'),
-                                icon: const Icon(Icons.close),
+                                icon: const MtIcon(Icons.close),
                                 onPressed: close,
                               ),
                             ),
@@ -627,6 +619,13 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, update) => AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+          contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
           title: const UiText('Tamanho dos mixes'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -751,6 +750,13 @@ class _HomePageState extends State<HomePage> {
               context: context,
               builder: (context) => StatefulBuilder(
                 builder: (context, update) => AlertDialog(
+                  insetPadding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 24,
+                  ),
+                  titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                  actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   title: UiText(name),
                   scrollable: true,
                   content: SizedBox(
@@ -957,7 +963,7 @@ class _HomePageState extends State<HomePage> {
       if (!homeSections.containsKey(key)) return const SizedBox.shrink();
       return Padding(
         key: ValueKey('home.section.$key'),
-        padding: const EdgeInsets.only(top: 48),
+        padding: const EdgeInsets.only(top: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1035,7 +1041,7 @@ class _HomePageState extends State<HomePage> {
                     t.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
                     t.artistNames.join('; '),
@@ -1048,7 +1054,7 @@ class _HomePageState extends State<HomePage> {
           );
     return Padding(
       key: ValueKey('home.section.$key'),
-      padding: const EdgeInsets.only(top: 48, bottom: 0),
+      padding: const EdgeInsets.only(top: 24, bottom: 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1198,7 +1204,7 @@ class _HomePageState extends State<HomePage> {
               group.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
@@ -1207,7 +1213,7 @@ class _HomePageState extends State<HomePage> {
     }).toList();
     return Padding(
       key: ValueKey('home.section.$key'),
-      padding: const EdgeInsets.only(top: 48),
+      padding: const EdgeInsets.only(top: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1268,37 +1274,22 @@ class _HomePageState extends State<HomePage> {
 
   Widget keepListening(List<Track> visible) {
     final track = widget.resumeTrack;
-    if (widget.onResume == null ||
-        (track != null && !visible.any((t) => t.id == track.id))) {
-      return Padding(
-        key: const ValueKey('home.section.continue'),
-        padding: const EdgeInsets.only(top: 48),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            UiText(
-              'Ouvindo agora',
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
-            const UiText('Start a track to keep listening here.'),
-          ],
-        ),
-      );
-    }
+    final available =
+        widget.onResume != null &&
+        (track == null || visible.any((t) => t.id == track.id));
     return Card(
       key: const ValueKey('home.section.continue'),
-      margin: const EdgeInsets.only(top: 48),
+      margin: const EdgeInsets.only(top: 24),
       clipBehavior: Clip.antiAlias,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: InkWell(
         onTap: widget.onNowPlaying,
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: LayoutBuilder(
             builder: (context, space) {
               final cover = SizedBox.square(
-                dimension: space.maxWidth < 540 ? 128 : 200,
+                dimension: space.maxWidth < 460 ? 72 : 96,
                 child: TrackCover(track: track),
               );
               final details = Column(
@@ -1307,51 +1298,50 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   UiText(
                     'Ouvindo agora',
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Text(
                     track?.title ??
                         widget.resumeTitle ??
                         ui(context, 'Sessão atual'),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   if (track != null)
                     Text(
                       track.artist +
                           (track.album.isEmpty ? '' : ' · ${track.album}'),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      FilledButton.icon(
-                        onPressed: widget.onResume,
-                        icon: const Icon(Icons.play_arrow),
-                        label: const UiText('Reproduzir'),
-                      ),
-                      if (track != null) widget.trackActions(track),
-                    ],
-                  ),
+                  if (!available)
+                    const UiText('Start a track to keep listening here.'),
                 ],
               );
-              return space.maxWidth < 400
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [cover, const SizedBox(height: 24), details],
-                    )
-                  : Row(
-                      children: [
-                        cover,
-                        const SizedBox(width: 24),
-                        Expanded(child: details),
-                      ],
-                    );
+              final play = FilledButton.icon(
+                onPressed: available ? widget.onResume : null,
+                icon: const MtIcon(Icons.play_arrow, size: 20),
+                label: const UiText('Reproduzir'),
+              );
+              return Row(
+                children: [
+                  cover,
+                  const SizedBox(width: 24),
+                  Expanded(child: details),
+                  const SizedBox(width: 12),
+                  if (space.maxWidth >= 460)
+                    play
+                  else
+                    IconButton.filled(
+                      tooltip: ui(context, 'Reproduzir'),
+                      onPressed: available ? widget.onResume : null,
+                      icon: const MtIcon(Icons.play_arrow),
+                    ),
+                ],
+              );
             },
           ),
         ),
@@ -1371,7 +1361,7 @@ class _HomePageState extends State<HomePage> {
                 widget.onExplore('songs', null);
                 setState(() => exploring = false);
               },
-              icon: const Icon(Icons.arrow_back),
+              icon: const MtIcon(Icons.arrow_back),
               label: const UiText('Voltar ao início'),
             ),
           ),
@@ -1391,7 +1381,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: widget.onAddSource,
-              icon: const Icon(Icons.add),
+              icon: const MtIcon(Icons.add),
               label: const UiText('Adicionar fonte'),
             ),
           ],
@@ -1513,12 +1503,14 @@ class _HomePageState extends State<HomePage> {
             final heading = UiText(
               'Sua música, em todo lugar',
               style: Theme.of(context).textTheme.headlineMedium
-                  ?.copyWith(fontWeight: FontWeight.w700),
+                  ?.copyWith(fontWeight: FontWeight.w700, fontSize: 32),
             );
             final actions = <Widget>[
               FilterChip(
                 key: const ValueKey('home.offline'),
-                label: const UiText('Ativar disponíveis offline'),
+                label: UiText(
+                  quickFilter == 'offline' ? 'Offline only' : 'All music',
+                ),
                 selected: quickFilter == 'offline',
                 onSelected: (value) =>
                     setState(() => quickFilter = value ? 'offline' : 'all'),
@@ -1527,13 +1519,13 @@ class _HomePageState extends State<HomePage> {
                 key: const ValueKey('home.sources'),
                 tooltip: ui(context, 'Fontes'),
                 onPressed: widget.onSources,
-                icon: const Icon(Icons.storage),
+                icon: const MtIcon(Icons.storage),
               ),
               IconButton(
                 key: const ValueKey('home.customize'),
                 tooltip: ui(context, 'Personalizar início'),
                 onPressed: () => customizeHome(context, widget.settings),
-                icon: const Icon(Icons.tune),
+                icon: const MtIcon(Icons.tune),
               ),
             ];
             if (constraints.maxWidth <
@@ -1572,7 +1564,7 @@ class _HomePageState extends State<HomePage> {
                 : (key == 'mixes')
                 ? Padding(
                     key: ValueKey('home.section.$key'),
-                    padding: const EdgeInsets.only(top: 48, bottom: 0),
+                    padding: const EdgeInsets.only(top: 24, bottom: 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1594,12 +1586,12 @@ class _HomePageState extends State<HomePage> {
                                 );
                                 if (mounted) setState(() {});
                               },
-                              icon: const Icon(Icons.dashboard_customize),
+                              icon: const MtIcon(Icons.dashboard_customize),
                             ),
                             IconButton(
                               tooltip: ui(context, 'Regenerar mixes'),
                               onPressed: () => setState(regenerate),
-                              icon: const Icon(Icons.refresh),
+                              icon: const MtIcon(Icons.refresh),
                             ),
                           ],
                         ),
@@ -1642,7 +1634,7 @@ class _HomePageState extends State<HomePage> {
                                     homeSectionMode(widget.settings, 'mixes'),
                                   ))
                                 CompactMediaCard(
-                                  artwork: const Icon(Icons.auto_awesome),
+                                  artwork: const MtIcon(Icons.auto_awesome),
                                   title: homeMixLabel(context, mix.key),
                                   subtitle: homeMixReference(mix.key).isNotEmpty
                                       ? homeMixReference(mix.key)
@@ -1660,14 +1652,8 @@ class _HomePageState extends State<HomePage> {
                                           Theme.of(context)
                                               .colorScheme
                                               .surfaceContainer,
-                                          Color(
-                                            0xff000000 |
-                                                (mix.key.codeUnits.fold<int>(
-                                                      0,
-                                                      (a, b) => a * 31 + b,
-                                                    ) &
-                                                    0xffffff),
-                                          ).withValues(alpha: .28),
+                                          homeMixColor(mix.key)
+                                              .withValues(alpha: .32),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -1684,7 +1670,7 @@ class _HomePageState extends State<HomePage> {
                                           children: [
                                             Row(
                                               children: [
-                                                Icon(
+                                                MtIcon(
                                                   mix.key.contains('favoritos')
                                                       ? Icons.favorite
                                                       : homeMixType(mix.key) ==
@@ -1714,11 +1700,11 @@ class _HomePageState extends State<HomePage> {
                                             const SizedBox(height: 8),
                                             Text(
                                               homeMixLabel(context, mix.key),
-                                              maxLines: 2,
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium,
                                             ),
                                             const SizedBox(height: 8),
                                             Text(
@@ -1739,8 +1725,11 @@ class _HomePageState extends State<HomePage> {
                                                         'decades'
                                                   ? 'Choose a period'
                                                   : '${mix.value.length} ${ui(context, 'faixas da biblioteca')}',
-                                              maxLines: 2,
+                                              maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall,
                                             ),
                                           ],
                                         ),
@@ -1755,7 +1744,7 @@ class _HomePageState extends State<HomePage> {
                   )
                 : (key == 'explore')
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 48, bottom: 0),
+                    padding: const EdgeInsets.only(top: 24, bottom: 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1780,7 +1769,7 @@ class _HomePageState extends State<HomePage> {
                                     homeSectionMode(widget.settings, 'explore'),
                                   ))
                                 CompactMediaCard(
-                                  artwork: const Icon(Icons.explore),
+                                  artwork: const MtIcon(Icons.explore),
                                   title: item.$2.name,
                                   subtitle:
                                       '${item.$2.tracks.length} ${ui(context, 'faixas')}',
@@ -1806,7 +1795,7 @@ class _HomePageState extends State<HomePage> {
                                         children: [
                                           Row(
                                             children: [
-                                              const Icon(Icons.explore),
+                                              const MtIcon(Icons.explore),
                                               const Spacer(),
                                               menu(item.$2.tracks),
                                             ],
@@ -1885,4 +1874,23 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+}
+
+Color homeMixColor(String name) {
+  if (name.startsWith('Last.fm')) {
+    return name.contains('mês')
+        ? const Color(0xffff3dbb)
+        : const Color(0xffed3838);
+  }
+  return switch (homeMixType(name)) {
+    'artists' => const Color(0xff2584a5),
+    'artist_radio' => const Color(0xffb5a929),
+    'decades' => const Color(0xff79ff12),
+    _ =>
+      name.contains('favoritos')
+          ? const Color(0xff8953ff)
+          : name.contains('Descobertas')
+          ? const Color(0xffff9f04)
+          : const Color(0xff27cf80),
+  };
 }

@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -118,6 +120,10 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     scrollable: true,
     title: Text(
       '${ui(context, radio ? 'Artist radio' : 'Artist mix')} · ${widget.artist}',
@@ -211,7 +217,7 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
                 Navigator.pop(context);
                 await widget.onPlay(snapshot, 0, title);
               },
-        icon: const Icon(Icons.play_arrow),
+        icon: const MtIcon(Icons.play_arrow),
         label: const UiText('Play'),
       ),
     ],

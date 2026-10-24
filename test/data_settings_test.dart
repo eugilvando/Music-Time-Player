@@ -63,7 +63,7 @@ void main() {
     },
   );
   testWidgets(
-    'cards da home formam quatro colunas e adaptam janelas pequenas',
+    'cards da home respeitam a largura Medium do Figma e adaptam janelas pequenas',
     (tester) async {
       for (final width in [800.0, 480.0, 320.0]) {
         await tester.pumpWidget(
@@ -85,11 +85,7 @@ void main() {
           ),
         );
         await tester.pump();
-        final columns = width >= 640
-            ? 4
-            : width >= 340
-            ? 2
-            : 1;
+        final columns = ((width + 16) / (196 + 16)).floor().clamp(1, 100);
         final first = tester.getTopLeft(find.byKey(const ValueKey('card-0')));
         final last = tester.getTopLeft(
           find.byKey(ValueKey('card-${columns - 1}')),

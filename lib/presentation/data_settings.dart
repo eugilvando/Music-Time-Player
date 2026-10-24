@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'settings_card.dart';
 import 'ui_language.dart';
 
@@ -12,6 +13,10 @@ Future<bool> confirmDataChange(
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       scrollable: true,
       title: UiText(reset ? 'Resetar todo o Music Time?' : 'Restaurar backup?'),
       content: UiText(
@@ -43,6 +48,10 @@ Future<bool> confirmDataChange(
     barrierDismissible: false,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         scrollable: true,
         title: const UiText('Confirmação final'),
         content: Column(
@@ -86,6 +95,10 @@ Future<bool> confirmDataChange(
     barrierDismissible: false,
     builder: (context) => StatefulBuilder(
       builder: (context, update) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Final review · 3 of 3'),
         content: CheckboxListTile(
           value: acknowledged,
@@ -117,9 +130,11 @@ class DataSettings extends StatefulWidget {
     required this.onRestore,
     required this.onReset,
     this.storage,
+    this.storageHasSurface = false,
   });
   final Future<void> Function() onBackup, onRestore, onReset;
   final Widget? storage;
+  final bool storageHasSurface;
   @override
   State<DataSettings> createState() => _DataSettingsState();
 }
@@ -134,10 +149,10 @@ class _DataSettingsState extends State<DataSettings> {
     });
     try {
       await action();
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
         setState(
-          () => message = 'Não foi possível concluir. Aguarde operações em andamento e tente novamente. Confira se o backup é válido e se há espaço no disco.',
+          () => message = error is FormatException ? error.message : 'Não foi possível concluir. Aguarde operações em andamento e tente novamente. Confira se o backup é válido e se há espaço no disco.',
         );
       }
     } finally {
@@ -147,7 +162,7 @@ class _DataSettingsState extends State<DataSettings> {
 
   @override
   Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.all(32),
+    padding: EdgeInsets.zero,
     children: [
       SettingsCard(
         child: Column(
@@ -159,7 +174,7 @@ class _DataSettingsState extends State<DataSettings> {
             ),
             const SizedBox(height: 16),
             const UiText(
-              'Backup versionado do catálogo, capas, playlists, favoritos, histórico, fila e preferências, até 128 MB. Credenciais, músicas e downloads físicos não entram no arquivo.',
+              'Escolha biblioteca, playlists, favoritos, histórico, fila, preferências e fontes. Capas são opcionais. Credenciais exigem um backup criptografado com senha. Músicas e downloads físicos não são incluídos.',
             ),
             if (busy) const LinearProgressIndicator(),
             if (message != null) UiText(message!),
@@ -168,12 +183,12 @@ class _DataSettingsState extends State<DataSettings> {
               children: [
                 FilledButton.icon(
                   onPressed: busy ? null : () => run(widget.onBackup),
-                  icon: const Icon(Icons.save_alt),
+                  icon: const MtIcon(Icons.save_alt),
                   label: const UiText('Exportar backup'),
                 ),
                 TextButton.icon(
                   onPressed: busy ? null : () => run(widget.onRestore),
-                  icon: const Icon(Icons.restore),
+                  icon: const MtIcon(Icons.restore),
                   label: const UiText('Restaurar backup'),
                 ),
               ],
@@ -182,12 +197,10 @@ class _DataSettingsState extends State<DataSettings> {
         ),
       ),
       if (widget.storage != null)
-        SettingsCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [widget.storage!],
-          ),
-        ),
+        if (widget.storageHasSurface)
+          widget.storage!
+        else
+          SettingsCard(child: widget.storage!),
       SettingsCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -213,7 +226,7 @@ class _DataSettingsState extends State<DataSettings> {
                           await run(widget.onReset);
                         }
                       },
-                icon: const Icon(Icons.delete_forever),
+                icon: const MtIcon(Icons.delete_forever),
                 label: const UiText('Resetar todo o aplicativo'),
               ),
             ),

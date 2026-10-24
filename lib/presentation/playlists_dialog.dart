@@ -1,3 +1,7 @@
+import 'design_icon.dart';
+import 'media_details_table.dart';
+import 'compact_media_card.dart';
+import 'media_card_size.dart';
 import 'media_indicators.dart';
 import 'item_action_region.dart';
 import 'view_style_selector.dart';
@@ -173,6 +177,10 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
     final track = await showDialog<Track>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Adicionar música'),
         content: SizedBox(
           width: 480,
@@ -297,6 +305,10 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Excluir playlist?'),
         content: const UiText(
           'As músicas e os arquivos originais serão preservados.',
@@ -380,8 +392,8 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
     ),
     isSelected:
         widget.settings?.collectionFavorites.contains('playlist:$id') == true,
-    icon: const Icon(Icons.favorite_border),
-    selectedIcon: const Icon(Icons.favorite),
+    icon: const MtIcon(Icons.favorite_border),
+    selectedIcon: const MtIcon(Icons.favorite),
     onPressed: widget.settings == null || busy
         ? null
         : () async {
@@ -469,7 +481,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
             context,
             descending ? 'Ordem decrescente' : 'Ordem crescente',
           ),
-          icon: Icon(descending ? Icons.arrow_downward : Icons.arrow_upward),
+          icon: MtIcon(descending ? Icons.arrow_downward : Icons.arrow_upward),
           onPressed: () {
             setState(() => descending = !descending);
             widget.settings?.updateVisual('playlists_descending', descending);
@@ -497,6 +509,47 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
     ),
   );
 
+  Widget playlistActions(Map<String, Object?> item) => PopupMenuButton<String>(
+    tooltip: ui(context, 'Ações da playlist'),
+    onSelected: (value) async {
+      final id = item['id'] as int;
+      if (value == 'open') {
+        openPlaylist(id);
+        return;
+      }
+      if (value == 'favorite') {
+        await widget.settings?.favoriteCollection('playlist:$id');
+        if (mounted) setState(() {});
+        return;
+      }
+      final rows = await widget.store.playlistEntries(id);
+      final tracks = rows.map(widget.store.trackFromRow).toList();
+      if (tracks.isEmpty) return;
+      if (value == 'shuffle') tracks.shuffle();
+      if (widget.onPlayNamed != null) {
+        widget.onPlayNamed!(tracks, 0, item['name'] as String);
+      } else {
+        widget.onPlay(tracks, 0);
+      }
+    },
+    itemBuilder: (_) => [
+      const PopupMenuItem(value: 'open', child: UiText('Open playlist')),
+      const PopupMenuItem(value: 'play', child: UiText('Reproduzir')),
+      const PopupMenuItem(value: 'shuffle', child: UiText('Aleatório')),
+      PopupMenuItem(
+        value: 'favorite',
+        child: UiText(
+          widget.settings?.collectionFavorites.contains(
+                    'playlist:${item['id']}',
+                  ) ==
+                  true
+              ? 'Remover favorito'
+              : 'Favoritar',
+        ),
+      ),
+    ],
+  );
+
   Widget content() {
     if (loading && (selected != null ? entries.isEmpty : playlists.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
@@ -513,63 +566,119 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
       }
       if (view == 'grid' || view == 'compact_card') {
         return LayoutBuilder(
-          builder: (context, constraints) => GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount:
-                  (constraints.maxWidth / (view == 'compact_card' ? 150 : 200))
-                      .floor()
-                      .clamp(1, 8),
-              mainAxisExtent: view == 'compact_card' ? 180 : 250,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-            ),
-            itemCount: values.length,
-            itemBuilder: (context, index) {
-              final item = values[index];
-              return ItemActionRegion(
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
+          builder: (context, space) {
+            final compact = view == 'compact_card';
+            final preferredWidth = compact
+                ? MediaCardSizeScope.horizontalWidth(context)
+                : MediaCardSizeScope.cardWidth(context);
+            final columns = ((space.maxWidth + 24) / (preferredWidth + 24))
+                .floor()
+                .clamp(1, 12);
+            final width = (space.maxWidth - (columns - 1) * 24) / columns;
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisExtent: compact
+                    ? MediaCardSizeScope.horizontalHeight(context)
+                    : width + 56 * MediaQuery.textScalerOf(context).scale(1),
+                crossAxisSpacing: 24,
+                mainAxisSpacing: compact ? 12 : 24,
+              ),
+              itemCount: values.length,
+              itemBuilder: (context, index) {
+                final item = values[index];
+                final id = item['id'] as int;
+                if (compact) {
+                  return CompactMediaCard(
+                    artwork: artwork(item),
+                    title: item['name'] as String,
+                    subtitle:
+                        '${item['track_count']} ${ui(context, 'músicas')}',
+                    actions: playlistActions(item),
+                    onTap: () {
+                      if (!busy) openPlaylist(id);
+                    },
+                  );
+                }
+                return ItemActionRegion(
                   child: InkWell(
-                    onTap: busy ? null : () => openPlaylist(item['id'] as int),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                Positioned.fill(child: artwork(item)),
-                                Positioned(
-                                  top: 0,
-                                  right: 0,
-                                  child: favoriteButton(item['id'] as int),
-                                ),
-                              ],
-                            ),
+                    onTap: busy ? null : () => openPlaylist(id),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AspectRatio(
+                          aspectRatio: 1,
+                          child: Stack(
+                            children: [
+                              Positioned.fill(child: artwork(item)),
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: playlistActions(item),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            item['name'] as String,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item['name'] as String,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          '${item['track_count']} ${ui(context, 'músicas')}',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        if ((item['pending_count'] as int? ?? 0) > 0)
+                          playlistPendingBadge(
+                            context,
+                            item['pending_count'] as int,
                           ),
-                          Text(
-                            '${item['track_count']} ${ui(context, 'músicas')}',
-                          ),
-                          if ((item['pending_count'] as int? ?? 0) > 0)
-                            playlistPendingBadge(
-                              context,
-                              item['pending_count'] as int,
-                            ),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
+                );
+              },
+            );
+          },
+        );
+      }
+      if (view == 'detailed') {
+        return MediaDetailsTable(
+          columnKey: 'playlists',
+          headers: [
+            ui(context, 'Título'),
+            ui(context, 'Músicas'),
+            ui(context, 'Pendências'),
+            '',
+          ],
+          widths: const [340, 140, 140, 128],
+          itemCount: values.length,
+          rowBuilder: (i) {
+            final item = values[i];
+            return [
+              InkWell(
+                onTap: busy ? null : () => openPlaylist(item['id'] as int),
+                child: Row(
+                  children: [
+                    SizedBox.square(dimension: 36, child: artwork(item)),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(item['name'] as String)),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+              Text('${item['track_count']}'),
+              Text('${item['pending_count'] ?? 0}'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  favoriteButton(item['id'] as int),
+                  playlistActions(item),
+                ],
+              ),
+            ];
+          },
         );
       }
       return ListView.builder(
@@ -592,6 +701,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                     values[index]['pending_count'] as int,
                   ),
                 favoriteButton(values[index]['id'] as int),
+                playlistActions(values[index]),
               ],
             ),
             subtitle: Text(
@@ -643,7 +753,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                 : () {
                     setState(() => selected = null);
                   },
-            icon: const Icon(Icons.arrow_back),
+            icon: const MtIcon(Icons.arrow_back),
           ),
           SizedBox.square(
             dimension: constraints.maxWidth < 650 ? 112 : 180,
@@ -691,7 +801,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                       onPressed: busy || queue.isEmpty
                           ? null
                           : () => playPlaylist(queue, 0),
-                      icon: const Icon(Icons.play_arrow),
+                      icon: const MtIcon(Icons.play_arrow),
                       label: const UiText('Reproduzir'),
                     ),
                     OutlinedButton.icon(
@@ -712,7 +822,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                                 );
                               }
                             },
-                      icon: const Icon(Icons.shuffle),
+                      icon: const MtIcon(Icons.shuffle),
                       label: const UiText('Aleatório'),
                     ),
                     if (widget.onQueue != null)
@@ -721,7 +831,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                         onPressed: busy || queue.isEmpty
                             ? null
                             : () => widget.onQueue!(queue),
-                        icon: const Icon(Icons.queue_music),
+                        icon: const MtIcon(Icons.queue_music),
                       ),
                     if (selected != null) favoriteButton(selected!),
                     PopupMenuButton<String>(
@@ -801,7 +911,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(20),
+    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -843,23 +953,23 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                     IconButton.filledTonal(
                       tooltip: ui(context, 'Criar playlist'),
                       onPressed: busy ? null : create,
-                      icon: const Icon(Icons.add),
+                      icon: const MtIcon(Icons.add),
                     ),
                     IconButton(
                       tooltip: ui(context, 'Importar playlist'),
                       onPressed: busy ? null : importPlaylist,
-                      icon: const Icon(Icons.file_open),
+                      icon: const MtIcon(Icons.file_open),
                     ),
                   ] else ...[
                     FilledButton.icon(
                       onPressed: busy ? null : create,
-                      icon: const Icon(Icons.add),
+                      icon: const MtIcon(Icons.add),
                       label: const UiText('Criar playlist'),
                     ),
                     const SizedBox(width: 8),
                     TextButton.icon(
                       onPressed: busy ? null : importPlaylist,
-                      icon: const Icon(Icons.file_open),
+                      icon: const MtIcon(Icons.file_open),
                       label: const UiText('Importar playlist'),
                     ),
                   ],
@@ -874,7 +984,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                     tooltip: ui(context, 'Visualização e ordenação'),
                     onPressed: () =>
                         setState(() => controlsExpanded = !controlsExpanded),
-                    icon: Icon(
+                    icon: MtIcon(
                       controlsExpanded ? Icons.chevron_right : Icons.tune,
                     ),
                   ),
@@ -1011,6 +1121,10 @@ class _PlaylistNameDialogState extends State<_PlaylistNameDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     title: Text(widget.title),
     content: TextField(
       controller: input,

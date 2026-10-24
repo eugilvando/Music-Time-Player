@@ -4,17 +4,21 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 1.2.1+41.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.0.0+44.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
+## Novidades da 2.0
+
+Design por **Gilvando Souza**, com Home e os cinco modelos Now Playing preservados, configurações reorganizadas, ícones arredondados, tamanhos do Figma, seleção de colunas e backup seletivo com criptografia opcional.
+
 ## Instalação
 
-1. Baixe `MusicTime-Setup-1.2.1.exe` na [release 1.2.1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v1.2.1).
+1. Baixe `MusicTime-Setup-2.0.0.exe` na [release 2.0.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.0.0).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
-5. O idioma inicial é inglês. Para português, selecione **General → Language** nas configurações. Alguns textos dinâmicos e diagnósticos ainda podem manter o idioma original.
+5. O idioma inicial é inglês. Para português, selecione **General and appearance → Language** nas configurações. Alguns textos dinâmicos e diagnósticos ainda podem manter o idioma original.
 
 O instalador Windows x64 inclui aplicação, motor de áudio, SQLite e bibliotecas necessárias. Não possui assinatura digital: o Windows pode identificar um editor desconhecido. Confira o SHA256 da release e não altere configurações de segurança para instalar algo em que não confia.
 
@@ -37,7 +41,7 @@ O [guia de configuração](docs/provider-setup.md) traz as etapas e links oficia
 | --- | --- |
 | Arquivos locais | Arquivos/pastas acessíveis no Windows. |
 | OneDrive pessoal | Registro OAuth próprio, conta pessoal, navegador e seleção de pastas; várias contas/pastas implementadas. |
-| Google Drive | Registro OAuth desktop próprio; My Drive ou ID de pasta, com subpastas. |
+| Google Drive | Registro OAuth desktop próprio; My Drive ou pasta escolhida no seletor visual, com subpastas. |
 | WebDAV | URL HTTPS completa da pasta musical e credenciais do servidor. |
 | Jellyfin / Emby | URL, usuário e senha; áudio direto, sem negociação de transcodificação. |
 | SMB | Caminho UNC acessível na sessão de rede do Windows; autenticação pelo Windows. |
@@ -57,7 +61,7 @@ O [guia de configuração](docs/provider-setup.md) traz as etapas e links oficia
 - **Playlists:** criar, renomear, excluir, favoritar, reordenar e preservar repetições; capa própria ou colagem de quatro capas. Importação/exportação M3U8 UTF-8 e referências OneDrive/Symfonium. Importação em lote continua após falhas, mantém pendências e permite revisar/vincular/remover. A barra de correção some quando as pendências terminam.
 - **Histórico e Last.fm:** histórico local com contagens reais; Last.fm opcional com autorização, now playing/scrobbling, outbox, favoritos/recentes/rankings e similaridade. Importar recentes não inventa contagens locais.
 - **Downloads e offline:** tarefas por faixa/coleção/seleção, retry, remoção individual dos permanentes e referências compartilhadas. Abas de permanentes/cache, listas compactas recolhíveis e informações de espaço. Cache padrão 10 GB, cinco próximas faixas e 30 dias sem uso. Offline global usa apenas arquivos presentes e válidos; placeholders OneDrive não contam.
-- **Configurações e dados:** nove categorias com cards e busca, informações de coleção/armazenamento, backup JSON versionado, restauração, otimização das capas e reset protegido por confirmações. Credenciais usam armazenamento seguro; backup não inclui músicas físicas/downloads/cache nem substitui as credenciais.
+- **Configurações e dados:** nove categorias redesenhadas pelo Figma, cards e busca, resumo da coleção, cache/downloads separados e colunas selecionáveis. Backup `.mtbackup` seletivo, importação apenas de playlists, capas opcionais e fontes/IDs. Credenciais/sessões são opcionais e exigem criptografia por senha. Músicas/downloads físicos não entram no backup.
 - **Windows:** bandeja, comportamento ao fechar/minimizar e controles de mídia nativos com capa, metadados, play/pause, navegação e seek.
 
 Editar informações, mesclar entidades ou remover uma ocorrência de playlist **não altera ou apaga suas músicas originais**.
@@ -76,13 +80,13 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 
 - Esta release é para Windows x64; Ubuntu/Linux, Android e macOS não são entregues/validados.
 - Google Drive, WebDAV, Jellyfin, Emby, SMB e envios Last.fm têm implementação/testes controlados, mas ainda precisam de aceites reais mais amplos. Testes não equivalem a certificação por serviço.
-- Sincronização manual/completa; não há política geral automática/incremental. Google usa ID de pasta, sem seletor visual. Não há transcodificação Jellyfin/Emby.
+- Sincronização manual/completa; não há política geral automática/incremental. Google oferece um seletor visual de pastas. Não há transcodificação Jellyfin/Emby.
 - Agrupamentos de artistas/álbuns ainda não são integralmente paginados em SQL. Coleções grandes exigem medição na máquina real.
 - Não há matriz exaustiva de formatos/codecs/dispositivos. Leitura remota MP3/FLAC é mais completa que outros containers.
 - Letras, retratos, biografias e similaridade dependem de terceiros e podem não encontrar o item ou confundir homônimos.
 - Sem regras AND/OR de playlists inteligentes, etiquetas, várias filas nomeadas ou posição independente por álbum/playlist.
 - Sem atualização automática da seleção offline de playlists, downloads por regras, retomada de bytes ou diretório/concorrência gerais configuráveis.
 - Sem timer, ReplayGain, controles de gapless/crossfade, AutoEQ/perfis de fone, saída avançada, início com Windows e sistema completo de atalhos/notificações configuráveis.
-- Backup JSON limitado a 128 MB; não inclui originais, arquivos de áudio gerenciados nem credenciais. Versões antigas podem não aceitar o banco atual.
+- Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
-Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-1.2.1.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.0.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.

@@ -155,7 +155,7 @@ void main() {
         );
         expect(offline.dx, lessThan(source.dx));
         expect(source.dx, lessThan(customize.dx));
-        expect(find.text('Activate Available Offline'), findsOneWidget);
+        expect(find.text('All music'), findsOneWidget);
         if (mode == 'detailed') {
           expect(find.byType(MediaDetailsTable), findsWidgets);
         }

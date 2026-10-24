@@ -455,6 +455,41 @@ class PlayerController extends ChangeNotifier {
     _notify();
   }
 
+  Future<void> removeSourceTracks(Set<String> ids) async {
+    if (opening || extending || playing) {
+      throw StateError('Pause playback before removing this source.');
+    }
+    final remaining = queue.where((t) => !ids.contains(t.id)).toList();
+    final active = current;
+    if (remaining.length == queue.length) return;
+    if (active == null || ids.contains(active.id)) {
+      final title = queueTitle;
+      await clearQueue();
+      if (remaining.isNotEmpty) {
+        await restore(remaining, 0, Duration.zero, title: title);
+      }
+      return;
+    }
+    final before = queue
+        .take(queueIndex)
+        .where((t) => !ids.contains(t.id))
+        .length;
+    final keys = [
+      for (var i = 0; i < queue.length; i++)
+        if (!ids.contains(queue[i].id)) queueKeys[i],
+    ];
+    queue
+      ..clear()
+      ..addAll(remaining);
+    queueKeys
+      ..clear()
+      ..addAll(keys);
+    queueIndex = before;
+    _cycle.reset(queue.length, queueIndex);
+    _previous.clear();
+    _notify();
+  }
+
   Future<void> toggle() async {
     if (current == null || opening) return;
     if (completed) {

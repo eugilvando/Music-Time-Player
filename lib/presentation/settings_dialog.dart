@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'artist_selection_settings.dart';
 import 'storage_settings.dart';
 import 'artwork_storage_settings.dart';
@@ -21,15 +22,15 @@ import 'player_bar_organizer.dart';
 import 'collection_summary.dart';
 
 enum SettingsCategory {
-  general('Geral', Icons.settings_outlined),
-  appearance('Aparência e acessibilidade', Icons.palette_outlined),
+  general('Geral e aparência', Icons.settings_outlined),
   customization('Interface e player', Icons.dashboard_customize_outlined),
   playback('Reprodução e áudio', Icons.graphic_eq),
   library('Biblioteca e metadados', Icons.library_music_outlined),
   onedrive('Fontes de música', Icons.cloud_outlined),
-  downloads('Offline e armazenamento', Icons.storage_outlined),
+  cache('Cache e offline', Icons.storage_outlined),
+  downloads('Downloads', Icons.download),
   lastfm('Integrações', Icons.extension_outlined),
-  data('Backup e manutenção', Icons.backup_outlined);
+  data('Backup e avançado', Icons.backup_outlined);
 
   const SettingsCategory(this.label, this.icon);
   final String label;
@@ -75,6 +76,7 @@ class _SettingsPageState extends State<SettingsPage> {
   SettingsCategory category = SettingsCategory.general;
   String subpage = '', search = '';
   final searchController = TextEditingController();
+  final sectionKeys = <String, GlobalKey>{};
   @override
   void dispose() {
     searchController.dispose();
@@ -82,13 +84,14 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   static const pages = <SettingsCategory, List<String>>{
-    SettingsCategory.general: ['Idioma', 'Janela e bandeja'],
-    SettingsCategory.appearance: [
+    SettingsCategory.general: [
       'Tema e cores',
-      'Tipografia',
+      'Idioma',
+      'Janela e bandeja',
       'Movimento e acessibilidade',
     ],
     SettingsCategory.customization: [
+      'Tipografia',
       'Página inicial',
       'Now Playing',
       'Capas e fundo',
@@ -108,6 +111,12 @@ class _SettingsPageState extends State<SettingsPage> {
       'Mostrar bibliotecas por fonte',
     ],
     SettingsCategory.onedrive: ['Fontes conectadas'],
+    SettingsCategory.cache: [
+      'Visão geral',
+      'Disponibilidade',
+      'Armazenamento e cache',
+      'Limpeza',
+    ],
     SettingsCategory.downloads: [
       'Visão geral',
       'Downloads permanentes',
@@ -117,18 +126,38 @@ class _SettingsPageState extends State<SettingsPage> {
     SettingsCategory.lastfm: ['Last.fm', 'Provedores de letras'],
     SettingsCategory.data: ['Backup e manutenção'],
   };
-  void navigate(SettingsCategory next, [String page = '']) => setState(() {
-    category = next;
-    subpage = page;
-    search = '';
-    searchController.clear();
-  });
+  void navigate(SettingsCategory next, [String page = '']) {
+    setState(() {
+      category = next;
+      subpage = page;
+      search = '';
+      searchController.clear();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final title = switch (page) {
+        'Letras — apresentação' => 'Letras',
+        'Barra do player' => 'Organizar barra de reprodução',
+        _ => page,
+      };
+      final target = sectionKeys[title]?.currentContext;
+      if (target != null && mounted) {
+        Scrollable.ensureVisible(
+          target,
+          duration: const Duration(milliseconds: 200),
+        );
+      }
+    });
+  }
+
   String get activePage =>
       pages[category]!.contains(subpage) ? subpage : pages[category]!.first;
-  Widget pageList(List<Widget> children) => ListView(
+  Widget pageList(List<Widget> children) => SingleChildScrollView(
     key: ValueKey('settings.content.${category.name}.$activePage'),
-    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-    children: children,
+    padding: const EdgeInsets.only(bottom: 24),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: children,
+    ),
   );
   Widget unavailable(String message) => Center(child: UiText(message));
 
@@ -137,16 +166,14 @@ class _SettingsPageState extends State<SettingsPage> {
     String title, {
     String? subtitle,
     bool fallback = true,
-  }) => Card(
-    child: SwitchListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      title: UiText(title),
-      subtitle: subtitle == null ? null : UiText(subtitle),
-      value: widget.settings.visualBool(key, fallback: fallback),
-      onChanged: widget.settings.saving
-          ? null
-          : (value) => widget.settings.updateVisual(key, value),
-    ),
+  }) => SwitchListTile(
+    contentPadding: const EdgeInsets.symmetric(vertical: 4),
+    title: UiText(title),
+    subtitle: subtitle == null ? null : UiText(subtitle),
+    value: widget.settings.visualBool(key, fallback: fallback),
+    onChanged: widget.settings.saving
+        ? null
+        : (value) => widget.settings.updateVisual(key, value),
   );
   Widget choice(
     String key,
@@ -158,6 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: DropdownButtonFormField<String>(
+        style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
         key: ValueKey('$key:$value'),
         initialValue: choices.containsKey(value) ? value : fallback,
@@ -210,13 +238,15 @@ class _SettingsPageState extends State<SettingsPage> {
     ],
   ];
   Widget subsection(String title, List<Widget> children) => Padding(
+    key: sectionKeys.putIfAbsent(title, () => GlobalKey()),
     padding: const EdgeInsets.only(bottom: 20),
     child: Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        color:
+            Theme.of(context).cardTheme.color ??
+            Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -228,7 +258,7 @@ class _SettingsPageState extends State<SettingsPage> {
               style: Theme.of(context).textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             ...children,
           ],
         ),
@@ -237,12 +267,8 @@ class _SettingsPageState extends State<SettingsPage> {
   );
   List<Widget> appearance() => [
     subsection('Tema e cores', [
-      UiText(
-        'Personalize o Music Time',
-        style: Theme.of(context).textTheme.titleLarge,
-      ),
-      const SizedBox(height: 20),
       DropdownButtonFormField<ThemeMode>(
+        style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
         key: ValueKey(widget.settings.mode),
         initialValue: widget.settings.mode,
@@ -266,6 +292,7 @@ class _SettingsPageState extends State<SettingsPage> {
             : 'Acompanha as alterações de cor do Windows.',
       ),
       DropdownButtonFormField<int>(
+        style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
         key: ValueKey(widget.settings.accent),
         initialValue: widget.settings.accent,
@@ -277,7 +304,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.circle, color: Color(entry.key), size: 20),
+                    MtIcon(Icons.circle, color: Color(entry.key), size: 20),
                     const SizedBox(width: 12),
                     UiText(entry.value),
                   ],
@@ -297,13 +324,11 @@ class _SettingsPageState extends State<SettingsPage> {
       if (widget.onCustomizeHome != null)
         TextButton.icon(
           onPressed: widget.onCustomizeHome,
-          icon: const Icon(Icons.home),
+          icon: const MtIcon(Icons.home),
           label: const UiText('Página inicial · personalizar seções'),
         ),
     ]),
-    subsection('Visual da reprodução', [
-      UiText('Now Playing', style: Theme.of(context).textTheme.titleLarge),
-      const SizedBox(height: 12),
+    subsection('Now Playing', [
       Wrap(
         spacing: 12,
         runSpacing: 12,
@@ -353,8 +378,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
         ],
       ),
-    ]),
-    subsection('Capas e fundo', [
       choice('cover_shape', 'Formato da capa', {
         'rounded': 'Arredondada',
         'square': 'Quadrada',
@@ -375,6 +398,8 @@ class _SettingsPageState extends State<SettingsPage> {
             ? null
             : (value) => widget.settings.updateVisual('cover_scale', value),
       ),
+    ]),
+    subsection('Capas e fundo', [
       choice('background', 'Fundo', {
         'solid': 'Sólido',
         'cover': 'Cores da capa',
@@ -426,6 +451,7 @@ class _SettingsPageState extends State<SettingsPage> {
   List<Widget> language() => [
     subsection('Idioma', [
       DropdownButtonFormField<String>(
+        style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
         key: ValueKey(widget.settings.language),
         initialValue: widget.settings.language,
@@ -467,6 +493,39 @@ class _SettingsPageState extends State<SettingsPage> {
         fallback: false,
         subtitle: 'Ao terminar a fila, acrescenta faixas do mesmo gênero da sua biblioteca, sem reproduzir músicas externas.',
       ),
+      DropdownButtonFormField<int>(
+        key: ValueKey(
+          'continuous.${widget.settings.visualNumber('continuous_count', 5)}',
+        ),
+        style: Theme.of(context).textTheme.bodyMedium,
+        initialValue: widget.settings
+            .visualNumber('continuous_count', 5)
+            .round()
+            .clamp(1, 100),
+        decoration: InputDecoration(
+          labelText: ui(context, 'Faixas a adicionar'),
+        ),
+        items: [
+          for (final n in {
+            1,
+            5,
+            10,
+            20,
+            50,
+            100,
+            widget.settings
+                .visualNumber('continuous_count', 5)
+                .round()
+                .clamp(1, 100),
+          }.toList()..sort())
+            DropdownMenuItem(value: n, child: Text('$n')),
+        ],
+        onChanged: (n) {
+          if (n != null) {
+            widget.settings.updateVisual('continuous_count', n.toDouble());
+          }
+        },
+      ),
     ]),
     subsection('Cache e pré-carregamento', [
       visualSwitch(
@@ -475,7 +534,7 @@ class _SettingsPageState extends State<SettingsPage> {
         fallback: true,
       ),
       Text(
-        'Limite: ${widget.settings.visualNumber('cache_gb', 10).round()} GB',
+        '${ui(context, 'Limite')}: ${widget.settings.visualNumber('cache_gb', 10).round()} GB',
       ),
       Slider(
         value: widget.settings.visualNumber('cache_gb', 10).clamp(1, 100),
@@ -598,6 +657,7 @@ class _SettingsPageState extends State<SettingsPage> {
   List<Widget> windows() => [
     subsection('Janela e bandeja', [
       DropdownButtonFormField<bool>(
+        style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
         key: ValueKey('close.${widget.settings.closeToTray}'),
         initialValue: widget.settings.closeToTray,
@@ -618,6 +678,7 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       const SizedBox(height: 24),
       DropdownButtonFormField<bool>(
+        style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
         key: ValueKey('minimize.${widget.settings.minimizeToTray}'),
         initialValue: widget.settings.minimizeToTray,
@@ -653,88 +714,74 @@ class _SettingsPageState extends State<SettingsPage> {
     ]),
   ];
   Widget content() {
-    final page = activePage;
     switch (category) {
       case SettingsCategory.general:
-        return pageList(page == 'Idioma' ? language() : windows());
-      case SettingsCategory.appearance:
         return pageList([
-          if (page == 'Tema e cores') appearance().first,
-          if (page == 'Tipografia') subsection('Tipografia', typography()),
-          if (page == 'Movimento e acessibilidade')
-            subsection(page, [
-              visualSwitch('animations', 'Animações da reprodução'),
-              visualSwitch(
-                'reduce_motion',
-                'Reduzir movimento',
-                fallback: false,
-                subtitle: 'A preferência de acessibilidade do sistema também é respeitada.',
-              ),
-            ]),
-          subsection('Restaurar aparência', [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: OutlinedButton.icon(
-                onPressed: widget.settings.saving
-                    ? null
-                    : widget.settings.resetAppearance,
-                icon: const Icon(Icons.restore),
-                label: const UiText(
-                  'Restaurar apenas aparência e acessibilidade',
-                ),
-              ),
+          appearance().first,
+          ...language(),
+          ...windows(),
+          subsection('Movimento e acessibilidade', [
+            visualSwitch('animations', 'Animações da reprodução'),
+            visualSwitch(
+              'reduce_motion',
+              'Reduzir movimento',
+              fallback: false,
+              subtitle: 'A preferência de acessibilidade do sistema também é respeitada.',
             ),
           ]),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: widget.settings.saving
+                  ? null
+                  : widget.settings.resetGeneral,
+              icon: const MtIcon(Icons.restore),
+              label: const UiText('Restaurar configurações gerais'),
+            ),
+          ),
         ]);
       case SettingsCategory.customization:
         return pageList([
-          if (page == 'Página inicial') appearance()[1],
-          if (page == 'Now Playing') ...[
-            appearance()[2],
-            OutlinedButton.icon(
+          appearance()[3],
+          appearance()[2],
+          subsection('Tipografia', typography()),
+          subsection('Letras', [
+            visualSwitch('lyrics_auto_scroll', 'Rolagem automática das letras'),
+            ...typography(lyrics: true),
+          ]),
+          controls()[3],
+          controls().first,
+          appearance()[1],
+          subsection('Informações e painéis', [
+            visualSwitch('show_queue', 'Mostrar fila lateral'),
+            visualSwitch('additional_info', 'Mostrar álbum nas informações'),
+          ]),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
               onPressed: widget.settings.saving
                   ? null
-                  : widget.settings.resetNowPlaying,
-              icon: const Icon(Icons.restore),
-              label: const UiText('Restaurar Now Playing'),
+                  : widget.settings.resetInterface,
+              icon: const MtIcon(Icons.restore),
+              label: const UiText('Restaurar interface e player'),
             ),
-          ],
-          if (page == 'Capas e fundo') appearance()[3],
-          if (page == 'Informações e painéis')
-            subsection(page, [
-              visualSwitch('show_queue', 'Mostrar fila lateral'),
-              visualSwitch('additional_info', 'Mostrar álbum nas informações'),
-            ]),
-          if (page == 'Barra do player') controls().first,
-          if (page == 'Informações da barra') controls()[3],
-          if (page == 'Letras — apresentação') ...[
-            subsection(
-              'Textos e espaçamento das letras',
-              typography(lyrics: true),
-            ),
-            subsection('Letras', [
-              visualSwitch(
-                'lyrics_auto_scroll',
-                'Rolagem automática das letras',
-              ),
-            ]),
-          ],
+          ),
         ]);
       case SettingsCategory.playback:
         return pageList([
-          if (page == 'Mixes and radios')
-            ArtistSelectionSettings(settings: widget.settings),
-          if (page == 'Play contínuo') controls()[1],
-          if (page == 'Equalizador' && widget.controller != null)
-            controls().last,
+          controls()[1],
+          controls()[2],
+          ArtistSelectionSettings(settings: widget.settings),
+          if (widget.controller != null) controls().last,
         ]);
       case SettingsCategory.library:
         return pageList([
-          if (page == 'Sua coleção') library().last,
-          if (page == 'Agrupamento visual') library()[1],
-          if (page == 'Mostrar bibliotecas por fonte' &&
-              widget.providers != null)
-            library()[2],
+          if (widget.downloads != null)
+            CollectionSummary(store: widget.downloads!.store),
+          const SizedBox(height: 20),
+          if (widget.providers != null) library()[2],
+          library().last,
+          library()[1],
         ]);
       case SettingsCategory.onedrive:
         return widget.providers == null
@@ -747,75 +794,59 @@ class _SettingsPageState extends State<SettingsPage> {
                 localSources: widget.localSources,
                 onImported: widget.onImported ?? () {},
               );
+      case SettingsCategory.cache:
+        return widget.downloads == null
+            ? unavailable('Downloads indisponíveis.')
+            : pageList([
+                DownloadsDialog(
+                  manager: widget.downloads!,
+                  embedded: true,
+                  overviewOnly: true,
+                  shrinkWrap: true,
+                ),
+                library().first,
+                subsection('Armazenamento e cache', [
+                  StorageSettings(
+                    manager: widget.downloads!,
+                    showCleanup: false,
+                  ),
+                ]),
+                subsection('Limpeza de cache', [
+                  StorageSettings(
+                    manager: widget.downloads!,
+                    showOverview: false,
+                  ),
+                ]),
+              ]);
       case SettingsCategory.downloads:
-        if (widget.downloads == null) {
-          return unavailable('Downloads indisponíveis.');
-        }
-        if (page == 'Downloads permanentes') {
-          return DownloadsDialog(
-            key: const ValueKey('offline.permanent'),
-            manager: widget.downloads!,
-            embedded: true,
-            fixedCacheTab: false,
-          );
-        }
-        if (page == 'Cache automático') {
-          return pageList([
-            controls()[2],
-            DownloadsDialog(
-              key: const ValueKey('offline.cache'),
-              manager: widget.downloads!,
-              embedded: true,
-              fixedCacheTab: true,
-              shrinkWrap: true,
-            ),
-          ]);
-        }
+        return widget.downloads == null
+            ? unavailable('Downloads indisponíveis.')
+            : DownloadsDialog(manager: widget.downloads!, embedded: true);
+      case SettingsCategory.lastfm:
         return pageList([
-          if (page == 'Visão geral') ...[
-            library().first,
-            DownloadsDialog(
-              manager: widget.downloads!,
-              embedded: true,
-              overviewOnly: true,
+          if (widget.providers != null)
+            ProviderSettingsPage(
+              providers: widget.providers!,
+              onlyMicrosoft: false,
+              onAddFiles: widget.onAddFiles,
+              onImported: widget.onImported ?? () {},
               shrinkWrap: true,
             ),
-          ],
-          subsection(page, [
-            StorageSettings(
-              key: ValueKey('storage.$page'),
-              manager: widget.downloads!,
-              showCleanup: page == 'Limpeza',
-              showOverview: page == 'Visão geral',
+          subsection('Provedores de letras', [
+            visualSwitch(
+              'online_lyrics',
+              'Online lyrics fallback · LRCLIB',
+              subtitle: 'Looks up the track title, artist, album and duration when your own lyrics are unavailable. Disabled in offline mode.',
             ),
           ]),
         ]);
-      case SettingsCategory.lastfm:
-        if (page == 'Provedores de letras') {
-          return pageList([
-            subsection('Provedores de letras', [
-              visualSwitch(
-                'online_lyrics',
-                'Online lyrics fallback · LRCLIB',
-                subtitle: 'Looks up the track title, artist, album and duration when your own lyrics are unavailable. Disabled in offline mode.',
-              ),
-            ]),
-          ]);
-        }
-        return widget.providers == null
-            ? unavailable('Provedor indisponível.')
-            : ProviderSettingsPage(
-                providers: widget.providers!,
-                onlyMicrosoft: false,
-                onAddFiles: widget.onAddFiles,
-                onImported: widget.onImported ?? () {},
-              );
       case SettingsCategory.data:
         return widget.onBackup == null ||
                 widget.onRestore == null ||
                 widget.onReset == null
             ? unavailable('Gestão de dados indisponível.')
             : DataSettings(
+                storageHasSurface: true,
                 onBackup: widget.onBackup!,
                 onRestore: widget.onRestore!,
                 onReset: widget.onReset!,
@@ -875,10 +906,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 .contains(q))
               Card(
                 child: ListTile(
-                  leading: Icon(entry.key.icon),
+                  leading: MtIcon(entry.key.icon),
                   title: UiText(page),
                   subtitle: UiText(entry.key.label),
-                  trailing: const Icon(Icons.arrow_forward),
+                  trailing: const MtIcon(Icons.arrow_forward),
                   onTap: () => navigate(entry.key, page),
                 ),
               ),
@@ -886,143 +917,126 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  bool searching = false;
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: widget.settings,
     builder: (context, _) => LayoutBuilder(
       builder: (context, constraints) {
         final compact = constraints.maxWidth < 900;
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              width: compact ? 68 : 248,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 16,
-                ),
-                children: [
-                  for (final item in SettingsCategory.values)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Tooltip(
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            compact ? 12 : 24,
+            12,
+            compact ? 12 : 24,
+            0,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: compact ? 48 : 240,
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    for (final item in SettingsCategory.values)
+                      Tooltip(
                         message: ui(context, item.label),
                         child: Material(
                           color: item == category
                               ? Theme.of(context).colorScheme.secondaryContainer
-                              : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(16),
-                          child: compact
-                              ? IconButton(
-                                  key: ValueKey('settings.${item.name}'),
-                                  isSelected: item == category,
-                                  onPressed: () => navigate(item),
-                                  icon: Icon(item.icon),
-                                )
-                              : ListTile(
-                                  key: ValueKey('settings.${item.name}'),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  selected: item == category,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 10,
-                                  ),
-                                  leading: Icon(item.icon),
-                                  title: UiText(
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          child: ListTile(
+                            key: ValueKey('settings.${item.name}'),
+                            minTileHeight: 44,
+                            horizontalTitleGap: 8,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: compact ? 0 : 12,
+                            ),
+                            leading: compact
+                                ? null
+                                : MtIcon(item.icon, size: 20),
+                            title: compact
+                                ? Center(child: MtIcon(item.icon, size: 20))
+                                : UiText(
                                     item.label,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium,
                                   ),
-                                  onTap: () => navigate(item),
-                                ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
-                    child: TextField(
-                      key: const ValueKey('settings.search'),
-                      controller: searchController,
-                      onChanged: (v) => setState(() => search = v),
-                      decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.search),
-                        hintText: ui(context, 'Buscar nas configurações'),
-                        filled: true,
-                        suffixIcon: search.isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: ui(context, 'Limpar'),
-                                icon: const Icon(Icons.close),
-                                onPressed: () => setState(() {
-                                  search = '';
-                                  searchController.clear();
-                                }),
-                              ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (search.isEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 8,
-                      ),
-                      child: UiText(
-                        category.label,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    if (pages[category]!.length > 1)
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          spacing: 8,
-                          children: [
-                            for (final page in pages[category]!)
-                              ChoiceChip(
-                                key: ValueKey('settings.page.$page'),
-                                label: UiText(page),
-                                selected: activePage == page,
-                                onSelected: (_) =>
-                                    setState(() => subpage = page),
-                              ),
-                          ],
+                            selected: item == category,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            onTap: () => navigate(item),
+                          ),
                         ),
                       ),
                   ],
-                  if (widget.settings.saving) const LinearProgressIndicator(),
-                  if (widget.settings.error != null)
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: UiText(widget.settings.error!),
-                    ),
-                  Expanded(child: search.isEmpty ? content() : searchResults()),
-                ],
+                ),
               ),
-            ),
-          ],
+              SizedBox(width: compact ? 12 : 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: UiText(
+                            category.label,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.headlineLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: ui(context, 'Buscar nas configurações'),
+                          icon: const MtIcon(Icons.search),
+                          onPressed: () => setState(() {
+                            searching = !searching;
+                            if (!searching) {
+                              search = '';
+                              searchController.clear();
+                            }
+                          }),
+                        ),
+                      ],
+                    ),
+                    if (searching)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: TextField(
+                          key: const ValueKey('settings.search'),
+                          controller: searchController,
+                          onChanged: (v) => setState(() => search = v),
+                          decoration: InputDecoration(
+                            hintText: ui(context, 'Buscar nas configurações'),
+                            prefixIcon: const MtIcon(Icons.search),
+                            suffixIcon: IconButton(
+                              icon: const MtIcon(Icons.close),
+                              onPressed: () => setState(() {
+                                search = '';
+                                searchController.clear();
+                              }),
+                            ),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 40),
+                    if (widget.settings.saving) const LinearProgressIndicator(),
+                    if (widget.settings.error != null)
+                      UiText(widget.settings.error!),
+                    Expanded(
+                      child: search.isEmpty ? content() : searchResults(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     ),

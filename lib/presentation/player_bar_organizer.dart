@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import '../settings/app_settings.dart';
@@ -27,20 +29,7 @@ class PlayerBarOrganizer extends StatelessWidget {
             'Arraste para ordenar. Ative ou desative cada item; a barra muda imediatamente.',
           ),
           const SizedBox(height: 12),
-          Card(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                spacing: 8,
-                children: [
-                  for (final id in order.where(visible.contains))
-                    Chip(label: UiText(playerBarItems[id]!)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
+
           ReorderableListView.builder(
             key: const ValueKey('player.organizer'),
             shrinkWrap: true,
@@ -53,21 +42,12 @@ class PlayerBarOrganizer extends StatelessWidget {
               return ListTile(
                 key: ValueKey('player.organizer.$id'),
                 contentPadding: EdgeInsets.zero,
-                leading: Switch(
-                  key: ValueKey('player.visibility.$id'),
-                  value: visible.contains(id),
-                  onChanged: (enabled) {
-                    final next = Set<String>.of(visible);
-                    if (enabled) {
-                      next.add(id);
-                    } else {
-                      next.remove(id);
-                    }
-                    settings.updateVisual(
-                      'bar_items',
-                      order.where(next.contains).toList(),
-                    );
-                  },
+                leading: ReorderableDragStartListener(
+                  index: index,
+                  child: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: MtIcon(Icons.drag_handle),
+                  ),
                 ),
                 title: UiText(playerBarItems[id]!),
                 subtitle: UiText(switch (id) {
@@ -106,22 +86,40 @@ class PlayerBarOrganizer extends StatelessWidget {
                             child: const UiText('Mover para a direita'),
                           ),
                       ],
-                      icon: const Icon(Icons.swap_horiz),
+                      icon: const MtIcon(Icons.swap_horiz),
                     ),
-                    ReorderableDragStartListener(
-                      index: index,
-                      child: Tooltip(
-                        message: ui(context, 'Arrastar para ordenar'),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(Icons.drag_handle),
-                        ),
-                      ),
+                    Switch(
+                      key: ValueKey('player.visibility.$id'),
+                      value: visible.contains(id),
+                      onChanged: (enabled) {
+                        final next = Set<String>.of(visible);
+                        if (enabled) {
+                          next.add(id);
+                        } else {
+                          next.remove(id);
+                        }
+                        settings.updateVisual(
+                          'bar_items',
+                          order.where(next.contains).toList(),
+                        );
+                      },
                     ),
                   ],
                 ),
               );
             },
+          ),
+          const SizedBox(height: 16),
+          const UiText('Espaçamento dos ícones'),
+          Slider(
+            key: const ValueKey('player.iconSpacing'),
+            value: settings.visualNumber('bar_icon_spacing', 4).clamp(0, 24),
+            min: 0,
+            max: 24,
+            divisions: 24,
+            label: '${settings.visualNumber('bar_icon_spacing', 4).round()} px',
+            onChanged: (value) =>
+                settings.updateVisual('bar_icon_spacing', value),
           ),
           TextButton.icon(
             onPressed: () async {
@@ -135,8 +133,9 @@ class PlayerBarOrganizer extends StatelessWidget {
                     .where((id) => !id.startsWith('separator'))
                     .toList(),
               );
+              await settings.updateVisual('bar_icon_spacing', 4.0);
             },
-            icon: const Icon(Icons.restore),
+            icon: const MtIcon(Icons.restore),
             label: const UiText('Restaurar barra padrão'),
           ),
         ],

@@ -60,15 +60,13 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Inglês').last);
     await tester.pumpAndSettle();
-    expect(find.text('General'), findsWidgets);
+    expect(find.text('General and appearance'), findsWidgets);
     expect(find.text('Language'), findsWidgets);
     expect(find.text('App language'), findsOneWidget);
     final restored = AppSettings(settings.preferences);
     expect(restored.language, 'en');
     restored.dispose();
-    await tester.tap(
-      find.byKey(const ValueKey('settings.page.Janela e bandeja')),
-    );
+    await tester.ensureVisible(find.text('Window and tray'));
     await tester.pumpAndSettle();
     expect(find.text('Window and tray'), findsWidgets);
     expect(find.text('Keep in tray'), findsOneWidget);
@@ -165,7 +163,7 @@ void main() {
     await tester.tap(find.text('Small').last);
     await tester.pumpAndSettle();
     expect(settings.visualBool('albums_grid'), true);
-    expect(settings.visualNumber('catalog_cover_size', 180), 140);
+    expect(settings.visualNumber('catalog_cover_size', 180), 144);
     await tester.tap(viewButton);
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('view.style.list')));

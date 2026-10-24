@@ -29,10 +29,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   }
   // A second launch restores the existing player instead of opening another DB writer.
   const bool validation = wcsstr(command_line, L"--validation-profile") != nullptr;
-  HANDLE instance_mutex = ::CreateMutexW(nullptr, FALSE, validation ? L"Local\\MusicTime.Validation" : L"Local\\MusicTime.Desktop");
+  const bool preview = wcsstr(command_line, L"--design-preview") != nullptr;
+  HANDLE instance_mutex = ::CreateMutexW(nullptr, FALSE, preview ? L"Local\\MusicTime.DesignReview" : validation ? L"Local\\MusicTime.Validation" : L"Local\\MusicTime.Desktop");
   if (!instance_mutex) return EXIT_FAILURE;
   if (::GetLastError() == ERROR_ALREADY_EXISTS) {
-    HWND existing = ::FindWindowW(L"FLUTTER_RUNNER_WIN32_WINDOW", L"Music Time");
+    const wchar_t* title = preview ? L"Music Time - Design Review (temporary)" : validation ? L"Music Time (Validacao)" : L"Music Time";
+    HWND existing = ::FindWindowW(L"FLUTTER_RUNNER_WIN32_WINDOW", title);
     if (existing) {
       ::ShowWindow(existing, SW_RESTORE);
       ::SetForegroundWindow(existing);
@@ -54,7 +56,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(validation ? L"Music Time (Validacao)" : L"Music Time", origin, size)) {
+  if (!window.Create(preview ? L"Music Time - Design Review (temporary)" : validation ? L"Music Time (Validacao)" : L"Music Time", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

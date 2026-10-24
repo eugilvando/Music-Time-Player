@@ -1,4 +1,5 @@
-import 'player_bar.dart' show playerBarHeight;
+import 'design_icon.dart';
+import 'design_tokens.dart';
 import 'media_card_size.dart';
 import 'ui_language.dart';
 
@@ -17,12 +18,14 @@ class AppShell extends StatefulWidget {
     required this.store,
     this.nativeIntegration = false,
     this.validation = false,
+    this.designPreview = false,
     this.smokeAudio,
     this.startupNotice,
   });
   final AppSettings settings;
   final LibraryStore store;
   final bool nativeIntegration, validation;
+  final bool designPreview;
   final String? smokeAudio, startupNotice;
   @override
   State<AppShell> createState() => _AppShellState();
@@ -61,14 +64,14 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget brand(bool compact) => SizedBox(
-    height: 84,
+    height: MtDesign.topbar,
     child: InkWell(
       key: const ValueKey('navigation.brand'),
       onTap: goHome,
       child: Padding(
         padding: compact
-            ? const EdgeInsets.symmetric(vertical: 16)
-            : const EdgeInsets.fromLTRB(20, 16, 16, 16),
+            ? const EdgeInsets.symmetric(vertical: 12)
+            : const EdgeInsets.fromLTRB(16, 12, 12, 12),
         child: compact
             ? SvgPicture.asset(
                 'assets/branding/icon.svg',
@@ -81,8 +84,8 @@ class _AppShellState extends State<AppShell> {
                   Theme.of(context).brightness == Brightness.dark
                       ? 'assets/branding/logo-on_dark.svg'
                       : 'assets/branding/logo-on_light.svg',
-                  height: 39.1,
-                  width: 166.6,
+                  height: 32,
+                  width: 150,
                   semanticsLabel: 'Music Time',
                 ),
               ),
@@ -98,29 +101,31 @@ class _AppShellState extends State<AppShell> {
         Expanded(
           child: ListView(
             key: const ValueKey('navigation.sidebar'),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             children: [
               for (final section in AppSection.values.where(
                 (s) => s != AppSection.settings && s != AppSection.downloads,
               ))
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 7 : 16,
+                    vertical: 4,
                   ),
                   child: Tooltip(
                     message: ui(context, section.label),
                     child: ListTile(
+                      minTileHeight: 44,
                       key: ValueKey('navigation.${section.name}'),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       selected: selected == section,
                       selectedTileColor: Theme.of(context)
                           .colorScheme
                           .secondaryContainer,
-                      leading: compact ? null : Icon(section.icon),
+                      leading: compact ? null : MtIcon(section.icon, size: 20),
                       title: compact
-                          ? Center(child: Icon(section.icon))
+                          ? Center(child: MtIcon(section.icon, size: 20))
                           : UiText(
                               section.label,
                               style: TextStyle(
@@ -128,9 +133,14 @@ class _AppShellState extends State<AppShell> {
                                   'font_navigation',
                                   14,
                                 ),
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
                               ),
                             ),
-                      contentPadding: compact ? EdgeInsets.zero : null,
+                      horizontalTitleGap: 8,
+                      contentPadding: compact
+                          ? EdgeInsets.zero
+                          : const EdgeInsets.symmetric(horizontal: 12),
                       onTap: () {
                         setState(() {
                           selected = section;
@@ -146,22 +156,32 @@ class _AppShellState extends State<AppShell> {
         ),
         SizedBox(
           key: const ValueKey("navigation.settings.footer"),
-          height: playerBarHeight(context, widget.settings),
+          height: 52,
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(color: Theme.of(context).dividerColor),
               ),
             ),
-            child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
               child: Tooltip(
                 message: ui(context, 'Configurações'),
                 child: ListTile(
                   key: const ValueKey('navigation.settings'),
-                  leading: compact ? null : const Icon(Icons.settings),
-                  contentPadding: compact ? EdgeInsets.zero : null,
+                  minTileHeight: 44,
+                  horizontalTitleGap: 12,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  leading: compact
+                      ? null
+                      : const MtIcon(Icons.settings, size: 20),
+                  contentPadding: compact
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.symmetric(horizontal: 16),
                   title: compact
-                      ? const Center(child: Icon(Icons.settings))
+                      ? const Center(child: MtIcon(Icons.settings, size: 20))
                       : const UiText('Configurações'),
                   selected: selected == AppSection.settings,
                   onTap: () {
@@ -198,12 +218,6 @@ class _AppShellState extends State<AppShell> {
               Expanded(
                 child: Row(
                   children: [
-                    if (desktop)
-                      SizedBox(
-                        width: collapsed ? 72 : 232,
-                        child: sidebar(drawer: false, compact: collapsed),
-                      ),
-                    if (desktop) const VerticalDivider(width: 1),
                     Expanded(
                       child: MediaCardSizeScope.wrap(
                         widget.settings,
@@ -228,6 +242,34 @@ class _AppShellState extends State<AppShell> {
                           store: widget.store,
                           nativeIntegration: widget.nativeIntegration,
                           validation: widget.validation,
+                          designPreview: widget.designPreview,
+                          sidebar: desktop
+                              ? SizedBox(
+                                  width: collapsed
+                                      ? MtDesign.sidebarCollapsed
+                                      : MtDesign.sidebar,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surface
+                                          .withValues(alpha: .90),
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: Theme.of(context).dividerColor,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: sidebar(
+                                        drawer: false,
+                                        compact: collapsed,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : null,
                           smokeAudio: widget.smokeAudio,
                         ),
                       ),

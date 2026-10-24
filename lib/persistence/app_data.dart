@@ -140,6 +140,10 @@ class AppData {
       value is List && value.every((v) => v is String);
 
   static bool validPreferenceType(String key, Object? value) {
+    if (key.startsWith('visual.details_columns_')) {
+      return value is List &&
+          value.every((v) => v is String && int.tryParse(v) != null);
+    }
     if (key == 'visual.bar_item_order' || key == 'visual.bar_items') {
       return validPlayerBarItems(value);
     }
@@ -171,6 +175,7 @@ class AppData {
       return value is double && value >= 10 && value <= 40;
     }
     const ranges = {
+      'bar_icon_spacing': (0.0, 24.0),
       'lyrics_spacing': (1.0, 2.0),
       'cover_scale': (.7, 1.8),
       'background_intensity': (.05, .45),
@@ -180,7 +185,8 @@ class AppData {
       'artist_radio_size': (1.0, 500.0),
       'cache_gb': (1.0, 100.0),
       'prefetch_count': (0.0, 20.0),
-      'catalog_cover_size': (100.0, 360.0),
+      'continuous_count': (1.0, 100.0),
+      'catalog_cover_size': (96.0, 360.0),
     };
     if (ranges.containsKey(name)) {
       final range = ranges[name]!;
@@ -205,6 +211,8 @@ class AppData {
       'merge_albums',
       'sidebar_collapsed',
       'artist_photos',
+      'artist_biographies',
+      'online_lyrics',
       'catalog_dense',
       'songs_descending',
       'playlists_descending',
@@ -218,7 +226,11 @@ class AppData {
       'show_times',
       'lyrics_auto_scroll',
     };
-    if (flags.contains(name) || name.endsWith('_grid')) return value is bool;
+    if (flags.contains(name) ||
+        name.endsWith('_grid') ||
+        name.endsWith('_controls_expanded')) {
+      return value is bool;
+    }
     return value is String;
   }
 

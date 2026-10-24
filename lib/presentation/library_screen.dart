@@ -1,3 +1,9 @@
+import 'design_icon.dart';
+import 'backup_options.dart';
+import '../persistence/backup_archive.dart';
+import 'design_tokens.dart';
+import '../lyrics/lyrics_view.dart';
+import 'now_playing_artwork.dart';
 import 'exit_confirmation.dart';
 import '../library/catalog.dart' show CatalogGroup;
 import 'global_library_search.dart';
@@ -21,12 +27,9 @@ import 'catalog_browser.dart';
 import 'catalog_search_field.dart';
 import 'home_page.dart';
 import 'window_controls.dart';
-import 'data_settings.dart';
 import 'cover_scope.dart';
 import '../persistence/app_data.dart';
 import '../sources/microsoft_auth.dart';
-
-import 'dart:convert';
 
 import 'package:path/path.dart' as path;
 
@@ -76,12 +79,16 @@ class LibraryScreen extends StatefulWidget {
     required this.store,
     this.nativeIntegration = false,
     this.validation = false,
+    this.designPreview = false,
+    this.sidebar,
     this.smokeAudio,
     this.navigationReset = 0,
   });
   final AppSettings settings;
   final LibraryStore store;
   final bool nativeIntegration, validation;
+  final bool designPreview;
+  final Widget? sidebar;
   final int navigationReset;
   final String? smokeAudio;
   final AppSection section;
@@ -123,6 +130,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   String cacheSignature = '';
   String playbackConfiguration = '';
   bool shutdownRequested = false;
+  bool importingBackup = false;
   late final playbackSaves = PlaybackSaveCoordinator(_writePlayback);
   Timer? saveTimer;
   final catalogKey = GlobalKey<CatalogBrowserState>();
@@ -139,14 +147,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
     providers = ProviderConnections(
       widget.settings.preferences,
       widget.store,
-      vault: widget.validation
+      vault: widget.designPreview
+          ? const SystemVault(prefix: 'music_time.design_review.')
+          : widget.validation
           ? const SystemVault(prefix: 'music_time.validation.')
           : const SystemVault(),
     );
     mediaCache = MediaCache(
       widget.store,
       providers,
-      directory: widget.validation
+      directory: (widget.validation || widget.designPreview)
           ? () => Future.value(
               Directory(
                 path.join(
@@ -157,7 +167,26 @@ class _LibraryScreenState extends State<LibraryScreen> {
             )
           : null,
     );
-    downloads = DownloadManager(widget.store, providers, cache: mediaCache);
+    downloads = DownloadManager(
+      widget.store,
+      providers,
+      cache: mediaCache,
+      directory: widget.designPreview
+          ? () async => Directory(
+              path.join(path.dirname(widget.store.database.path), 'offline'),
+            )
+          : null,
+    );
+    widget.store.beforeSourceRemoval = (ids) async {
+      if (ids.any((id) => controller.queue.any((t) => t.id == id))) {
+        if (controller.opening || controller.playing) {
+          throw StateError('Pause playback before removing this source.');
+        }
+        await controller.removeSourceTracks(ids.toSet());
+        await playbackSaves.flush();
+      }
+      await downloads.removeSourceTracks(ids);
+    };
     downloads.addListener(scheduleAvailability);
     mediaCache.addListener(scheduleAvailability);
     widget.settings.addListener(configurePlayback);
@@ -226,6 +255,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       widget.settings.visualNumber('cache_gb', 10),
       widget.settings.visualNumber('prefetch_count', 5),
       widget.settings.visualBool('smart_play', fallback: false),
+      widget.settings.visualNumber('continuous_count', 5),
     ].join('|');
     if (configuration == playbackConfiguration) return;
     playbackConfiguration = configuration;
@@ -251,6 +281,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
               recent,
               offlineOnly: offline,
               offline: available,
+              count: widget.settings
+                  .visualNumber('continuous_count', 5)
+                  .round()
+                  .clamp(1, 100),
             );
           }
         : null;
@@ -312,12 +346,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
     });
   }
 
-  Future<void> load() async {
+  Future<void> load({bool registerSources = true}) async {
     try {
       coverCache.clear();
       catalogRevision++;
-      for (final source in providers.microsoftSources) {
-        await source.registerMicrosoftFolder();
+      if (registerSources) {
+        for (final source in providers.microsoftSources) {
+          await source.registerMicrosoftFolder();
+        }
       }
       final values = await widget.store.loadTracks(includeCovers: false);
       final favoriteIds = await widget.store.favoriteIds();
@@ -375,7 +411,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   Future<void> save() async {
-    if (shutdownRequested) return;
+    if (shutdownRequested || importingBackup) return;
     try {
       await playbackSaves.save();
     } catch (_) {
@@ -384,6 +420,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   Future<void> _writePlayback() async {
+    if (importingBackup) return;
     if (loading || controller.opening) {
       if (shutdownRequested) throw StateError('Playback is still opening');
       return;
@@ -477,26 +514,32 @@ class _LibraryScreenState extends State<LibraryScreen> {
       throw StateError('Operação em andamento');
     }
     await save();
-    final content = await AppData.backup(
-      widget.store,
-      widget.settings.preferences,
-    );
+    if (!mounted) return;
+    final options = await showBackupOptions(context);
+    if (options == null) return;
     final location = await getSaveLocation(
-      suggestedName: 'MusicTime-backup.json',
+      suggestedName: 'MusicTime-backup.mtbackup',
       acceptedTypeGroups: [
-        const XTypeGroup(label: 'Backup Music Time', extensions: ['json']),
+        const XTypeGroup(label: 'Backup Music Time', extensions: ['mtbackup']),
       ],
     );
     if (location == null) return;
+    final content = await BackupArchive.create(
+      widget.store,
+      widget.settings.preferences,
+      providers.vault,
+      options.sections,
+      password: options.password,
+    );
     await XFile.fromData(
-      utf8.encode(content),
-      mimeType: 'application/json',
+      content,
+      mimeType: 'application/octet-stream',
     ).saveTo(location.path);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: UiText(
-            'Backup exportado sem credenciais ou arquivos musicais.',
+            'Backup exportado. Guarde o arquivo e a senha em um local seguro.',
           ),
         ),
       );
@@ -506,26 +549,75 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Future<void> restoreBackup() async {
     final file = await openFile(
       acceptedTypeGroups: [
-        const XTypeGroup(label: 'Backup Music Time', extensions: ['json']),
+        const XTypeGroup(
+          label: 'Backup Music Time',
+          extensions: ['json', 'mtbackup'],
+        ),
       ],
     );
     if (file == null || !mounted) return;
     if (await file.length() > AppData.maxBytes) {
       throw const FormatException('Backup maior que 128 MB.');
     }
-    final content = await file.readAsString();
-    final document = AppData.parse(content);
+    final bytes = await file.readAsBytes();
+    String? password;
+    if (BackupArchive.encrypted(bytes)) {
+      if (!mounted) return;
+      final options = await showBackupOptions(context, passwordOnly: true);
+      if (options == null) return;
+      password = options.password;
+    }
+    final archive = await BackupArchive.read(bytes, password: password);
     if (!mounted) return;
-    if (await confirmDataChange(
+    final options = await showBackupOptions(
       context,
-      reset: false,
-      summary: uiFormat(
-        context,
-        '${(document['tables']['tracks'] as List).length} músicas e ${(document['tables']['playlists'] as List).length} playlists no backup.',
-        '${(document['tables']['tracks'] as List).length} tracks and ${(document['tables']['playlists'] as List).length} playlists in this backup.',
-      ),
-    )) {
-      await restartForMaintenance(backup: content);
+      available: (archive['sections'] as List).cast<String>().toSet(),
+    );
+    if (options == null) return;
+    if (loading ||
+        controller.opening ||
+        providers.busy ||
+        downloads.running ||
+        widget.store.artwork.running ||
+        widget.settings.saving) {
+      throw StateError('Aguarde as operações em andamento.');
+    }
+    await save();
+    importingBackup = true;
+    int missing;
+    try {
+      if (options.sections.contains('queue')) {
+        await controller.player.pause();
+      }
+      missing = await BackupArchive.restore(
+        widget.store,
+        widget.settings.preferences,
+        providers.vault,
+        archive,
+        options.sections,
+      );
+      widget.settings.refreshFromPreferences();
+      favorites = await widget.store.favoriteIds();
+      await reloadCatalog();
+      if (options.sections.contains('queue')) {
+        await load(registerSources: false);
+      }
+    } finally {
+      importingBackup = false;
+    }
+    await save();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            uiFormat(
+              context,
+              'Dados importados. $missing referências aguardam revisão. Se importou fontes ou credenciais, reinicie o app antes de conectar.',
+              'Data imported. $missing references need review. If you imported sources or credentials, restart the app before connecting.',
+            ),
+          ),
+        ),
+      );
     }
   }
 
@@ -756,6 +848,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           final id = await showDialog<int>(
             context: context,
             builder: (context) => SimpleDialog(
+              insetPadding: const EdgeInsets.all(24),
+              titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               title: const UiText('Adicionar à playlist'),
               children: [
                 if (lists.isEmpty)
@@ -789,6 +884,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       context: context,
       builder: (context) => SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -805,7 +901,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 'details': 'Detalhes da faixa',
               }.entries)
                 ListTile(
-                  title: Text(entry.value),
+                  title: UiText(entry.value),
                   onTap: () {
                     Navigator.pop(context);
                     performTrackAction(track, entry.key);
@@ -826,6 +922,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: Text(track.title),
         content: SingleChildScrollView(
           child: Column(
@@ -837,7 +937,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   track.cover!,
                   height: 160,
                   errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.album, size: 80),
+                      const MtIcon(Icons.album, size: 80),
                 ),
               Text('${ui(context, 'Artista')}: ${track.artist}'),
               Text(
@@ -899,6 +999,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: Text(title),
         content: SizedBox(
           width: 520,
@@ -965,6 +1069,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   void showQueue() {
+    setState(() => lyricsOpen = false);
     final box =
         queueScaffoldKey.currentContext?.findRenderObject() as RenderBox?;
     if (box != null && box.size.width >= 900) {
@@ -977,6 +1082,49 @@ class _LibraryScreenState extends State<LibraryScreen> {
     }
   }
 
+  Widget sidePanel({bool drawer = false}) => lyricsActive
+      ? Material(
+          key: const ValueKey('lyrics.side-panel'),
+          color: Theme.of(context).colorScheme.surface,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 16, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        controller.current?.title ?? ui(context, 'Letras'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: ui(context, 'Fechar'),
+                      icon: const MtIcon(Icons.close),
+                      onPressed: () {
+                        setState(() => lyricsOpen = false);
+                        if (drawer) {
+                          queueScaffoldKey.currentState?.closeEndDrawer();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: LyricsView(
+                  controller: controller,
+                  settings: widget.settings,
+                  loader: libraryLyrics.load,
+                ),
+              ),
+            ],
+          ),
+        )
+      : queueSidebar(drawer: drawer);
+
   Widget queueSidebar({bool drawer = false}) => Material(
     key: const ValueKey("queue.surface"),
     color: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -984,7 +1132,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 4, 8),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
               children: [
                 Expanded(
@@ -992,9 +1140,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const UiText(
+                      UiText(
                         'Fila de reprodução',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       if (controller.queueTitle != null)
                         Text(
@@ -1009,7 +1157,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ),
                 IconButton(
                   tooltip: ui(context, 'Fechar fila'),
-                  icon: const Icon(Icons.close),
+                  icon: const MtIcon(Icons.close),
                   onPressed: () {
                     if (drawer) {
                       queueScaffoldKey.currentState?.closeEndDrawer();
@@ -1038,14 +1186,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       save();
                     },
                     itemBuilder: (context, index) => ListTile(
+                      dense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                      ),
+                      leading: SizedBox.square(
+                        dimension: 32,
+                        child: TrackCover(track: controller.queue[index]),
+                      ),
                       key: ValueKey(controller.queueKeys[index]),
                       title: Text(
                         controller.queue[index].title,
+                        style: Theme.of(context).textTheme.titleSmall,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Text(
                         controller.queue[index].artist,
+                        style: Theme.of(context).textTheme.bodySmall,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1082,6 +1240,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   );
   @override
   void dispose() {
+    widget.store.beforeSourceRemoval = null;
     availabilityTimer?.cancel();
     saveTimer?.cancel();
     if (!shutdownRequested) unawaited(save());
@@ -1376,6 +1535,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           final id = await showDialog<int>(
             context: context,
             builder: (context) => SimpleDialog(
+              insetPadding: const EdgeInsets.all(24),
+              titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               title: const UiText('Adicionar seleção à playlist'),
               children: [
                 SimpleDialogOption(
@@ -1415,6 +1577,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final name = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         title: const UiText('Salvar seleção como playlist manual'),
         content: TextField(
           controller: input,
@@ -1447,7 +1613,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   Widget cover(Track track, {bool artist = false}) => track.cover == null
-      ? Icon(artist ? Icons.person : Icons.album, size: 40)
+      ? MtIcon(artist ? Icons.person : Icons.album, size: 40)
       : ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: Image.memory(
@@ -1455,7 +1621,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
             width: 48,
             height: 48,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const Icon(Icons.album, size: 40),
+            errorBuilder: (_, __, ___) => const MtIcon(Icons.album, size: 40),
           ),
         );
 
@@ -1475,6 +1641,68 @@ class _LibraryScreenState extends State<LibraryScreen> {
     onOffline: (selection, values) => downloads.select(selection, values),
     onTrackDetails: showTrackDetails,
     trackActions: trackActions,
+  );
+
+  Widget reviewPlayerBar() => PlayerBar(
+    availability: TrackAvailabilityButton(
+      track: controller.current,
+      downloads: downloads,
+    ),
+    lyricsActive: lyricsActive,
+    lastfmActive:
+        providers.lastfmConnected &&
+        ((widget.settings.preferences.getBool('lastfm.scrobbling') ?? false) ||
+            (widget.settings.preferences.getBool('lastfm.now_playing') ??
+                false)) &&
+        !downloads.offlineOnly,
+    lastfmStatus: providers.lastfmStatusLoading
+        ? 'Restaurando conexão Last.fm…'
+        : providers.lastfmStatusError
+        ? 'Não foi possível ler a sessão Last.fm no cofre'
+        : !providers.lastfmConnected
+        ? 'Last.fm não conectado'
+        : downloads.offlineOnly
+        ? 'Last.fm conectado • modo offline'
+        : ((widget.settings.preferences.getBool('lastfm.scrobbling') ??
+                  false) ||
+              (widget.settings.preferences.getBool('lastfm.now_playing') ??
+                  false))
+        ? 'Last.fm conectado • envios ativados'
+        : 'Last.fm conectado • envios desativados',
+    onArtist: () => controller.current == null
+        ? null
+        : openCollection(controller.current!, false),
+    onAlbum: () => controller.current == null
+        ? null
+        : openCollection(controller.current!, true),
+    controller: controller,
+    settings: widget.settings,
+    favorite: favorites.contains(controller.current?.id),
+    onFavorite: () {
+      if (controller.current != null) {
+        favorite(controller.current!);
+      }
+    },
+    onDetails: () {
+      if (controller.current != null) {
+        showCurrentActions();
+      }
+    },
+    onLyrics: () {
+      final enabled = !lyricsActive;
+      setState(() => lyricsOpen = enabled);
+      if (enabled) {
+        widget.settings.updateVisual('show_queue', false);
+        final box =
+            queueScaffoldKey.currentContext?.findRenderObject() as RenderBox?;
+        if (box != null && box.size.width < 900) {
+          queueScaffoldKey.currentState?.openEndDrawer();
+        }
+      }
+    },
+    onQueue: showQueue,
+    onExpand: () => widget.onNavigate(AppSection.nowPlaying),
+    onSave: save,
   );
 
   bool get sharedBackdrop =>
@@ -1525,394 +1753,469 @@ class _LibraryScreenState extends State<LibraryScreen> {
       child: CatalogCoverScope(
         cache: coverCache,
         revision: catalogRevision,
-        child: Scaffold(
-          key: queueScaffoldKey,
-          extendBodyBehindAppBar: sharedBackdrop,
-          endDrawer: Drawer(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 84, 16, 16),
-              child: Card(
-                elevation: 12,
-                clipBehavior: Clip.antiAlias,
-                child: queueSidebar(drawer: true),
-              ),
-            ),
-          ),
-          appBar: AppBar(
-            backgroundColor: sharedBackdrop ? Colors.transparent : null,
-            surfaceTintColor: sharedBackdrop ? Colors.transparent : null,
-            flexibleSpace: widget.nativeIntegration
-                ? const DragToMoveArea(child: SizedBox.expand())
-                : null,
-            actions: [if (widget.nativeIntegration) const WindowControls()],
-            toolbarHeight: 84,
-            centerTitle: true,
-            title: ConstrainedBox(
-              key: const ValueKey('search.global.container'),
-              constraints: const BoxConstraints(maxWidth: 760),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+        child: playbackSurface(
+          Column(
+            children: [
+              Expanded(
                 child: Row(
-                  children: [
-                    Expanded(child: searchField()),
-                    if ({
-                      AppSection.home,
-                      AppSection.library,
-                      AppSection.artists,
-                      AppSection.albums,
-                      AppSection.favorites,
-                    }.contains(widget.section))
-                      IconButton(
-                        tooltip: ui(context, 'Filtros da página'),
-                        icon: const Icon(Icons.filter_alt),
-                        onPressed: () => catalogKey.currentState?.editFilters(),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            leading: widget.onMenu == null
-                ? null
-                : IconButton(
-                    tooltip: ui(context, widget.menuTooltip),
-                    icon: const Icon(Icons.menu),
-                    onPressed: widget.onMenu,
-                  ),
-          ),
-          body: playbackSurface(
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.zero,
-                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (widget.sidebar != null) widget.sidebar!,
                     Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) => Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  if (!{
-                                    AppSection.home,
-                                    AppSection.library,
-                                    AppSection.favorites,
-                                    AppSection.artists,
-                                    AppSection.albums,
-                                    AppSection.settings,
-                                    AppSection.nowPlaying,
-                                    AppSection.playlists,
-                                  }.contains(widget.section))
-                                    Padding(
-                                      key: const ValueKey('page.heading'),
-                                      padding: const EdgeInsets.fromLTRB(
-                                        24,
-                                        12,
-                                        24,
-                                        64,
-                                      ),
-                                      child: UiText(
-                                        widget.section.label,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
-                                    ),
-                                  Expanded(
-                                    child:
-                                        globalSearch && query.trim().isNotEmpty
-                                        ? GlobalLibrarySearch(
-                                            tracks: downloads.offlineOnly
-                                                ? tracks
-                                                      .where(
-                                                        (t) => catalogMemory
-                                                            .offline
-                                                            .contains(t.id),
-                                                      )
-                                                      .toList()
-                                                : tracks,
-                                            query: query,
-                                            store: widget.store,
-                                            revision: catalogRevision,
-                                            onOpen: openSearchResult,
-                                            onPlaylist: (id) {
-                                              setState(() {
-                                                query = '';
-                                                selectedPlaylist = id;
-                                              });
-                                              widget.onNavigate(
-                                                AppSection.playlists,
-                                              );
-                                            },
-                                          )
-                                        : switch (widget.section) {
-                                            AppSection.home ||
-                                            AppSection.library ||
-                                            AppSection.favorites =>
-                                              libraryPage(),
-                                            AppSection.artists => libraryPage(
-                                              category: 'albumArtists',
-                                            ),
-                                            AppSection.albums => libraryPage(
-                                              category: 'albums',
-                                            ),
-                                            AppSection.nowPlaying => NowPlayingPage(
-                                              loadLyrics: libraryLyrics.load,
-                                              showLyrics: lyricsOpen,
-                                              onArtist: () =>
-                                                  controller.current == null
-                                                  ? null
-                                                  : openCollection(
-                                                      controller.current!,
-                                                      false,
-                                                    ),
-                                              onAlbum: () =>
-                                                  controller.current == null
-                                                  ? null
-                                                  : openCollection(
-                                                      controller.current!,
-                                                      true,
-                                                    ),
-                                              controller: controller,
-                                              settings: widget.settings,
-                                              favorite: favorites.contains(
-                                                controller.current?.id,
-                                              ),
-                                              onFavorite: () {
-                                                if (controller.current !=
-                                                    null) {
-                                                  favorite(controller.current!);
-                                                }
-                                              },
-                                              onDetails: () {
-                                                if (controller.current !=
-                                                    null) {
-                                                  showCurrentActions();
-                                                }
-                                              },
-                                              onFullscreen:
-                                                  widget.nativeIntegration
-                                                  ? () async {
-                                                      await windowManager
-                                                          .setFullScreen(
-                                                            !await windowManager
-                                                                .isFullScreen(),
-                                                          );
-                                                    }
-                                                  : null,
-                                            ),
-                                            AppSection.playlists => PlaylistsPage(
-                                              key: ValueKey(
-                                                'playlists.root.${widget.navigationReset}',
-                                              ),
-                                              onChanged: markCatalogDirty,
-                                              initialPlaylist: selectedPlaylist,
-                                              query: query,
-                                              store: widget.store,
-                                              settings: widget.settings,
-                                              trackActions: trackActions,
-                                              tracks: List.of(tracks),
-                                              onPlay: play,
-                                              onPlayNamed: playNamed,
-                                              onOffline: (selection, values) =>
-                                                  downloads.select(
-                                                    selection,
-                                                    values,
-                                                  ),
-                                              onShuffle: (values) =>
-                                                  catalogAction(
-                                                    'shuffle',
-                                                    values,
-                                                  ),
-                                              onQueue: (values) =>
-                                                  catalogAction(
-                                                    'queue',
-                                                    values,
-                                                  ),
-                                            ),
-                                            AppSection.history => HistoryPage(
-                                              store: widget.store,
-                                              onPlay: play,
-                                              trackActions: trackActions,
-                                            ),
-                                            AppSection.downloads =>
-                                              DownloadsDialog(
-                                                manager: downloads,
-                                                embedded: true,
-                                              ),
-                                            AppSection.settings => SettingsPage(
-                                              key: ValueKey(
-                                                'settings.root.${widget.navigationReset}',
-                                              ),
-                                              settings: widget.settings,
-                                              canOptimizeArtwork: () =>
-                                                  !loading &&
-                                                  !shutdownRequested &&
-                                                  !localSync.running,
-                                              onCustomizeHome: () {
-                                                widget.onNavigate(
-                                                  AppSection.home,
-                                                );
-                                                WidgetsBinding.instance
-                                                    .addPostFrameCallback((_) {
-                                                      if (mounted) {
-                                                        customizeHome(
-                                                          context,
-                                                          widget.settings,
-                                                        );
-                                                      }
-                                                    });
-                                              },
-                                              localSources: LocalSourcesPanel(
-                                                sync: localSync,
-                                                store: widget.store,
-                                                onAddFiles: addFiles,
-                                                onAddFolder: addFolder,
-                                                onSync: syncLocalSource,
-                                                onChanged: reloadCatalog,
-                                              ),
-                                              trackCount: tracks.length,
-                                              onAddFiles: addFiles,
-                                              onAddFolder: addFolder,
-                                              providers: providers,
-                                              onImported: reloadCatalog,
-                                              previewTrack: controller.current,
-                                              downloads: downloads,
-                                              controller: controller,
-                                              onBackup: exportBackup,
-                                              onRestore: restoreBackup,
-                                              onReset: () =>
-                                                  restartForMaintenance(),
-                                            ),
-                                          },
-                                  ),
-                                ],
-                              ),
+                      child: Scaffold(
+                        backgroundColor: Colors.transparent,
+                        key: queueScaffoldKey,
+                        extendBodyBehindAppBar: false,
+                        endDrawer: Drawer(
+                          backgroundColor: Colors.transparent,
+                          elevation: 0,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 84, 16, 16),
+                            child: Card(
+                              elevation: 12,
+                              clipBehavior: Clip.antiAlias,
+                              child: sidePanel(drawer: true),
                             ),
-                            if (constraints.maxWidth >= 900 &&
-                                widget.settings.visualBool('show_queue')) ...[
-                              SizedBox(
-                                width: 340,
-                                child: Padding(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    16,
-                                    24,
-                                    16,
-                                  ),
-                                  child: Card(
-                                    key: const ValueKey("queue.floating"),
-                                    elevation: 12,
-                                    clipBehavior: Clip.antiAlias,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: queueSidebar(),
+                          ),
+                        ),
+                        appBar: AppBar(
+                          backgroundColor: sharedBackdrop
+                              ? Colors.transparent
+                              : null,
+                          surfaceTintColor: sharedBackdrop
+                              ? Colors.transparent
+                              : null,
+                          flexibleSpace:
+                              (widget.nativeIntegration || widget.designPreview)
+                              ? const DragToMoveArea(child: SizedBox.expand())
+                              : null,
+                          actions: [
+                            if (widget.designPreview)
+                              Tooltip(
+                                message: ui(
+                                  context,
+                                  'Perfil temporário com coleção de demonstração',
+                                ),
+                                child: Chip(
+                                  label: UiText(
+                                    'Prévia de design',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall,
                                   ),
                                 ),
                               ),
-                            ],
+                            if (widget.nativeIntegration ||
+                                widget.designPreview)
+                              const WindowControls(),
                           ],
+                          toolbarHeight: MtDesign.topbar,
+                          centerTitle: true,
+                          title: ConstrainedBox(
+                            key: const ValueKey('search.global.container'),
+                            constraints: const BoxConstraints(maxWidth: 640),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(child: searchField()),
+                                  if ({
+                                    AppSection.home,
+                                    AppSection.library,
+                                    AppSection.artists,
+                                    AppSection.albums,
+                                    AppSection.favorites,
+                                  }.contains(widget.section))
+                                    IconButton(
+                                      tooltip: ui(context, 'Filtros da página'),
+                                      icon: const MtIcon(Icons.filter_alt),
+                                      onPressed: () => catalogKey.currentState
+                                          ?.editFilters(),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          leading: widget.onMenu == null
+                              ? null
+                              : IconButton(
+                                  tooltip: ui(context, widget.menuTooltip),
+                                  icon: const MtIcon(Icons.menu),
+                                  onPressed: widget.onMenu,
+                                ),
                         ),
-                      ),
-                    ),
-                    if (storageError != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: UiText(
-                          storageError!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                        body: SafeArea(
+                          child: Padding(
+                            padding: EdgeInsets.zero,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) => Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              if (!{
+                                                AppSection.home,
+                                                AppSection.library,
+                                                AppSection.favorites,
+                                                AppSection.artists,
+                                                AppSection.albums,
+                                                AppSection.settings,
+                                                AppSection.nowPlaying,
+                                                AppSection.playlists,
+                                              }.contains(widget.section))
+                                                Padding(
+                                                  key: const ValueKey(
+                                                    'page.heading',
+                                                  ),
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        24,
+                                                        12,
+                                                        24,
+                                                        24,
+                                                      ),
+                                                  child: UiText(
+                                                    widget.section.label,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .headlineSmall
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                  ),
+                                                ),
+                                              Expanded(
+                                                child:
+                                                    globalSearch &&
+                                                        query.trim().isNotEmpty
+                                                    ? GlobalLibrarySearch(
+                                                        tracks:
+                                                            downloads
+                                                                .offlineOnly
+                                                            ? tracks
+                                                                  .where(
+                                                                    (
+                                                                      t,
+                                                                    ) => catalogMemory
+                                                                        .offline
+                                                                        .contains(
+                                                                          t.id,
+                                                                        ),
+                                                                  )
+                                                                  .toList()
+                                                            : tracks,
+                                                        query: query,
+                                                        store: widget.store,
+                                                        revision:
+                                                            catalogRevision,
+                                                        onOpen:
+                                                            openSearchResult,
+                                                        onPlaylist: (id) {
+                                                          setState(() {
+                                                            query = '';
+                                                            selectedPlaylist =
+                                                                id;
+                                                          });
+                                                          widget.onNavigate(
+                                                            AppSection
+                                                                .playlists,
+                                                          );
+                                                        },
+                                                      )
+                                                    : switch (widget.section) {
+                                                        AppSection.home ||
+                                                        AppSection.library ||
+                                                        AppSection.favorites =>
+                                                          libraryPage(),
+                                                        AppSection.artists =>
+                                                          libraryPage(
+                                                            category:
+                                                                'albumArtists',
+                                                          ),
+                                                        AppSection.albums =>
+                                                          libraryPage(
+                                                            category: 'albums',
+                                                          ),
+                                                        AppSection.nowPlaying => NowPlayingPage(
+                                                          loadLyrics:
+                                                              libraryLyrics
+                                                                  .load,
+                                                          showLyrics: false,
+                                                          onArtist: () =>
+                                                              controller
+                                                                      .current ==
+                                                                  null
+                                                              ? null
+                                                              : openCollection(
+                                                                  controller
+                                                                      .current!,
+                                                                  false,
+                                                                ),
+                                                          onAlbum: () =>
+                                                              controller
+                                                                      .current ==
+                                                                  null
+                                                              ? null
+                                                              : openCollection(
+                                                                  controller
+                                                                      .current!,
+                                                                  true,
+                                                                ),
+                                                          controller:
+                                                              controller,
+                                                          settings:
+                                                              widget.settings,
+                                                          favorite: favorites
+                                                              .contains(
+                                                                controller
+                                                                    .current
+                                                                    ?.id,
+                                                              ),
+                                                          onFavorite: () {
+                                                            if (controller
+                                                                    .current !=
+                                                                null) {
+                                                              favorite(
+                                                                controller
+                                                                    .current!,
+                                                              );
+                                                            }
+                                                          },
+                                                          onDetails: () {
+                                                            if (controller
+                                                                    .current !=
+                                                                null) {
+                                                              showCurrentActions();
+                                                            }
+                                                          },
+                                                          onFullscreen:
+                                                              widget
+                                                                  .nativeIntegration
+                                                              ? () async {
+                                                                  await windowManager
+                                                                      .setFullScreen(
+                                                                        !await windowManager
+                                                                            .isFullScreen(),
+                                                                      );
+                                                                }
+                                                              : null,
+                                                        ),
+                                                        AppSection.playlists =>
+                                                          PlaylistsPage(
+                                                            key: ValueKey(
+                                                              'playlists.root.${widget.navigationReset}',
+                                                            ),
+                                                            onChanged:
+                                                                markCatalogDirty,
+                                                            initialPlaylist:
+                                                                selectedPlaylist,
+                                                            query: query,
+                                                            store: widget.store,
+                                                            settings:
+                                                                widget.settings,
+                                                            trackActions:
+                                                                trackActions,
+                                                            tracks: List.of(
+                                                              tracks,
+                                                            ),
+                                                            onPlay: play,
+                                                            onPlayNamed:
+                                                                playNamed,
+                                                            onOffline:
+                                                                (
+                                                                  selection,
+                                                                  values,
+                                                                ) => downloads
+                                                                    .select(
+                                                                      selection,
+                                                                      values,
+                                                                    ),
+                                                            onShuffle: (values) =>
+                                                                catalogAction(
+                                                                  'shuffle',
+                                                                  values,
+                                                                ),
+                                                            onQueue: (values) =>
+                                                                catalogAction(
+                                                                  'queue',
+                                                                  values,
+                                                                ),
+                                                          ),
+                                                        AppSection.history =>
+                                                          HistoryPage(
+                                                            store: widget.store,
+                                                            onPlay: play,
+                                                            trackActions:
+                                                                trackActions,
+                                                          ),
+                                                        AppSection.downloads =>
+                                                          DownloadsDialog(
+                                                            manager: downloads,
+                                                            embedded: true,
+                                                          ),
+                                                        AppSection.settings => SettingsPage(
+                                                          key: ValueKey(
+                                                            'settings.root.${widget.navigationReset}',
+                                                          ),
+                                                          settings:
+                                                              widget.settings,
+                                                          canOptimizeArtwork: () =>
+                                                              !loading &&
+                                                              !shutdownRequested &&
+                                                              !localSync
+                                                                  .running,
+                                                          onCustomizeHome: () {
+                                                            widget.onNavigate(
+                                                              AppSection.home,
+                                                            );
+                                                            WidgetsBinding
+                                                                .instance
+                                                                .addPostFrameCallback((
+                                                                  _,
+                                                                ) {
+                                                                  if (mounted) {
+                                                                    customizeHome(
+                                                                      context,
+                                                                      widget
+                                                                          .settings,
+                                                                    );
+                                                                  }
+                                                                });
+                                                          },
+                                                          localSources:
+                                                              LocalSourcesPanel(
+                                                                sync: localSync,
+                                                                store: widget
+                                                                    .store,
+                                                                onAddFiles:
+                                                                    addFiles,
+                                                                onAddFolder:
+                                                                    addFolder,
+                                                                onSync:
+                                                                    syncLocalSource,
+                                                                onChanged:
+                                                                    reloadCatalog,
+                                                              ),
+                                                          trackCount:
+                                                              tracks.length,
+                                                          onAddFiles: addFiles,
+                                                          onAddFolder:
+                                                              addFolder,
+                                                          providers: providers,
+                                                          onImported:
+                                                              reloadCatalog,
+                                                          previewTrack:
+                                                              controller
+                                                                  .current,
+                                                          downloads: downloads,
+                                                          controller:
+                                                              controller,
+                                                          onBackup:
+                                                              exportBackup,
+                                                          onRestore:
+                                                              restoreBackup,
+                                                          onReset: () =>
+                                                              restartForMaintenance(),
+                                                        ),
+                                                      },
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (constraints.maxWidth >= 900 &&
+                                            (widget.settings.visualBool(
+                                                  'show_queue',
+                                                ) ||
+                                                lyricsActive)) ...[
+                                          SizedBox(
+                                            width: lyricsActive
+                                                ? MtDesign.lyrics.clamp(
+                                                    300.0,
+                                                    constraints.maxWidth * .43,
+                                                  )
+                                                : MtDesign.queue,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                  ),
+                                              child: Card(
+                                                key: const ValueKey(
+                                                  "queue.floating",
+                                                ),
+                                                margin: EdgeInsets.zero,
+                                                elevation: 0,
+                                                clipBehavior: Clip.antiAlias,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      const BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(24),
+                                                      ),
+                                                ),
+                                                child: sidePanel(),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                if (storageError != null)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: UiText(
+                                      storageError!,
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error,
+                                      ),
+                                    ),
+                                  ),
+                                if (controller.error != null)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                    ),
+                                    child: UiText(
+                                      controller.error!,
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    if (controller.error != null)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: UiText(
-                          controller.error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                        ),
-                      ),
-                    PlayerBar(
-                      availability: TrackAvailabilityButton(
-                        track: controller.current,
-                        downloads: downloads,
-                      ),
-                      lyricsActive: lyricsActive,
-                      lastfmActive:
-                          providers.lastfmConnected &&
-                          ((widget.settings.preferences.getBool(
-                                    'lastfm.scrobbling',
-                                  ) ??
-                                  false) ||
-                              (widget.settings.preferences.getBool(
-                                    'lastfm.now_playing',
-                                  ) ??
-                                  false)) &&
-                          !downloads.offlineOnly,
-                      lastfmStatus: providers.lastfmStatusLoading
-                          ? 'Restaurando conexão Last.fm…'
-                          : providers.lastfmStatusError
-                          ? 'Não foi possível ler a sessão Last.fm no cofre'
-                          : !providers.lastfmConnected
-                          ? 'Last.fm não conectado'
-                          : downloads.offlineOnly
-                          ? 'Last.fm conectado • modo offline'
-                          : ((widget.settings.preferences.getBool(
-                                      'lastfm.scrobbling',
-                                    ) ??
-                                    false) ||
-                                (widget.settings.preferences.getBool(
-                                      'lastfm.now_playing',
-                                    ) ??
-                                    false))
-                          ? 'Last.fm conectado • envios ativados'
-                          : 'Last.fm conectado • envios desativados',
-                      onArtist: () => controller.current == null
-                          ? null
-                          : openCollection(controller.current!, false),
-                      onAlbum: () => controller.current == null
-                          ? null
-                          : openCollection(controller.current!, true),
-                      controller: controller,
-                      settings: widget.settings,
-                      favorite: favorites.contains(controller.current?.id),
-                      onFavorite: () {
-                        if (controller.current != null) {
-                          favorite(controller.current!);
-                        }
-                      },
-                      onDetails: () {
-                        if (controller.current != null) {
-                          showCurrentActions();
-                        }
-                      },
-                      onLyrics: () {
-                        final enabled = !lyricsActive;
-                        setState(() => lyricsOpen = enabled);
-                        if (enabled) widget.onNavigate(AppSection.nowPlaying);
-                      },
-                      onQueue: showQueue,
-                      onExpand: () => widget.onNavigate(AppSection.nowPlaying),
-                      onSave: save,
                     ),
                   ],
                 ),
               ),
-            ),
+              reviewPlayerBar(),
+            ],
           ),
         ),
       ),

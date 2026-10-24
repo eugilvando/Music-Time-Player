@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart' show compute;
 
 import 'artwork.dart';
 import 'local_metadata.dart';
+import 'mp3_duration.dart';
 import '../lyrics/id3_lyrics.dart';
 
 const maxCloudMetadataBytes = 8 * 1024 * 1024;
@@ -42,6 +43,7 @@ class CloudMetadataReader {
   final http.Client client;
   final bool Function()? cancelled;
   int received = 0;
+  int? totalBytes;
 
   Future<String?> readEmbeddedLyrics(Uri uri) async {
     received = 0;
@@ -164,6 +166,7 @@ class CloudMetadataReader {
         throw const FormatException('Metadados incompletos');
       }
       received += bytes.length;
+      totalBytes = int.parse(range.group(3)!);
       return bytes.takeBytes();
     }
     throw const FormatException('Redirecionamento inválido');
@@ -171,6 +174,7 @@ class CloudMetadataReader {
 
   Future<CloudTags?> read(Uri uri, String name, {int? fileSize}) async {
     received = 0;
+    totalBytes = null;
     if (!RegExp(r'\.(mp3|flac)$', caseSensitive: false).hasMatch(name)) {
       return null;
     }
@@ -178,6 +182,22 @@ class CloudMetadataReader {
     Uint8List data;
     var mp3 = ascii.decode(head.sublist(0, 3), allowInvalid: true) == 'ID3';
     var id3v1 = false;
+    Duration? duration;
+    Future<Duration?> audioDuration(int offset) async {
+      final available = (fileSize ?? totalBytes ?? 0) - offset;
+      if (available < 64 || received > maxCloudMetadataBytes - 4096) {
+        return null;
+      }
+      try {
+        return mp3FrameDuration(
+          await _range(uri, offset, available.clamp(0, 256)),
+        );
+      } catch (_) {
+        // Optional duration must not discard valid tags or Graph metadata.
+        return null;
+      }
+    }
+
     if (mp3) {
       if (!{3, 4}.contains(head[3]) ||
           (head[3] == 3 ? head[5] & 0x1f != 0 : head[5] & 0x8f != 0) ||
@@ -187,6 +207,9 @@ class CloudMetadataReader {
       final size = (head[6] << 21) | (head[7] << 14) | (head[8] << 7) | head[9];
       if (size == 0 || size + 10 > maxCloudMetadataBytes) return null;
       var body = await _range(uri, 10, size);
+      duration = await audioDuration(
+        size + 10 + (head[3] == 4 && head[5] & 0x10 != 0 ? 10 : 0),
+      );
       if (head[3] == 3 && head[5] & 0x80 != 0) {
         final restored = BytesBuilder(copy: false);
         for (var i = 0; i < body.length; i++) {
@@ -255,11 +278,11 @@ class CloudMetadataReader {
         for (final block in blocks) ...block,
       ]);
     } else if (name.toLowerCase().endsWith('.mp3') &&
-        fileSize != null &&
-        fileSize >= 128) {
-      data = await _range(uri, fileSize - 128, 128);
+        (fileSize ?? totalBytes ?? 0) >= 128) {
+      duration = await audioDuration(0);
+      data = await _range(uri, (fileSize ?? totalBytes!) - 128, 128);
       if (ascii.decode(data.sublist(0, 3), allowInvalid: true) != 'TAG') {
-        return null;
+        return duration == null ? null : CloudTags(duration: duration);
       }
       mp3 = id3v1 = true;
     } else {
@@ -288,7 +311,7 @@ class CloudMetadataReader {
             ),
             trackNumber: _positive(tags.trackNumber),
             discNumber: _positive(tags.discNumber),
-            duration: tags.duration,
+            duration: duration ?? tags.duration,
             cover: embeddedArtwork(tags.pictures),
           );
         }

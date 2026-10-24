@@ -1,3 +1,5 @@
+import 'design_icon.dart';
+
 import 'package:flutter/material.dart';
 
 import '../domain/track.dart';
@@ -49,6 +51,10 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     title: const UiText('Revisar importação'),
     content: SizedBox(
       width: 760,
@@ -73,7 +79,7 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
                 if (e.selected != null && !e.removed && collapsed.contains(e)) {
                   return ListTile(
                     key: ValueKey('playlist.resolved.${e.line}'),
-                    leading: const Icon(
+                    leading: const MtIcon(
                       Icons.check_circle,
                       color: Colors.green,
                     ),
@@ -88,7 +94,7 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
                     trailing: IconButton(
                       tooltip: ui(context, 'Alterar faixa confirmada'),
                       onPressed: () => setState(() => collapsed.remove(e)),
-                      icon: const Icon(Icons.expand_more),
+                      icon: const MtIcon(Icons.expand_more),
                     ),
                     onTap: () => setState(() => collapsed.remove(e)),
                   );
@@ -125,11 +131,11 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
                             IconButton(
                               tooltip: ui(context, 'Recolher faixa confirmada'),
                               onPressed: () => setState(() => collapsed.add(e)),
-                              icon: const Icon(Icons.expand_less),
+                              icon: const MtIcon(Icons.expand_less),
                             ),
                           TextButton.icon(
                             onPressed: () => locate(e),
-                            icon: const Icon(Icons.search),
+                            icon: const MtIcon(Icons.search),
                             label: const UiText('Localizar faixa'),
                           ),
                           TextButton(
@@ -195,6 +201,10 @@ class _TrackPickerState extends State<_TrackPicker> {
         .map((e) => e.$1)
         .toList();
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       title: const UiText('Localizar faixa'),
       content: SizedBox(
         width: 680,

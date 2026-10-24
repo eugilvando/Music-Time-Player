@@ -12,17 +12,21 @@ class InformationCards extends StatelessWidget {
       child: SizedBox(
         width: constraints.maxWidth.clamp(640.0, double.infinity),
         child: Wrap(
-          spacing: 16,
-          runSpacing: 16,
+          spacing: 12,
+          runSpacing: 12,
           children: [
             for (final item in values.entries)
               SizedBox(
                 width:
-                    (constraints.maxWidth.clamp(640.0, double.infinity) - 48) /
+                    (constraints.maxWidth.clamp(640.0, double.infinity) - 36) /
                     4,
                 child: Card(
+                  margin: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -31,13 +35,18 @@ class InformationCards extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                              ?.copyWith(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                         ),
                         const SizedBox(height: 12),
                         Tooltip(
                           message: ui(context, item.key),
                           child: UiText(
                             item.key,
+                            style: Theme.of(context).textTheme.bodySmall,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),

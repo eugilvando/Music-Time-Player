@@ -94,7 +94,7 @@ void main() {
       final button = find.widgetWithText(OutlinedButton, 'Importar favoritos');
       await tester.scrollUntilVisible(
         button,
-        250,
+        -250,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pump(const Duration(milliseconds: 350));

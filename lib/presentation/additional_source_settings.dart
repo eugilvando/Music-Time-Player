@@ -1,3 +1,5 @@
+import 'settings_card.dart';
+import 'design_icon.dart';
 import '../domain/ports.dart';
 
 import 'package:flutter/material.dart';
@@ -106,6 +108,10 @@ class _SourceFormState extends State<_SourceForm> {
         reconnect: widget.connection != null,
       );
       if (!mounted) return;
+      if (source.type == 'google' && widget.connection == null) {
+        await chooseGoogleFolder(context, widget.sources, source);
+        if (!mounted) return;
+      }
       widget.onChanged();
       Navigator.pop(context);
     } catch (failure) {
@@ -142,6 +148,10 @@ class _SourceFormState extends State<_SourceForm> {
   );
   @override
   Widget build(BuildContext context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     title: Text(
       '${ui(context, widget.connection == null ? 'Adicionar' : 'Reconnect')} ${additionalSourceTypes[widget.type]}',
     ),
@@ -237,7 +247,10 @@ class _SourceFormState extends State<_SourceForm> {
       FilledButton(
         onPressed: busy ? null : save,
         child: Text(
-          widget.type == 'google' ? 'Connect in browser' : 'Save connection',
+          ui(
+            context,
+            widget.type == 'google' ? 'Connect in browser' : 'Save connection',
+          ),
         ),
       ),
     ],
@@ -256,11 +269,17 @@ class AdditionalSourceSettings extends StatelessWidget {
     try {
       await action();
       onChanged();
-    } catch (_) {
+    } catch (failure) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: UiText('Source unavailable. Check its status and retry.'),
+          SnackBar(
+            content: UiText(
+              failure is StateError
+                  ? failure.message.toString()
+                  : failure is MediaSourceFailure
+                  ? failure.message
+                  : 'Source unavailable. Check its status and retry.',
+            ),
           ),
         );
       }
@@ -273,122 +292,385 @@ class AdditionalSourceSettings extends StatelessWidget {
     builder: (context, _) => Column(
       children: [
         for (final source in sources.connections)
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    source.label,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(additionalSourceTypes[source.type]!),
-                  if (sources.busy.contains(source.id))
-                    const LinearProgressIndicator(),
-                  UiText(
-                    !source.connected
-                        ? 'Disconnected. Reconnect to restore access to your library and playlists.'
-                        : sources.messages[source.id] ?? 'Ready. Synchronize to check this connection and update the catalog.',
-                  ),
-                  Wrap(
-                    spacing: 12,
+          SettingsCard(
+            padding: 0,
+            child: ExpansionTile(
+              key: ValueKey('source.card.${source.id}'),
+              tilePadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 8,
+              ),
+              leading: MtIcon(
+                source.type == 'smb'
+                    ? Icons.folder_shared
+                    : source.type == 'jellyfin' || source.type == 'emby'
+                    ? Icons.dns
+                    : Icons.cloud,
+              ),
+              title: Text(
+                source.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(additionalSourceTypes[source.type]!, maxLines: 1),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      TextButton.icon(
-                        onPressed: !source.connected
-                            ? null
-                            : () => sources.busy.contains(source.id)
-                                  ? sources.cancel(source.id)
-                                  : run(context, () => sources.sync(source)),
-                        icon: Icon(
-                          sources.busy.contains(source.id)
-                              ? Icons.stop
-                              : Icons.sync,
+                      if (source.type == 'google') ...[
+                        Text(
+                          source.folderName.isEmpty
+                              ? (source.folder.isEmpty
+                                    ? 'My Drive'
+                                    : source.folder)
+                              : source.folderName,
                         ),
-                        label: UiText(
-                          sources.busy.contains(source.id)
-                              ? 'Cancel'
-                              : 'Synchronize',
-                        ),
-                      ),
-                      TextButton.icon(
-                        onPressed:
-                            sources.busy.contains(source.id) ||
-                                !source.connected
-                            ? null
-                            : () => run(
-                                context,
-                                () =>
-                                    sources.setVisible(source, !source.visible),
-                              ),
-                        icon: Icon(
-                          source.visible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        label: UiText(
-                          source.visible ? 'Hide library' : 'Show library',
-                        ),
-                      ),
-                      TextButton.icon(
-                        icon: const Icon(Icons.login),
-                        label: const UiText('Reconnect'),
-                        onPressed: sources.busy.contains(source.id)
-                            ? null
-                            : () => addAdditionalSource(
-                                context,
-                                sources,
-                                source.type,
-                                onChanged,
-                                connection: source,
-                              ),
-                      ),
-                      TextButton.icon(
-                        icon: const Icon(Icons.link_off),
-                        label: const UiText('Disconnect'),
-                        onPressed:
-                            sources.busy.contains(source.id) ||
-                                !source.connected
-                            ? null
-                            : () async {
-                                final confirmed = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const UiText(
-                                      'Disconnect this source?',
-                                    ),
-                                    content: const UiText(
-                                      'Credentials will be removed and the catalog hidden. The connection definition is kept so Reconnect can restore the same track IDs and playlists. Original music files are preserved.',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, false),
-                                        child: const UiText('Cancel'),
-                                      ),
-                                      FilledButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context, true),
-                                        child: const UiText('Disconnect'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (confirmed == true && context.mounted) {
-                                  await run(
+                        TextButton.icon(
+                          icon: const MtIcon(Icons.folder_open),
+                          label: const UiText('Selecionar pasta musical'),
+                          onPressed:
+                              !source.connected ||
+                                  sources.busy.contains(source.id)
+                              ? null
+                              : () => run(context, () async {
+                                  await chooseGoogleFolder(
                                     context,
-                                    () => sources.disconnect(source),
+                                    sources,
+                                    source,
                                   );
-                                }
-                              },
+                                }),
+                        ),
+                      ],
+                      if (sources.busy.contains(source.id))
+                        const LinearProgressIndicator(),
+                      UiText(
+                        !source.connected
+                            ? 'Disconnected. Reconnect to restore access to your library and playlists.'
+                            : sources.messages[source.id] ?? 'Ready. Synchronize to check this connection and update the catalog.',
+                      ),
+                      Wrap(
+                        spacing: 12,
+                        children: [
+                          TextButton.icon(
+                            onPressed: !source.connected
+                                ? null
+                                : () => sources.busy.contains(source.id)
+                                      ? sources.cancel(source.id)
+                                      : run(
+                                          context,
+                                          () => sources.sync(source),
+                                        ),
+                            icon: MtIcon(
+                              sources.busy.contains(source.id)
+                                  ? Icons.stop
+                                  : Icons.sync,
+                            ),
+                            label: UiText(
+                              sources.busy.contains(source.id)
+                                  ? 'Cancel'
+                                  : 'Synchronize',
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed:
+                                sources.busy.contains(source.id) ||
+                                    !source.connected
+                                ? null
+                                : () => run(
+                                    context,
+                                    () => sources.setVisible(
+                                      source,
+                                      !source.visible,
+                                    ),
+                                  ),
+                            icon: MtIcon(
+                              source.visible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            label: UiText(
+                              source.visible ? 'Hide library' : 'Show library',
+                            ),
+                          ),
+                          TextButton.icon(
+                            icon: const MtIcon(Icons.login),
+                            label: const UiText('Reconnect'),
+                            onPressed: sources.busy.contains(source.id)
+                                ? null
+                                : () => addAdditionalSource(
+                                    context,
+                                    sources,
+                                    source.type,
+                                    onChanged,
+                                    connection: source,
+                                  ),
+                          ),
+                          TextButton.icon(
+                            icon: const MtIcon(Icons.link_off),
+                            label: const UiText('Disconnect'),
+                            onPressed:
+                                sources.busy.contains(source.id) ||
+                                    !source.connected
+                                ? null
+                                : () async {
+                                    final confirmed = await showDialog<bool>(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        insetPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 24,
+                                              vertical: 24,
+                                            ),
+                                        titlePadding: const EdgeInsets.fromLTRB(
+                                          24,
+                                          24,
+                                          24,
+                                          16,
+                                        ),
+                                        contentPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              24,
+                                              8,
+                                              24,
+                                              24,
+                                            ),
+                                        actionsPadding:
+                                            const EdgeInsets.fromLTRB(
+                                              24,
+                                              0,
+                                              24,
+                                              24,
+                                            ),
+                                        title: const UiText(
+                                          'Disconnect this source?',
+                                        ),
+                                        content: const UiText(
+                                          'Credentials will be removed and the catalog hidden. The connection definition is kept so Reconnect can restore the same track IDs and playlists. Original music files are preserved.',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                            child: const UiText('Cancel'),
+                                          ),
+                                          FilledButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                            child: const UiText('Disconnect'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirmed == true && context.mounted) {
+                                      await run(
+                                        context,
+                                        () => sources.disconnect(source),
+                                      );
+                                    }
+                                  },
+                          ),
+                          TextButton.icon(
+                            icon: const MtIcon(Icons.delete_outline),
+                            label: const UiText('Remover fonte'),
+                            onPressed: sources.busy.contains(source.id)
+                                ? null
+                                : () async {
+                                    if (await confirmSourceRemoval(context) &&
+                                        context.mounted) {
+                                      await run(
+                                        context,
+                                        () => sources.remove(source),
+                                      );
+                                    }
+                                  },
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
       ],
     ),
+  );
+}
+
+const sourceRemovalWarning =
+    'Removing this source deletes its catalog tracks, favorites, history, downloads and cache. Playlist entries become missing references. Tracks shared with another source and original music files are preserved.';
+
+Future<bool> confirmSourceRemoval(BuildContext context) async =>
+    await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        title: const UiText('Remove this source?'),
+        content: const UiText(sourceRemovalWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const UiText('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const UiText('Remover fonte'),
+          ),
+        ],
+      ),
+    ) ==
+    true;
+
+Future<void> chooseGoogleFolder(
+  BuildContext context,
+  AdditionalSources sources,
+  SourceConnection source,
+) async {
+  await showDialog<void>(
+    context: context,
+    builder: (_) => _GoogleFolderPicker(sources: sources, source: source),
+  );
+}
+
+class _GoogleFolderPicker extends StatefulWidget {
+  const _GoogleFolderPicker({required this.sources, required this.source});
+  final AdditionalSources sources;
+  final SourceConnection source;
+  @override
+  State<_GoogleFolderPicker> createState() => _GoogleFolderPickerState();
+}
+
+class _GoogleFolderPickerState extends State<_GoogleFolderPicker> {
+  final trail = <({String id, String name})>[(id: 'root', name: 'My Drive')];
+  late Future<List<Map<String, dynamic>>> listing;
+  bool saving = false;
+  String? error;
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  void load() {
+    listing = widget.sources.googleFolders(widget.source, trail.last.id);
+  }
+
+  Future<void> select() async {
+    setState(() {
+      saving = true;
+      error = null;
+    });
+    try {
+      await widget.sources.selectGoogleFolder(
+        widget.source,
+        trail.last.id,
+        trail.last.name,
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          saving = false;
+          error = 'Could not load folders. Check the connection and retry.';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+    titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+    contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+    actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+    title: const UiText('Selecionar pasta musical'),
+    content: SizedBox(
+      width: 520,
+      height: 380,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(trail.map((f) => f.name).join(' / ')),
+          const UiText(
+            'Only audio in the selected folder and its subfolders will be scanned.',
+          ),
+          if (trail.length > 1)
+            TextButton.icon(
+              onPressed: saving
+                  ? null
+                  : () => setState(() {
+                      trail.removeLast();
+                      load();
+                    }),
+              icon: const MtIcon(Icons.arrow_back),
+              label: const UiText('Back'),
+            ),
+          if (error != null) UiText(error!),
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: listing,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const UiText(
+                        'Could not load folders. Check the connection and retry.',
+                      ),
+                      TextButton(
+                        onPressed: () => setState(load),
+                        child: const UiText('Retry'),
+                      ),
+                    ],
+                  );
+                }
+                final folders = snapshot.data ?? [];
+                if (folders.isEmpty) {
+                  return const Center(
+                    child: UiText('No subfolders. You can select this folder.'),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: folders.length,
+                  itemBuilder: (context, i) => ListTile(
+                    leading: const MtIcon(Icons.folder),
+                    title: Text(folders[i]['name'] as String? ?? ''),
+                    trailing: const MtIcon(Icons.chevron_right),
+                    onTap: saving
+                        ? null
+                        : () => setState(() {
+                            trail.add((
+                              id: folders[i]['id'] as String,
+                              name: folders[i]['name'] as String? ?? '',
+                            ));
+                            load();
+                          }),
+                  ),
+                );
+              },
+            ),
+          ),
+          if (saving) const LinearProgressIndicator(),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: saving ? null : () => Navigator.pop(context),
+        child: const UiText('Cancel'),
+      ),
+      FilledButton(
+        onPressed: saving ? null : select,
+        child: const UiText('Select this folder'),
+      ),
+    ],
   );
 }

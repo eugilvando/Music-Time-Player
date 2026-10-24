@@ -83,7 +83,9 @@ class SourceConnection {
     this.connected = true,
     this.allowHttp = false,
   });
-  final String id, type, label, address, folder, username, clientId;
+  final String id, type, label, address, username, clientId;
+  String folder;
+  String folderName = '';
   bool visible;
   bool connected;
   final bool allowHttp;
@@ -93,6 +95,7 @@ class SourceConnection {
     'label': label,
     'address': address,
     'folder': folder,
+    'folderName': folderName,
     'username': username,
     'clientId': clientId,
     'visible': visible,
@@ -100,7 +103,7 @@ class SourceConnection {
     'allowHttp': allowHttp,
   };
   factory SourceConnection.fromJson(Map<String, dynamic> value) =>
-      SourceConnection(
+      (SourceConnection(
         id: value['id'] as String,
         type: value['type'] as String,
         label: value['label'] as String,
@@ -111,7 +114,7 @@ class SourceConnection {
         visible: value['visible'] != false,
         connected: value['connected'] != false,
         allowHttp: value['allowHttp'] == true,
-      );
+      )..folderName = value['folderName'] as String? ?? '');
   Uri get base {
     final uri = Uri.parse(address.endsWith('/') ? address : '$address/');
     if (uri.host.isEmpty ||
@@ -589,6 +592,96 @@ class AdditionalSources extends ChangeNotifier
     await vault.delete(secretKey(s.id));
     await store.saveCloudSource(s.id, s.id, '/source', s.label, false);
     await persist();
+  }
+
+  Future<void> remove(SourceConnection s) async {
+    if (busy.contains(s.id)) {
+      throw const MediaSourceFailure(
+        'Cancel synchronization and wait before removing this source.',
+      );
+    }
+    busy.add(s.id);
+    changed();
+    try {
+      await store.removeCloudSource(s.id);
+      await vault.delete(secretKey(s.id));
+      connections.remove(s);
+      try {
+        await persist();
+      } catch (_) {
+        connections.add(s);
+        rethrow;
+      }
+      messages.remove(s.id);
+    } finally {
+      busy.remove(s.id);
+      changed();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> googleFolders(
+    SourceConnection s,
+    String parent,
+  ) async {
+    if (s.type != 'google' || !s.connected) {
+      throw const MediaSourceFailure(
+        'Reconnect this source before synchronizing.',
+      );
+    }
+    final result = <Map<String, dynamic>>[];
+    String? token;
+    do {
+      final data = await requestJson(
+        s,
+        Uri.https('www.googleapis.com', '/drive/v3/files', {
+          'q':
+              "'${parent.replaceAll("'", "\\'")}' in parents and trashed=false and mimeType='application/vnd.google-apps.folder'",
+          'fields': 'nextPageToken,files(id,name)',
+          'pageSize': '1000',
+          'orderBy': 'name',
+          if (token != null) 'pageToken': token,
+        }),
+      );
+      result.addAll(
+        (data['files'] as List? ?? []).map(
+          (r) => Map<String, dynamic>.from(r as Map),
+        ),
+      );
+      token = data['nextPageToken'] as String?;
+    } while (token != null && token.isNotEmpty);
+    return result;
+  }
+
+  Future<void> selectGoogleFolder(
+    SourceConnection s,
+    String id,
+    String name,
+  ) async {
+    if (s.type != 'google' || busy.contains(s.id)) {
+      throw const MediaSourceFailure('Wait for synchronization to finish.');
+    }
+    // Validate access and type before changing the scan scope.
+    final data = await requestJson(
+      s,
+      Uri.https(
+        'www.googleapis.com',
+        '/drive/v3/files/${Uri.encodeComponent(id)}',
+        {'fields': 'id,name,mimeType'},
+      ),
+    );
+    if (data['mimeType'] != 'application/vnd.google-apps.folder') {
+      throw const MediaSourceFailure('Select a music folder.');
+    }
+    final previous = s.folder, previousName = s.folderName;
+    s.folder = data['id'] as String;
+    s.folderName = data['name'] as String? ?? name;
+    try {
+      await persist();
+    } catch (_) {
+      s.folder = previous;
+      s.folderName = previousName;
+      rethrow;
+    }
   }
 
   Future<void> setVisible(SourceConnection s, bool value) async {

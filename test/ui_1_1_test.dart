@@ -90,6 +90,8 @@ void main() {
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: category.name);
       }
+      await tester.tap(find.byTooltip('Search settings'));
+      await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const ValueKey('settings.search')),
         'lyrics',
@@ -99,6 +101,11 @@ void main() {
       expect(find.text('Lyrics providers'), findsOneWidget);
       await tester.tap(find.text('Lyrics — presentation'));
       await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Auto-scroll lyrics'),
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
       expect(find.text('Auto-scroll lyrics'), findsOneWidget);
       expect({
         for (final key in settings.preferences.getKeys())
@@ -106,7 +113,11 @@ void main() {
       }, before);
       await tester.tap(find.byKey(const ValueKey('settings.customization')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('settings.page.Now Playing')));
+      await tester.scrollUntilVisible(
+        find.text('Now Playing').last,
+        -300,
+        scrollable: find.byType(Scrollable).last,
+      );
       await tester.pumpAndSettle();
       await tester.runAsync(() async {
         final image =
@@ -350,38 +361,42 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     },
   );
-  testWidgets(
-    'all five card sizes change actual horizontal artwork dimensions',
-    (tester) async {
-      var last = 0.0;
-      for (final entry in mediaCardSizes.entries) {
-        await tester.pumpWidget(
-          app(
-            MediaCardSizeScope(
-              value: entry.key,
-              onChanged: (_) {},
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: 600,
-                  height: 200,
-                  child: CompactMediaCard(
-                    artwork: const SizedBox(key: ValueKey('art')),
-                    title: 'Title',
-                    subtitle: 'Artist',
-                    actions: const Icon(Icons.more_horiz),
-                    onTap: () {},
-                  ),
+  testWidgets('Figma compact cards use 36 48 64 and 80 pixel artwork', (
+    tester,
+  ) async {
+    const expected = {
+      'Extra Small': 36.0,
+      'Small': 36.0,
+      'Medium': 48.0,
+      'Large': 64.0,
+      'Extra Large': 80.0,
+    };
+    for (final entry in mediaCardSizes.entries) {
+      await tester.pumpWidget(
+        app(
+          MediaCardSizeScope(
+            value: entry.key,
+            onChanged: (_) {},
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 600,
+                height: 200,
+                child: CompactMediaCard(
+                  artwork: const SizedBox(key: ValueKey('art')),
+                  title: 'Title',
+                  subtitle: 'Artist',
+                  actions: const Icon(Icons.more_horiz),
+                  onTap: () {},
                 ),
               ),
             ),
           ),
-        );
-        final size = tester.getSize(find.byKey(const ValueKey('art')));
-        expect(size.width, greaterThan(last));
-        last = size.width;
-        expect(tester.takeException(), isNull);
-      }
-    },
-  );
+        ),
+      );
+      final size = tester.getSize(find.byKey(const ValueKey('art')));
+      expect(size.width, expected[entry.key]);
+      expect(tester.takeException(), isNull);
+    }
+  });
 }

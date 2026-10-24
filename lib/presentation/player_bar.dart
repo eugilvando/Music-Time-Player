@@ -1,3 +1,7 @@
+import 'design_icon.dart';
+
+import 'package:flutter_svg/flutter_svg.dart';
+
 import 'ui_language.dart';
 
 import 'dart:math';
@@ -21,7 +25,7 @@ double playerBarHeight(BuildContext context, AppSettings settings) {
         1.5 *
             (textScale.scale(settings.visualNumber('font_secondary', 12)) +
                 (visible.contains('info')
-                    ? textScale.scale(settings.visualNumber('font_body', 13))
+                    ? textScale.scale(settings.visualNumber('font_body', 16))
                     : 0)),
       ) +
       28;
@@ -81,7 +85,7 @@ class PlayerBar extends StatelessWidget {
     'cover' => InkWell(
       onTap: onExpand,
       child: SizedBox.square(
-        dimension: 44,
+        dimension: 48,
         child: TrackCover(track: controller.current),
       ),
     ),
@@ -99,8 +103,9 @@ class PlayerBar extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: settings.visualNumber('font_body', 13),
+                fontFamily: 'Bricolage Grotesque',
+                fontWeight: FontWeight.w700,
+                fontSize: settings.visualNumber('font_body', 16),
               ),
             ),
             if (controller.current != null) secondaryInfo(context),
@@ -110,7 +115,7 @@ class PlayerBar extends StatelessWidget {
     ),
     'previous' => IconButton(
       tooltip: ui(context, 'Anterior'),
-      icon: const Icon(Icons.skip_previous),
+      icon: const MtIcon(Icons.skip_previous),
       onPressed: controller.canGoPrevious && !controller.opening
           ? () async {
               await controller.previous();
@@ -134,12 +139,12 @@ class PlayerBar extends StatelessWidget {
                 dimension: 20,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : Icon(controller.playing ? Icons.pause : Icons.play_arrow),
+            : MtIcon(controller.playing ? Icons.pause : Icons.play_arrow),
       ),
     ),
     'next' => IconButton(
       tooltip: ui(context, 'Próxima'),
-      icon: const Icon(Icons.skip_next),
+      icon: const MtIcon(Icons.skip_next),
       onPressed: controller.nextIndex >= 0 && !controller.opening
           ? () async {
               await controller.next();
@@ -150,7 +155,7 @@ class PlayerBar extends StatelessWidget {
     'shuffle' => IconButton(
       tooltip: ui(context, 'Aleatório'),
       isSelected: controller.shuffle,
-      icon: const Icon(Icons.shuffle, size: 20),
+      icon: const MtIcon(Icons.shuffle, size: 20),
       onPressed: () {
         controller.toggleShuffle();
         onSave();
@@ -165,7 +170,7 @@ class PlayerBar extends StatelessWidget {
           })}',
       isSelected: controller.repeat != PlaybackRepeat.off,
       onPressed: controller.cycleRepeat,
-      icon: Icon(
+      icon: MtIcon(
         controller.repeat == PlaybackRepeat.track
             ? Icons.repeat_one
             : Icons.repeat,
@@ -176,12 +181,12 @@ class PlayerBar extends StatelessWidget {
       tooltip: ui(context, favorite ? 'Remover favorito' : 'Favoritar'),
       isSelected: favorite,
       onPressed: controller.current == null ? null : onFavorite,
-      icon: const Icon(Icons.favorite, size: 20),
+      icon: const MtIcon(Icons.favorite, size: 20),
     ),
     'actions' => IconButton(
       tooltip: ui(context, 'Ações da faixa'),
       onPressed: controller.current == null ? null : onDetails,
-      icon: const Icon(Icons.more_horiz, size: 20),
+      icon: const MtIcon(Icons.more_horiz, size: 20),
     ),
     'lastfm' => lastfmIndicator(context),
     'elapsed' || 'duration' => Text(
@@ -198,7 +203,7 @@ class PlayerBar extends StatelessWidget {
       availability ??
           IconButton(
             tooltip: ui(context, 'Disponibilidade da faixa'),
-            icon: const Icon(Icons.offline_pin),
+            icon: const MtIcon(Icons.offline_pin),
             onPressed: null,
           ),
     'separator1' || 'separator2' || 'separator3' => const SizedBox(
@@ -208,30 +213,98 @@ class PlayerBar extends StatelessWidget {
     'continuous' => IconButton(
       tooltip: ui(context, 'Play contínuo'),
       isSelected: settings.visualBool('smart_play', fallback: false),
-      icon: const Icon(Icons.auto_awesome),
+      icon: const MtIcon(Icons.auto_awesome),
       onPressed: () => settings.updateVisual(
         'smart_play',
         !settings.visualBool('smart_play', fallback: false),
       ),
     ),
-    'lyrics' => IconButton(
-      tooltip: ui(context, lyricsActive ? 'Desativar letras' : 'Ativar letras'),
-      isSelected: lyricsActive,
-      onPressed: onLyrics,
-      icon: const Icon(Icons.lyrics),
-    ),
-    'queue' => IconButton(
-      tooltip: ui(context, 'Fila'),
-      onPressed: onQueue,
-      icon: const Icon(Icons.queue_music),
-    ),
+    'lyrics' => panelToggle(context, 'lyrics'),
+    'queue' => panelToggle(context, 'queue'),
     'expand' => IconButton(
       tooltip: ui(context, 'Tocando agora'),
       onPressed: onExpand,
-      icon: const Icon(Icons.open_in_full),
+      icon: const MtIcon(Icons.open_in_full),
     ),
     _ => const SizedBox.shrink(),
   };
+
+  Widget panelToggle(BuildContext context, String id) {
+    final lyrics = id == 'lyrics';
+    final selected = lyrics
+        ? lyricsActive
+        : settings.visualBool('show_queue', fallback: false) && !lyricsActive;
+    final colors = Theme.of(context).colorScheme;
+    return IconButton(
+      style: IconButton.styleFrom(
+        minimumSize: const Size(40, 32),
+        maximumSize: const Size(40, 32),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        backgroundColor: selected ? colors.primary : Colors.transparent,
+        foregroundColor: selected ? colors.onPrimary : colors.onSurface,
+        shape: const StadiumBorder(),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      tooltip: lyrics
+          ? ui(context, lyricsActive ? 'Desativar letras' : 'Ativar letras')
+          : ui(context, 'Fila'),
+      isSelected: selected,
+      onPressed: lyrics ? onLyrics : onQueue,
+      icon: MtIcon(lyrics ? Icons.lyrics : Icons.queue_music, size: 16),
+    );
+  }
+
+  List<Widget> barItems(
+    BuildContext context,
+    List<String> order,
+    double width,
+  ) {
+    Widget keyed(String id) => Padding(
+      key: ValueKey('player.item.$id'),
+      padding: EdgeInsets.only(right: id == 'cover' || id == 'info' ? 10 : 0),
+      child: item(context, id, width),
+    );
+    final result = <Widget>[];
+    for (var i = 0; i < order.length; i++) {
+      final id = order[i];
+      if (id == 'progress') {
+        result.add(Expanded(child: item(context, id, width)));
+      } else if (i + 1 < order.length &&
+          {'lyrics', 'queue'}.contains(id) &&
+          {'lyrics', 'queue'}.contains(order[i + 1])) {
+        final colors = Theme.of(context).colorScheme;
+        result.add(
+          DecoratedBox(
+            key: const ValueKey('player.panelSelector'),
+            decoration: BoxDecoration(
+              color: colors.onSurface.withValues(alpha: .10),
+              border: Border.all(color: colors.outline.withValues(alpha: .1)),
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(1),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [keyed(id), keyed(order[++i])],
+              ),
+            ),
+          ),
+        );
+      } else {
+        result.add(keyed(id));
+      }
+    }
+    final spacing = settings
+        .visualNumber('bar_icon_spacing', 4)
+        .clamp(0.0, 24.0)
+        .toDouble();
+    return [
+      for (var i = 0; i < result.length; i++) ...[
+        if (i > 0) SizedBox(width: spacing),
+        result[i],
+      ],
+    ];
+  }
 
   Widget volume(BuildContext context) => SizedBox(
     width: 128,
@@ -243,7 +316,7 @@ class PlayerBar extends StatelessWidget {
             context,
             controller.volume == 0 ? 'Desativar mudo' : 'Ativar mudo',
           ),
-          icon: Icon(
+          icon: MtIcon(
             controller.volume == 0 ? Icons.volume_off : Icons.volume_up,
             size: 18,
           ),
@@ -306,10 +379,18 @@ class PlayerBar extends StatelessWidget {
       context,
       lastfmStatus ?? (lastfmActive ? 'Last.fm ativo' : 'Last.fm inativo'),
     ),
-    child: Icon(
-      Icons.music_note,
-      size: 18,
-      color: lastfmActive ? Colors.green : Theme.of(context).disabledColor,
+    child: SizedBox.square(
+      key: const ValueKey('player.lastfm'),
+      dimension: 32,
+      child: Center(
+        child: SizedBox.square(
+          dimension: 24,
+          child: SvgPicture.asset(
+            'assets/design/lastfm-${lastfmActive ? 'active' : 'inactive'}.svg',
+            semanticsLabel: 'Last.fm',
+          ),
+        ),
+      ),
     ),
   );
 
@@ -318,28 +399,30 @@ class PlayerBar extends StatelessWidget {
     onSecondaryTapDown: controller.current == null ? null : (_) => onDetails(),
     child: DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: .96),
         border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: IconButtonTheme(
         data: IconButtonThemeData(
           style: IconButton.styleFrom(
-            minimumSize: const Size(40, 40),
-            maximumSize: const Size(40, 40),
-            padding: const EdgeInsets.all(8),
+            minimumSize: const Size(32, 32),
+            visualDensity: VisualDensity.standard,
+            maximumSize: const Size(32, 32),
+            iconSize: 20,
+            padding: const EdgeInsets.all(6),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final infoWidth = (constraints.maxWidth * .18).clamp(
-                140.0,
+              final infoWidth = (constraints.maxWidth * .20).clamp(
+                120.0,
                 300.0,
               );
               final visible = playerBarVisible(settings);
-              final rowHeight = playerBarHeight(context, settings) - 28;
+              final rowHeight = playerBarHeight(context, settings) - 24;
               final order = playerBarOrder(settings)
                   .where(visible.contains)
                   .toList();
@@ -353,19 +436,7 @@ class PlayerBar extends StatelessWidget {
                       child: Row(
                         key: const ValueKey('player.single-line'),
                         mainAxisSize: MainAxisSize.min,
-                        children: [
-                          for (final id in order)
-                            if (id == 'progress')
-                              Expanded(child: item(context, id, infoWidth))
-                            else
-                              Padding(
-                                key: ValueKey('player.item.$id'),
-                                padding: EdgeInsets.only(
-                                  right: id == 'cover' || id == 'info' ? 10 : 0,
-                                ),
-                                child: item(context, id, infoWidth),
-                              ),
-                        ],
+                        children: barItems(context, order, infoWidth),
                       ),
                     ),
                   ),

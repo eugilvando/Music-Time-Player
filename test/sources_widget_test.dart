@@ -11,10 +11,55 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:music_time/presentation/sources_dialog.dart';
 import 'package:music_time/persistence/library_store.dart';
 import 'package:music_time/sources/provider_connections.dart';
+import 'package:music_time/sources/additional_sources.dart';
 
 import 'provider_auth_test.dart' show MemoryVault;
 
 void main() {
+  testWidgets(
+    'disconnected additional source card expands with removal still available',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final store = (await tester.runAsync(
+        () => LibraryStore.open(':memory:'),
+      ))!;
+      final providers = ProviderConnections(
+        await SharedPreferences.getInstance(),
+        store,
+        vault: MemoryVault(),
+      );
+      providers.additional.connections.add(
+        SourceConnection(
+          id: 'google-fixture',
+          type: 'google',
+          label: 'Google demo',
+          connected: false,
+        ),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ProviderSettingsPage(
+              providers: providers,
+              onImported: () {},
+              onlyMicrosoft: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Remover fonte'), findsNothing);
+      await tester.tap(
+        find.byKey(const ValueKey('source.card.google-fixture')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Remover fonte'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      providers.dispose();
+      await tester.runAsync(store.close);
+    },
+  );
   testWidgets(
     'duas fontes aparecem separadas e adicionar OneDrive continua disponível',
     (tester) async {
@@ -110,6 +155,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.byType(ExpansionTile).first);
+      await tester.pumpAndSettle();
       await tester.ensureVisible(
         find.text('Verificar conexão, pasta e leitura'),
       );
@@ -192,6 +239,8 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ExpansionTile).first);
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Escolher pasta'));
       await tester.pumpAndSettle();

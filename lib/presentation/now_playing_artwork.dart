@@ -1,5 +1,6 @@
 import '../library/local_metadata.dart' show albumKey;
 import 'media_indicators.dart';
+import 'artwork_placeholder.dart';
 import 'ui_language.dart';
 
 import 'dart:math' as math;
@@ -22,16 +23,7 @@ class TrackCover extends StatelessWidget {
   final bool circular, rounded, album, indicators;
   @override
   Widget build(BuildContext context) {
-    final fallback = ColoredBox(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Center(
-        child: Icon(
-          Icons.album,
-          size: 52,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-      ),
-    );
+    const fallback = ArtworkPlaceholder();
     final scope = context
         .dependOnInheritedWidgetOfExactType<CatalogCoverScope>();
     final image = track?.cover == null

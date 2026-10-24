@@ -1,3 +1,4 @@
+import 'design_icon.dart';
 import 'media_card_size.dart';
 import '../library/catalog.dart';
 import 'ui_language.dart';
@@ -219,7 +220,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
           IconButton(
             tooltip: ui(context, 'Voltar às coleções'),
             onPressed: () => setState(() => selected = null),
-            icon: const Icon(Icons.arrow_back),
+            icon: const MtIcon(Icons.arrow_back),
           ),
           SizedBox.square(
             dimension: constraints.maxWidth < 650 ? 128 : 200,
@@ -245,7 +246,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                   children: [
                     FilledButton.icon(
                       onPressed: () => widget.onPlay(ordered(group), 0),
-                      icon: const Icon(Icons.play_arrow),
+                      icon: const MtIcon(Icons.play_arrow),
                       label: const UiText('Reproduzir'),
                     ),
                     OutlinedButton.icon(
@@ -256,7 +257,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                           widget.onPlay(List<Track>.of(group)..shuffle(), 0);
                         }
                       },
-                      icon: const Icon(Icons.shuffle),
+                      icon: const MtIcon(Icons.shuffle),
                       label: const UiText('Aleatório'),
                     ),
                     IconButton(
@@ -266,7 +267,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                             ? 'Remover favorito da coleção'
                             : 'Favoritar coleção',
                       ),
-                      icon: Icon(
+                      icon: MtIcon(
                         isFavorite(group)
                             ? Icons.favorite
                             : Icons.favorite_border,
@@ -440,12 +441,12 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                   tooltip: grid ? 'Exibir lista' : 'Exibir grade',
                   onPressed: () =>
                       widget.settings.updateVisual('${preference}_grid', !grid),
-                  icon: Icon(grid ? Icons.view_list : Icons.grid_view),
+                  icon: MtIcon(grid ? Icons.view_list : Icons.grid_view),
                 ),
                 IconButton(
                   tooltip: ui(context, 'Verificar arquivos offline'),
                   onPressed: refreshOffline,
-                  icon: const Icon(Icons.refresh),
+                  icon: const MtIcon(Icons.refresh),
                 ),
               ],
             ),
@@ -489,7 +490,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                                     const Positioned(
                                       bottom: 8,
                                       right: 8,
-                                      child: Icon(
+                                      child: MtIcon(
                                         Icons.offline_pin,
                                         color: Color(0xff54cf9b),
                                         size: 22,
