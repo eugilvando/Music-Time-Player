@@ -8,6 +8,61 @@ import '../domain/track.dart';
 import 'artwork.dart';
 import 'file_availability.dart';
 
+int? metadataPosition(Object? value) {
+  if (value is int) return value > 0 ? value : null;
+  final match = RegExp(r'^\s*(\d+)\s*(?:/\s*\d+\s*)?$')
+      .firstMatch(value?.toString() ?? '');
+  final number = match == null ? null : int.tryParse(match[1]!);
+  return number != null && number > 0 ? number : null;
+}
+
+String _trackAlbumFolder(Track track) =>
+    track.localPath != null ? path.dirname(track.localPath!) : track.sourcePath;
+
+int? discFolderNumber(String folder) {
+  final name = folder.replaceAll('\\', '/').split('/').last;
+  final match = RegExp(
+    r'^(?:cd|disc|disk|disco)[ _.\-]*0*([1-9]\d{0,2})$',
+    caseSensitive: false,
+  ).firstMatch(name);
+  return match == null ? null : int.tryParse(match[1]!);
+}
+
+int? effectiveDiscNumber(Track track) =>
+    metadataPosition(track.discNumber) ??
+    discFolderNumber(_trackAlbumFolder(track));
+
+int compareAlbumTracks(Track a, Track b) {
+  final disc = (effectiveDiscNumber(a) ?? 0x7fffffff).compareTo(
+    effectiveDiscNumber(b) ?? 0x7fffffff,
+  );
+  if (disc != 0) return disc;
+  final number = (metadataPosition(a.trackNumber) ?? 0x7fffffff).compareTo(
+    metadataPosition(b.trackNumber) ?? 0x7fffffff,
+  );
+  if (number != 0) return number;
+  final title = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+  return title != 0 ? title : a.id.compareTo(b.id);
+}
+
+Set<String> albumFavoriteAliases(Track track) => {
+  'album:${albumKey(track)}',
+  'album:${albumKey(track, combineDiscs: false)}',
+  'album:${legacyAlbumKey(track)}',
+  if (track.albumId.isNotEmpty) 'album:id:${track.albumId}',
+};
+
+Set<String> canonicalAlbumFavorites(
+  List<Track> tracks,
+  Set<String> favorites,
+) => !favorites.any((key) => key.startsWith('album:'))
+    ? <String>{}
+    : {
+        for (final track in tracks)
+          if (albumFavoriteAliases(track).any(favorites.contains))
+            'album:${albumKey(track)}',
+      };
+
 Uint8List? folderArtwork(String value) {
   for (final name in [
     'cover.jpg',
@@ -95,7 +150,10 @@ List<Track> readLocalTracks(
           ? metadata.year!.year
           : null,
       trackNumber: metadata.trackNumber,
-      discNumber: metadata.discNumber,
+      discNumber:
+          metadataPosition(metadata.discNumber) ??
+          metadataPosition(mp3?.partOfSet) ??
+          metadataPosition(vorbis?.unknowns['DISC']),
       duration: metadata.duration ?? Duration.zero,
       cover: embeddedArtwork(metadata.pictures) ?? folderArtwork(value),
     );
@@ -120,12 +178,21 @@ String legacyAlbumKey(Track track) {
   return '${track.album.trim().toLowerCase()}|${artist.trim().toLowerCase()}|${track.year ?? ''}';
 }
 
-String albumKey(Track track) {
+String albumKey(Track track, {bool combineDiscs = true}) {
   if (track.albumId.isNotEmpty) {
     return 'id:${track.albumId}${track.edition.isEmpty ? '' : '|edition:${track.edition.trim().toLowerCase()}'}';
   }
-  final folder = track.localPath != null
-      ? path.dirname(track.localPath!)
-      : track.sourcePath;
+  var folder = _trackAlbumFolder(track);
+  final disc = discFolderNumber(folder);
+  if (combineDiscs &&
+      track.album.trim().isNotEmpty &&
+      disc != null &&
+      disc == effectiveDiscNumber(track)) {
+    folder = track.localPath != null
+        ? path.dirname(folder)
+        : folder.contains('\\')
+        ? path.windows.dirname(folder)
+        : path.posix.dirname(folder);
+  }
   return '${legacyAlbumKey(track)}|${track.edition}|${track.provider}|${track.account}|$folder';
 }

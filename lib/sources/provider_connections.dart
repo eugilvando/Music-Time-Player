@@ -19,6 +19,7 @@ import '../persistence/library_store.dart';
 import 'microsoft_auth.dart';
 import 'onedrive_verification.dart';
 import '../library/cloud_metadata.dart';
+import '../library/local_metadata.dart' show metadataPosition;
 import '../library/lastfm_profile_index.dart';
 import 'microsoft_sources.dart';
 import 'additional_sources.dart';
@@ -865,13 +866,15 @@ class ProviderConnections extends ChangeNotifier
             syncCurrentFile = name;
             if (processed.length % 25 == 0) _notify();
             CloudTags? embedded;
-            if ((previous?.cloudTagsVersion == 2 ||
-                    previous?.cloudTagsVersion == 1 &&
-                        previous!.duration > Duration.zero) &&
+            if ((previous != null &&
+                    (previous.cloudTagsVersion >= cloudMetadataVersion ||
+                        previous.cloudTagsVersion >= 1 &&
+                            previous.duration > Duration.zero &&
+                            previous.discNumber != null)) &&
                 revision.isNotEmpty &&
-                previous?.revision == revision) {
+                previous.revision == revision) {
               embedded = CloudTags(
-                title: previous!.title,
+                title: previous.title,
                 artists: previous.hasScrobbleMetadata
                     ? previous.artistNames
                     : const [],
@@ -962,7 +965,11 @@ class ProviderConnections extends ChangeNotifier
               if (valueFromFile != null && valueFromFile > 0) {
                 return valueFromFile;
               }
-              final value = audio[key] as num?;
+              final raw = audio[key];
+              if (key == 'disc' || key == 'track') {
+                return metadataPosition(raw) ?? fallback;
+              }
+              final value = raw as num?;
               return value != null && value > 0 ? value.toInt() : fallback;
             }
 
@@ -1028,7 +1035,7 @@ class ProviderConnections extends ChangeNotifier
                 discNumber: positiveTag('disc', previous?.discNumber),
                 sourcePath: parentPath,
                 fileName: name,
-                cloudTagsVersion: embedded == null ? 0 : 2,
+                cloudTagsVersion: embedded == null ? 0 : cloudMetadataVersion,
                 cloudCoverEmbedded:
                     embedded?.cover != null ||
                     (previous?.cloudCoverEmbedded == true &&

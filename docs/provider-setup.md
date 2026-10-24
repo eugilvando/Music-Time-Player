@@ -2,7 +2,7 @@
 
 [Back to README](../README.md)
 
-Music Time 2.0.0 does not ship a shared Google or Microsoft application registration. **Each user must register an application and enter its Client ID** before connecting Google Drive or OneDrive. Local files, WebDAV, Jellyfin, Emby and Windows SMB do not require a Google/Microsoft registration.
+Music Time does not ship a shared Google or Microsoft application registration. **Each user must register an application and enter its Client ID** before connecting Google Drive or OneDrive. Local files, WebDAV, Jellyfin, Emby and Windows SMB do not require a Google/Microsoft registration.
 
 A Client ID identifies an OAuth application; it is not your account password, an API access token or a one-time login code. Enter provider passwords only on the provider's website, and server credentials only in the app. Do not paste passwords, tokens or client secrets into issues.
 

@@ -149,19 +149,11 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
   bool isFavorite(List<Track> group) =>
       widget.settings.collectionFavorites.contains(key(group)) ||
       (widget.albums &&
-          widget.settings.collectionFavorites.contains(
-            'album:${legacyAlbumKey(group.first)}',
-          ));
-  List<Track> ordered(List<Track> group) => List.of(group)
-    ..sort((a, b) {
-      final disc = (a.discNumber ?? 1).compareTo(b.discNumber ?? 1);
-      final order = (a.trackNumber ?? 0).compareTo(b.trackNumber ?? 0);
-      return disc != 0
-          ? disc
-          : order != 0
-          ? order
-          : a.title.compareTo(b.title);
-    });
+          group
+              .expand(albumFavoriteAliases)
+              .any(widget.settings.collectionFavorites.contains));
+  List<Track> ordered(List<Track> group) =>
+      List.of(group)..sort(compareAlbumTracks);
   Widget image(List<Track> group) => widget.albums
       ? TrackCover(track: group.first)
       : ArtistPortrait(
@@ -186,11 +178,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
           widget.settings.favoriteCollection(
             key(group),
             aliases: widget.albums
-                ? [
-                    'album:${legacyAlbumKey(group.first)}',
-                    if (group.first.albumId.isNotEmpty)
-                      'album:id:${group.first.albumId}',
-                  ]
+                ? group.expand(albumFavoriteAliases).toSet()
                 : const [],
           );
         case 'offline':
@@ -277,7 +265,7 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                         await widget.settings.favoriteCollection(
                           key(group),
                           aliases: widget.albums
-                              ? ['album:${legacyAlbumKey(group.first)}']
+                              ? group.expand(albumFavoriteAliases).toSet()
                               : const [],
                         );
                         if (mounted) setState(() {});

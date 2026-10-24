@@ -190,11 +190,16 @@ class CatalogIndex {
 
   bool isFavorite(Track t) => favorites.contains(t.id);
 
+  late final favoriteAlbumKeys = canonicalAlbumFavorites(
+    tracks,
+    collectionFavorites,
+  );
+  late final previousAlbumKeys = {
+    for (final track in tracks)
+      albumKey(track, combineDiscs: false): albumKey(track),
+  };
   bool isAlbumFavorite(Track t) =>
-      collectionFavorites.contains('album:${albumKey(t)}') ||
-      (t.albumId.isNotEmpty &&
-          collectionFavorites.contains('album:id:${t.albumId}')) ||
-      collectionFavorites.contains('album:${legacyAlbumKey(t)}');
+      favoriteAlbumKeys.contains('album:${albumKey(t)}');
   late final sortKeys = {
     for (final t in tracks)
       t.id: (
@@ -210,6 +215,9 @@ class CatalogIndex {
     String sort = 'title',
     bool descending = false,
   }) {
+    final albumFilter = filters.album.isEmpty
+        ? ''
+        : previousAlbumKeys[filters.album] ?? filters.album;
     final queries = [
       text,
       quick,
@@ -241,7 +249,7 @@ class CatalogIndex {
               t.artistNames.any(
                 (a) => artistNameKey(a) == artistNameKey(filters.artist),
               )) &&
-          (filters.album.isEmpty || albumKey(t) == filters.album) &&
+          (albumFilter.isEmpty || albumKey(t) == albumFilter) &&
           (filters.genre.isEmpty || t.genreNames.contains(filters.genre)) &&
           (filters.year.isEmpty || t.year?.toString() == filters.year) &&
           (filters.format.isEmpty || trackFormat(t) == filters.format) &&
@@ -252,10 +260,7 @@ class CatalogIndex {
       int result;
       switch (sort) {
         case 'track':
-          result = (a.discNumber ?? 1).compareTo(b.discNumber ?? 1);
-          if (result == 0) {
-            result = (a.trackNumber ?? 0).compareTo(b.trackNumber ?? 0);
-          }
+          result = compareAlbumTracks(a, b);
         case 'artist':
           result = sortKeys[a.id]!.artist.compareTo(sortKeys[b.id]!.artist);
         case 'album':
@@ -338,7 +343,7 @@ class CatalogIndex {
         final songs = <String, Track>{};
         for (final track in group.tracks) {
           final signature = jsonEncode([
-            track.discNumber ?? 1,
+            effectiveDiscNumber(track),
             track.trackNumber,
             track.title.trim().toLowerCase(),
             track.artistNames.map(artistIdentity).toList(),
@@ -377,6 +382,11 @@ class CatalogIndex {
         }
       }
       groups = unique.values.toList();
+    }
+    if (category == 'albums') {
+      for (final group in groups) {
+        group.tracks.sort(compareAlbumTracks);
+      }
     }
     return groups
       ..sort((a, b) => searchKey(a.name).compareTo(searchKey(b.name)));

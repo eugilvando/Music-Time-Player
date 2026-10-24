@@ -547,7 +547,7 @@ void main() {
       expect(
         (await store.database.rawQuery('PRAGMA user_version'))
             .single['user_version'],
-        16,
+        17,
       );
       expect(
         (await store.catalogPage(

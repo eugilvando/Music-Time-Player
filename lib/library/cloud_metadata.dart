@@ -13,6 +13,7 @@ import 'mp3_duration.dart';
 import '../lyrics/id3_lyrics.dart';
 
 const maxCloudMetadataBytes = 8 * 1024 * 1024;
+const cloudMetadataVersion = 3;
 
 class CloudTags {
   const CloudTags({
@@ -310,7 +311,8 @@ class CloudMetadataReader {
                   ),
             ),
             trackNumber: _positive(tags.trackNumber),
-            discNumber: _positive(tags.discNumber),
+            discNumber:
+                _positive(tags.discNumber) ?? metadataPosition(tags.partOfSet),
             duration: duration ?? tags.duration,
             cover: embeddedArtwork(tags.pictures),
           );
@@ -324,7 +326,9 @@ class CloudMetadataReader {
           genres: _names(tags.genres),
           year: _positive(tags.date.firstOrNull?.year),
           trackNumber: _positive(tags.trackNumber.firstOrNull),
-          discNumber: _positive(tags.discNumber),
+          discNumber:
+              _positive(tags.discNumber) ??
+              metadataPosition(tags.unknowns['DISC']),
           duration: tags.duration,
           cover: embeddedArtwork(tags.pictures),
           albumId: tags.unknowns['MUSICBRAINZ_ALBUMID'] ?? '',

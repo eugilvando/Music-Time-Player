@@ -217,7 +217,7 @@ void main() {
           .single
           .values
           .single,
-      16,
+      17,
     );
     expect(await store.database.rawQuery('PRAGMA foreign_key_check'), isEmpty);
     await store.appendToPlaylist(id, 'a');

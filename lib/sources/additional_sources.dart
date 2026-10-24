@@ -787,6 +787,7 @@ class AdditionalSources extends ChangeNotifier
     String name, {
     String revision = '',
     CloudTags? tags,
+    int tagsVersion = 0,
     String folder = '/source',
   }) => Track(
     id: trackId(s, item),
@@ -805,6 +806,7 @@ class AdditionalSources extends ChangeNotifier
     year: tags?.year,
     trackNumber: tags?.trackNumber,
     discNumber: tags?.discNumber,
+    cloudTagsVersion: tagsVersion,
     duration: tags?.duration ?? Duration.zero,
     cover: tags?.cover,
     driveId: s.id,
@@ -847,8 +849,15 @@ class AdditionalSources extends ChangeNotifier
   }) async {
     final old = _previous[s.id]?[trackId(s, item)];
     CloudTags? tags;
-    if (old == null || revision.isEmpty || revision != old.revision) {
+    var tagsVersion = old?.cloudTagsVersion ?? 0;
+    if (old == null ||
+        revision.isEmpty ||
+        revision != old.revision ||
+        old.discNumber == null &&
+            old.cloudTagsVersion < cloudMetadataVersion &&
+            RegExp(r'\.(mp3|flac)$', caseSensitive: false).hasMatch(name)) {
       tags = await remoteTags(s, item, name);
+      if (tags != null) tagsVersion = cloudMetadataVersion;
     }
     tags ??= old == null
         ? null
@@ -865,7 +874,15 @@ class AdditionalSources extends ChangeNotifier
             albumId: old.albumId,
             edition: old.edition,
           );
-    return track(s, item, name, folder: folder, revision: revision, tags: tags);
+    return track(
+      s,
+      item,
+      name,
+      folder: folder,
+      revision: revision,
+      tags: tags,
+      tagsVersion: tagsVersion,
+    );
   }
 
   Stream<Track> googleTracks(SourceConnection s) async* {

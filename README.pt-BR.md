@@ -4,11 +4,15 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.2.0+47.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.2.1+48.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
+
+## Novidades da 2.2.1
+
+Álbuns com vários discos passam a exibir seções por disco e reproduzir na ordem disco/faixa. Leitura MP3 TPOS e FLAC DISCNUMBER, com faixas na mesma pasta ou em subpastas CD1/CD2. IDs, playlists e favoritos existentes preservados. [Detalhes e compatibilidade](docs/release-2.2.1.md).
 
 ## Novidades desde a 2.0
 
@@ -18,7 +22,7 @@ Inclui fontes primária/secundária independentes, refinamentos de Home/capas/a�
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.2.0.exe` na [release 2.2.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.0).
+1. Baixe `MusicTime-Setup-2.2.1.exe` na [release 2.2.1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.1).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -96,4 +100,4 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 - Sem timer, ReplayGain, controles de gapless/crossfade, AutoEQ/perfis de fone, saída avançada, início com Windows e sistema completo de atalhos/notificações configuráveis.
 - Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
-Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.2.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.2.1.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.

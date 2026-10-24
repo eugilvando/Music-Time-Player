@@ -8,11 +8,15 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.2.0+47.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.2.1+48.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
+
+## New in 2.2.1
+
+Multi-disc albums now show ordered disc sections and play in disc/track order. MP3 TPOS and FLAC DISCNUMBER are read, including number/total values. Tracks in one folder or explicit CD1/CD2 subfolders are supported; existing track IDs, playlists and album favorites are preserved. [Details and upgrade compatibility](docs/release-2.2.1.md).
 
 ## What changed since 2.0
 
@@ -23,7 +27,7 @@ Design by **Gilvando Souza**.
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.2.0.exe` from the [2.2.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.0).
+1. Download `MusicTime-Setup-2.2.1.exe` from the [2.2.1 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.1).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -151,9 +155,9 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Validation and development
 
-Version 2.2.0 validation is recorded in [release notes](docs/release-2.2.0.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
+Version 2.2.1 validation is recorded in [release notes](docs/release-2.2.1.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.2.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.2.1.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 

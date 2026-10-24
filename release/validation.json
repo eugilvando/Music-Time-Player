@@ -1,43 +1,43 @@
 {
-    "version":  "2.2.0+47",
+    "version":  "2.2.1+48",
     "limits":  "Controlled tests do not establish live Last.fm report acceptance, service certification or universal codec/device support. No personal profile is included.",
     "checks":  {
                    "windowsIntegration":  "passed; SMTC artwork/play/pause, accent, vault, tray, player models, window placement, clean exit",
                    "runtimeSource":  {
-                                         "files":  215,
+                                         "files":  216,
                                          "identical":  true
                                      },
-                   "windowsBuild":  "passed; 130.2s",
+                   "windowsBuild":  "passed; 157.3s",
                    "screenshotRendering":  "Listening Insights uses actual application widgets and fictional data; existing interface gallery captured in 2.0",
-                   "finalInsightsRegression":  {
-                                                   "note":  "Overlaps the full suite; repeated after final cancellation/cache guards",
-                                                   "failed":  0,
-                                                   "passed":  15
-                                               },
                    "dartAnalysis":  "passed; development and public copies, no issues",
-                   "publicInsightsRegression":  {
-                                                    "note":  "Same tests repeated in the public snapshot; not additional unique tests",
-                                                    "failed":  0,
-                                                    "passed":  15
-                                                },
                    "installer":  "Inno Setup 6; tested runtime bundle with existing dependency notices",
-                   "baselineTests":  {
-                                         "duration":  "6m18s",
-                                         "command":  "flutter test --no-pub --concurrency=1",
-                                         "failed":  0,
-                                         "passed":  338
-                                     },
-                   "dataRestart":  "Not repeated in 2.2.0; prior release validation is historical",
+                   "dataRestart":  "Not repeated in 2.2.1; migration and playlist integrity covered by targeted tests",
                    "relativeDocumentationLinks":  "passed",
-                   "pubGet":  "passed; offline, development and public copies"
+                   "pubGet":  "passed; offline, development and public copies",
+                   "intermediateFullRun":  {
+                                               "note":  "Both cases corrected and included in the final regression run",
+                                               "failed":  2,
+                                               "passed":  346
+                                           },
+                   "finalRegressions":  {
+                                            "uniquePassingCasesAcrossOverlappingRuns":  348,
+                                            "note":  "Not a single final clean full-suite run",
+                                            "failed":  0,
+                                            "passed":  50
+                                        },
+                   "publicDiscRegression":  {
+                                                "note":  "Repeated tests from development validation, not additional unique tests",
+                                                "failed":  0,
+                                                "passed":  10
+                                            }
                },
     "binaries":  [
                      {
-                         "sha256":  "c8dcab0fb4fb0ea7fdad219155c493506fa73d5850797d478e1b3fa6b5528402",
+                         "sha256":  "0d4f7d728cf7d7df15b36d31c8eb4630c9ccda393601ea2ce0998609f28d1c1d",
                          "file":  "music_time.exe"
                      },
                      {
-                         "sha256":  "ac383e2e69c2483f1a28970b233e79153f5d56a811068f70ccd2ece91a43451d",
+                         "sha256":  "4c19e949c45dd6d674ca7fd3a1423fe2655a2a149888220c991a74f454b2d1b3",
                          "file":  "data/app.so"
                      },
                      {
@@ -48,8 +48,8 @@
     "date":  "2026-10-24",
     "platform":  "Windows x64",
     "installer":  {
-                      "sha256":  "316916254bf98f02b2c62fbaeda12c4ec2fd263f7c90567744b99b12c6b1fa18",
-                      "file":  "MusicTime-Setup-2.2.0.exe",
-                      "bytes":  20436396
+                      "sha256":  "fdc0144871af46cda3c0584651d007a07e70e46493aa91b4f037947197cc8717",
+                      "file":  "MusicTime-Setup-2.2.1.exe",
+                      "bytes":  20438357
                   }
 }

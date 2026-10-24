@@ -19,7 +19,7 @@ List<int> syncsafe(int n) => [
   for (final shift in [21, 14, 7, 0]) (n >> shift) & 127,
 ];
 
-Uint8List mp3Fixture(Uint8List image, {int version = 3}) {
+Uint8List mp3Fixture(Uint8List image, {int version = 3, String disc = '2/2'}) {
   List<int> frame(String name, List<int> body) => [
     ...ascii.encode(name),
     ...(version == 4 ? syncsafe(body.length) : number(body.length)),
@@ -35,7 +35,7 @@ Uint8List mp3Fixture(Uint8List image, {int version = 3}) {
       'TALB': 'Álbum original',
       'TYER': '2022',
       'TRCK': '3/12',
-      'TPOS': '2/2',
+      'TPOS': disc,
     }.entries)
       ...frame(tag.key, [3, ...utf8.encode(tag.value)]),
     ...frame('APIC', [0, ...ascii.encode('image/png'), 0, 3, 0, ...image]),
@@ -260,6 +260,7 @@ void main() {
         'ALBUMARTIST=Grupo',
         'DATE=2020',
         'TRACKNUMBER=4',
+        'DISCNUMBER=2/2',
       ];
       final comment = [
         ...number(0, Endian.little),
@@ -312,6 +313,7 @@ void main() {
       expect(tags.albumArtists, ['Grupo']);
       expect(tags.year, 2020);
       expect(tags.trackNumber, 4);
+      expect(tags.discNumber, 2);
       expect(tags.cover, image);
       expect(reader.received, lessThan(file.length - 65536));
     },
@@ -402,13 +404,27 @@ void main() {
       expect(track.albumArtist, 'Artista do álbum');
       expect(track.album, 'Álbum original');
       expect(track.cover, image);
-      expect(track.cloudTagsVersion, 2);
+      expect(track.cloudTagsVersion, 3);
       expect(track.duration.inSeconds, 199);
       expect(track.fileName, '03 - Arquivo.mp3');
       expect(providers.syncSummary?['tagsRead'], 1);
       await providers.importMicrosoft();
       expect(providers.error, isNull);
       expect(reads, 3);
+      // An unchanged old metadata revision without a disc must be read once
+      // with the new parser, while retaining the persistent track identity.
+      await store.database.rawUpdate(
+        "UPDATE tracks SET metadata=json_set(metadata,'\$.cloudTagsVersion',2,'\$.discNumber',NULL)",
+      );
+      await providers.importMicrosoft();
+      expect(providers.error, isNull);
+      final refreshed = (await store.loadTracks()).single;
+      expect(refreshed.id, track.id);
+      expect(refreshed.discNumber, 2);
+      expect(refreshed.cloudTagsVersion, 3);
+      expect(reads, 6);
+      await providers.importMicrosoft();
+      expect(reads, 6);
       expect((await store.downloadTasks()), isEmpty);
     },
   );

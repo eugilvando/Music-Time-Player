@@ -23,7 +23,10 @@ Map<String, Object?> catalogProjection(Track track) => {
   'artist_key': searchKey(track.artist),
   'album_key': searchKey(track.album),
   'album_identity': albumKey(track),
+  'album_previous': albumKey(track, combineDiscs: false),
   'album_legacy': legacyAlbumKey(track),
+  'disc_number': effectiveDiscNumber(track),
+  'track_number': metadataPosition(track.trackNumber),
   'searchable': searchKey(
     [
       track.title,
@@ -88,7 +91,12 @@ class CatalogSqlQuery {
         filters.genre,
       ]);
     }
-    if (filters.album.isNotEmpty) add('c.album_identity=?', [filters.album]);
+    if (filters.album.isNotEmpty) {
+      add(
+        'c.album_identity=? OR c.album_identity IN (SELECT album_identity FROM catalog_search WHERE album_previous=?)',
+        [filters.album, filters.album],
+      );
+    }
     if (filters.year.isNotEmpty) add('CAST(c.year AS TEXT)=?', [filters.year]);
     if (filters.format.isNotEmpty) add('c.format=?', [filters.format]);
     if (filters.offline) {
@@ -117,7 +125,9 @@ class CatalogSqlQuery {
       _ => 'c.title_key',
     };
     final direction = descending ? 'DESC' : 'ASC';
-    order = '$field $direction,t.id $direction';
+    order = sort == 'track'
+        ? 'COALESCE(c.disc_number,2147483647) $direction,COALESCE(c.track_number,2147483647) $direction,c.title_key $direction,t.id $direction'
+        : '$field $direction,t.id $direction';
   }
   final clauses = <String>[], arguments = <Object?>[];
   late final String order;

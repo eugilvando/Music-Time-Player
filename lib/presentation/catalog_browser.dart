@@ -966,11 +966,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
 
   Iterable<String> collectionAliases(String collection, List<Track> values) =>
       collection.startsWith('album:') && values.isNotEmpty
-      ? [
-          'album:${legacyAlbumKey(values.first)}',
-          if (values.first.albumId.isNotEmpty)
-            'album:id:${values.first.albumId}',
-        ]
+      ? values.expand(albumFavoriteAliases).toSet()
       : collection.startsWith('artist:')
       ? widget.settings.collectionFavorites.where(
           (key) =>
@@ -1063,7 +1059,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     'artist' => t.artistNames.join('; '),
     'album' => t.album.isEmpty ? 'Sem álbum' : t.album,
     'duration' => catalogTime(t.duration),
-    'track' => '${t.trackNumber ?? '—'} / ${t.discNumber ?? '—'}',
+    'track' => '${t.trackNumber ?? '—'} / ${effectiveDiscNumber(t) ?? '—'}',
     'year' => t.year?.toString() ?? 'Não informado',
     'genre' => t.genreNames.isEmpty ? 'Não informado' : t.genreNames.join('; '),
     'format' => trackFormat(t).isEmpty ? 'Não informado' : trackFormat(t),
@@ -1076,64 +1072,67 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     'added' => catalogDate(t.addedAt),
     _ => '',
   };
-  Widget trackDetails(List<Track> values, {bool paged = false}) =>
-      MediaDetailsTable(
-        onChooseColumns: chooseColumns,
-        columnKey: 'catalog_tracks',
-        headers: [
-          if (category == 'albums') '#',
-          ui(context, 'Título'),
-          ...columns.map((c) => ui(context, catalogColumns[c] ?? c)),
-          '',
-        ],
-        widths: [
-          if (category == 'albums') 64,
-          340,
-          ...columns.map((_) => 175.0),
-          72,
-        ],
-        itemCount: values.length,
-        rowBuilder: (i) {
-          final t = values[i];
-          return [
-            if (category == 'albums')
-              Text(t.trackNumber?.toString() ?? (i + 1).toString()),
-            InkWell(
-              onTap: () => paged ? selectPaged(t) : select(t, values),
-              child: Row(
-                children: [
-                  if (showSelection || selectedIds.isNotEmpty)
-                    Checkbox(
-                      value: selectedIds.contains(t.id),
-                      onChanged: (_) => paged
-                          ? selectPaged(t, checkbox: true)
-                          : select(t, values, checkbox: true),
-                    ),
-                  SizedBox.square(dimension: 32, child: TrackCover(track: t)),
-                  const SizedBox(width: 12),
-                  Expanded(child: Text(t.title)),
-                ],
-              ),
-            ),
-            ...columns.map(
-              (c) => InkWell(
-                onTap: c == 'artist'
-                    ? () => openArtist(t.artistNames.first)
-                    : c == 'album' && t.album.isNotEmpty
-                    ? () => openTrackCollection(t, true)
-                    : null,
-                child: Text(
-                  {'duration', 'offline', 'favorite'}.contains(c) ||
-                          {'Sem álbum', 'Não informado'}.contains(cell(t, c))
-                      ? ui(context, cell(t, c))
-                      : cell(t, c),
+  Widget trackDetails(
+    List<Track> values, {
+    bool paged = false,
+    List<Track>? queue,
+  }) => MediaDetailsTable(
+    onChooseColumns: chooseColumns,
+    columnKey: 'catalog_tracks',
+    headers: [
+      if (category == 'albums') '#',
+      ui(context, 'Título'),
+      ...columns.map((c) => ui(context, catalogColumns[c] ?? c)),
+      '',
+    ],
+    widths: [
+      if (category == 'albums') 64,
+      340,
+      ...columns.map((_) => 175.0),
+      72,
+    ],
+    itemCount: values.length,
+    rowBuilder: (i) {
+      final t = values[i];
+      return [
+        if (category == 'albums')
+          Text(t.trackNumber?.toString() ?? (i + 1).toString()),
+        InkWell(
+          onTap: () => paged ? selectPaged(t) : select(t, queue ?? values),
+          child: Row(
+            children: [
+              if (showSelection || selectedIds.isNotEmpty)
+                Checkbox(
+                  value: selectedIds.contains(t.id),
+                  onChanged: (_) => paged
+                      ? selectPaged(t, checkbox: true)
+                      : select(t, queue ?? values, checkbox: true),
                 ),
-              ),
+              SizedBox.square(dimension: 32, child: TrackCover(track: t)),
+              const SizedBox(width: 12),
+              Expanded(child: Text(t.title)),
+            ],
+          ),
+        ),
+        ...columns.map(
+          (c) => InkWell(
+            onTap: c == 'artist'
+                ? () => openArtist(t.artistNames.first)
+                : c == 'album' && t.album.isNotEmpty
+                ? () => openTrackCollection(t, true)
+                : null,
+            child: Text(
+              {'duration', 'offline', 'favorite'}.contains(c) ||
+                      {'Sem álbum', 'Não informado'}.contains(cell(t, c))
+                  ? ui(context, cell(t, c))
+                  : cell(t, c),
             ),
-            widget.trackActions(t),
-          ];
-        },
-      );
+          ),
+        ),
+        widget.trackActions(t),
+      ];
+    },
+  );
   Widget trackList(List<Track> values, {bool paged = false}) {
     if (values.isEmpty) return empty();
     if (view == 'compact_card') {
@@ -1497,16 +1496,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     );
   }
 
-  List<Track> ordered(List<Track> values) => List.of(values)
-    ..sort((a, b) {
-      final disc = (a.discNumber ?? 1).compareTo(b.discNumber ?? 1),
-          track = (a.trackNumber ?? 0).compareTo(b.trackNumber ?? 0);
-      return disc != 0
-          ? disc
-          : track != 0
-          ? track
-          : searchKey(a.title).compareTo(searchKey(b.title));
-    });
+  List<Track> ordered(List<Track> values) =>
+      List.of(values)..sort(compareAlbumTracks);
   void openArtist(String name) {
     final values = widget.tracks
         .where(
@@ -1736,7 +1727,12 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           );
   }
 
-  Widget compactTrack(List<Track> values, int i, {bool paged = false}) {
+  Widget compactTrack(
+    List<Track> values,
+    int i, {
+    bool paged = false,
+    List<Track>? queue,
+  }) {
     final t = values[i];
     return ItemActionRegion(
       child: Card(
@@ -1749,10 +1745,14 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               if (paged) {
                 selectPaged(t);
               } else {
-                select(t, values);
+                select(t, queue ?? values);
               }
             } else {
-              widget.onPlay(values, i);
+              final playback = queue ?? values;
+              widget.onPlay(
+                playback,
+                playback.indexWhere((track) => track.id == t.id),
+              );
             }
           },
           child: Padding(
@@ -1815,8 +1815,12 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     );
   }
 
-  List<Widget> detailTracks(List<Track> values) => [
-    if (category != 'albums' || selectedIds.isNotEmpty)
+  List<Widget> detailTracks(
+    List<Track> values, {
+    List<Track>? queue,
+    bool showToolbar = true,
+  }) => [
+    if (showToolbar && (category != 'albums' || selectedIds.isNotEmpty))
       SliverToBoxAdapter(
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -1829,10 +1833,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 onPressed: () => setState(() => showSelection = !showSelection),
                 icon: const MtIcon(Icons.checklist),
               ),
-              Text('${values.length} ${ui(context, 'músicas')}'),
+              Text('${(queue ?? values).length} ${ui(context, 'músicas')}'),
               TextButton(
                 onPressed: () => setState(
-                  () => selectedIds = values.map((t) => t.id).toSet(),
+                  () =>
+                      selectedIds = (queue ?? values).map((t) => t.id).toSet(),
                 ),
                 child: const UiText('Selecionar todas'),
               ),
@@ -1842,7 +1847,9 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                   child: const UiText('Limpar seleção'),
                 ),
                 actions(
-                  values.where((t) => selectedIds.contains(t.id)).toList(),
+                  (queue ?? values)
+                      .where((t) => selectedIds.contains(t.id))
+                      .toList(),
                 ),
               ],
             ],
@@ -1850,7 +1857,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         ),
       ),
     if (view == 'detailed')
-      SliverToBoxAdapter(child: trackDetails(values))
+      SliverToBoxAdapter(child: trackDetails(values, queue: queue))
     else if (view == 'compact_card')
       SliverGrid.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
@@ -1860,7 +1867,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           mainAxisSpacing: 12,
         ),
         itemCount: values.length,
-        itemBuilder: (_, i) => compactTrack(values, i),
+        itemBuilder: (_, i) => compactTrack(values, i, queue: queue),
       )
     else
       SliverList.builder(
@@ -1920,12 +1927,43 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               ),
               selected: selectedIds.contains(track.id),
               trailing: widget.trackActions(track),
-              onTap: () => select(track, values),
+              onTap: () => select(track, queue ?? values),
             ),
           );
         },
       ),
   ];
+
+  List<Widget> albumDiscSections(List<Track> values) {
+    final discs = <int?, List<Track>>{};
+    for (final track in values) {
+      discs.putIfAbsent(effectiveDiscNumber(track), () => []).add(track);
+    }
+    if (discs.length <= 1 && (discs.keys.firstOrNull ?? 1) == 1) {
+      return detailTracks(values);
+    }
+    final numbers = discs.keys.toList()
+      ..sort((a, b) => (a ?? 0x7fffffff).compareTo(b ?? 0x7fffffff));
+    final queue = [for (final disc in numbers) ...discs[disc]!];
+    return [
+      for (var i = 0; i < numbers.length; i++) ...[
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+            child: Text(
+              numbers[i] == null
+                  ? ui(context, 'Disco não informado')
+                  : '${ui(context, 'Disco')} ${numbers[i]}',
+              key: ValueKey('album.disc.${numbers[i] ?? 'unknown'}'),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        ...detailTracks(discs[numbers[i]]!, queue: queue, showToolbar: i == 0),
+      ],
+    ];
+  }
 
   Widget detail(List<Track> visible) {
     final original = selectedGroup!;
@@ -2256,22 +2294,23 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       }
     } else {
       content.addAll(
-        detailTracks(
-          album
-              ? values
-              : artistTab == 'participations'
-              ? values
-                    .where(
-                      (t) =>
-                          (t.albumArtist.isNotEmpty ||
-                              t.albumArtists.isNotEmpty) &&
-                          !t.albumArtistNames.any(
-                            (n) => searchKey(n) == searchKey(original.name),
-                          ),
-                    )
-                    .toList()
-              : values,
-        ),
+        album
+            ? albumDiscSections(values)
+            : detailTracks(
+                artistTab == 'participations'
+                    ? values
+                          .where(
+                            (t) =>
+                                (t.albumArtist.isNotEmpty ||
+                                    t.albumArtists.isNotEmpty) &&
+                                !t.albumArtistNames.any(
+                                  (n) =>
+                                      searchKey(n) == searchKey(original.name),
+                                ),
+                          )
+                          .toList()
+                    : values,
+              ),
       );
     }
     if (album && artists.isNotEmpty) {
@@ -2596,7 +2635,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
 
   Widget toolbar({bool detail = false}) {
     final sorts = {
-      if (detail && category == 'albums') 'track': 'Track number',
+      if (detail && category == 'albums') 'track': 'Disco / faixa',
       'title': 'Título',
       'artist': 'Artista',
       'album': 'Álbum',

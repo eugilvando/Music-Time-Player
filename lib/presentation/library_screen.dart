@@ -114,6 +114,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
   String query = '';
   SettingsCategory? settingsDestination;
   int catalogRevision = 0;
+  int indicatorRevision = -1;
+  Set<String> indicatorFavorites = {}, indicatorAlbumCollections = {};
+  Set<String> get indicatorCollections {
+    final current = widget.settings.collectionFavorites;
+    if (indicatorRevision != catalogRevision ||
+        !setEquals(current, indicatorFavorites)) {
+      indicatorRevision = catalogRevision;
+      indicatorFavorites = current;
+      indicatorAlbumCollections = {
+        ...current,
+        ...canonicalAlbumFavorites(tracks, current),
+      };
+    }
+    return indicatorAlbumCollections;
+  }
+
   int? selectedPlaylist;
   bool? lyricsOpen;
   bool get lyricsActive =>
@@ -997,13 +1013,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     List<Track> values, {
     required String selection,
   }) {
-    final ordered = List<Track>.of(values)
-      ..sort((a, b) {
-        final disc = (a.discNumber ?? 1).compareTo(b.discNumber ?? 1);
-        if (disc != 0) return disc;
-        final track = (a.trackNumber ?? 0).compareTo(b.trackNumber ?? 0);
-        return track == 0 ? a.title.compareTo(b.title) : track;
-      });
+    final ordered = List<Track>.of(values)..sort(compareAlbumTracks);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1755,7 +1765,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     animation: Listenable.merge([controller, widget.settings, providers]),
     builder: (context, _) => MediaIndicatorScope(
       favorites: favorites,
-      collections: widget.settings.collectionFavorites,
+      collections: indicatorCollections,
       currentId: controller.current?.id,
       currentTrack: controller.current,
       playing: controller.playing,

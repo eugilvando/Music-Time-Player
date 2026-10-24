@@ -45,7 +45,7 @@ class LibraryStore {
     final db = await databaseFactoryFfi.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 16,
+        version: 17,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -113,7 +113,8 @@ class LibraryStore {
           await _ensureColumn(db, 'playback', 'title', 'TEXT');
           await ArtworkStorage.createSchema(db);
           await _playlistReferencesSchema(db);
-          if (oldVersion < 15) {
+          if (oldVersion < 17) {
+            await _catalogSearchSchema(db);
             await LibraryStore._(db)
                 .rebuildCatalogIndex(executor: db, onProgress: onProgress);
           }
@@ -436,6 +437,9 @@ class LibraryStore {
     await db.execute(
       'CREATE TABLE IF NOT EXISTS catalog_search(track_id TEXT PRIMARY KEY REFERENCES tracks(id) ON DELETE CASCADE,title_key TEXT NOT NULL,artist_key TEXT NOT NULL,album_key TEXT NOT NULL,album_identity TEXT NOT NULL,album_legacy TEXT NOT NULL,searchable TEXT NOT NULL,provider TEXT NOT NULL,account TEXT NOT NULL,folder TEXT NOT NULL,artists TEXT NOT NULL,genres TEXT NOT NULL,year INTEGER,format TEXT NOT NULL,duration_ms INTEGER NOT NULL,added_us INTEGER NOT NULL)',
     );
+    await _ensureColumn(db, 'catalog_search', 'disc_number', 'INTEGER');
+    await _ensureColumn(db, 'catalog_search', 'track_number', 'INTEGER');
+    await _ensureColumn(db, 'catalog_search', 'album_previous', 'TEXT');
     for (final field in [
       'title_key',
       'artist_key',
@@ -446,6 +450,7 @@ class LibraryStore {
       'account',
       'folder',
       'album_identity',
+      'album_previous',
     ]) {
       await db.execute(
         'CREATE INDEX IF NOT EXISTS catalog_${field}_idx ON catalog_search($field,track_id)',

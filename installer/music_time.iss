@@ -1,5 +1,5 @@
 #define MyAppName "Music Time"
-#define MyAppVersion "2.2.0"
+#define MyAppVersion "2.2.1"
 [Setup]
 AppId=MusicTime.Experimental
 AppName={#MyAppName}

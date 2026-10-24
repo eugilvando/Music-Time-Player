@@ -1,5 +1,5 @@
 import 'design_icon.dart';
-import '../library/local_metadata.dart' show albumKey, legacyAlbumKey;
+import '../library/local_metadata.dart' show albumFavoriteAliases;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,11 +24,8 @@ class MediaIndicatorScope extends InheritedWidget {
   final bool playing;
   static MediaIndicatorScope? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<MediaIndicatorScope>();
-  bool albumFavorite(Track t) => [
-    'album:${albumKey(t)}',
-    'album:${legacyAlbumKey(t)}',
-    if (t.albumId.isNotEmpty) 'album:id:${t.albumId}',
-  ].any(collections.contains);
+  bool albumFavorite(Track t) =>
+      albumFavoriteAliases(t).any(collections.contains);
   bool artistFavorite(String name) =>
       collections.contains('artist:$name') ||
       collections.contains('artist:${artistNameKey(name)}');
