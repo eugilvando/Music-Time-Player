@@ -239,7 +239,7 @@ void main() {
       final settings = AppSettings(await SharedPreferences.getInstance());
       await settings.resetAppearance();
       expect(settings.visualNumber('font_body', 14), 14);
-      expect(settings.nowPlayingStyle, 'focus');
+      expect(settings.nowPlayingStyle, 'lyrics_only');
       await settings.resetNowPlaying();
       expect(settings.nowPlayingStyle, 'vinyl');
       expect(settings.language, 'pt');

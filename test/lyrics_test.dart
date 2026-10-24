@@ -65,7 +65,7 @@ void main() {
     await settings.favoriteCollection('album:test');
     await settings.setLyricsOffset('track-a', 500);
     final restored = AppSettings(prefs);
-    expect(restored.nowPlayingStyle, 'gallery');
+    expect(restored.nowPlayingStyle, 'cover_only');
     expect(restored.visualBool('reduce_motion', fallback: false), isTrue);
     expect(restored.collectionFavorites, contains('album:test'));
     expect(restored.lyricsOffset('track-a'), 500);

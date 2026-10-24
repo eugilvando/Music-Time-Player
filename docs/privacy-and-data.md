@@ -39,3 +39,7 @@ The current database/inner document schema is **16**, and the new archive format
 Include Windows version, Music Time version, source type, steps, a sanitized error message and the audio container/codec when known. Remove tokens, client secrets, authorization URLs, server passwords, local usernames, personal music paths and private account details before attaching diagnostics. This release does not yet provide a complete sanitized diagnostic-export workflow.
 
 [README](../README.md) · [Provider setup](provider-setup.md)
+
+## Listening Insights cache and exports
+
+Listening Insights stores bounded derived reports by Last.fm profile and period in the local database, separately from local listening history. The cache is excluded from backups and discarded on restore/reset. CSV export is explicit and contains profile name, listening metadata, date ranges and coverage, without API keys or sessions. Generated playlists store references to tracks already in the user's library. No report is uploaded to a Music Time server.

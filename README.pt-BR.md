@@ -4,17 +4,21 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.0.0+44.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.2.0+47.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
-## Novidades da 2.0
+Design: **Gilvando Souza**.
 
-Design por **Gilvando Souza**, com Home e os cinco modelos Now Playing preservados, configurações reorganizadas, ícones arredondados, tamanhos do Figma, seleção de colunas e backup seletivo com criptografia opcional.
+## Novidades desde a 2.0
+
+**Listening Insights / Estatísticas de escuta**, abaixo de Histórico: rankings pessoais Last.fm, períodos exatos/personalizados, gráfico de atividade, comparação e resumos semanais/mensais/anuais, CSV e geração revisada de playlist manual ou fila. Cache offline e cobertura parcial explícita, sem alterar o histórico local.
+
+Inclui fontes primária/secundária independentes, refinamentos de Home/capas/ações, Top Tracks em artistas, painéis Queue/Lyrics redimensionáveis e restauração da janela pela bandeja sem perder dimensões. Modelos: Classic, Vinyl, Minimalist, Cover Only e Lyrics Only.
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.0.0.exe` na [release 2.0.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.0.0).
+1. Baixe `MusicTime-Setup-2.2.0.exe` na [release 2.2.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.0).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -60,6 +64,7 @@ O [guia de configuração](docs/provider-setup.md) traz as etapas e links oficia
 - **Áudio e letras:** equalizador de cinco bandas com presets/compensação de ganho; letras LRC/TXT ao lado, MP3 embutidas suportadas, recuperação OneDrive e fallback opcional LRCLIB. Rolagem, seek, offset e apresentação configuráveis; palavras sincronizadas apenas com timestamps reais.
 - **Playlists:** criar, renomear, excluir, favoritar, reordenar e preservar repetições; capa própria ou colagem de quatro capas. Importação/exportação M3U8 UTF-8 e referências OneDrive/Symfonium. Importação em lote continua após falhas, mantém pendências e permite revisar/vincular/remover. A barra de correção some quando as pendências terminam.
 - **Histórico e Last.fm:** histórico local com contagens reais; Last.fm opcional com autorização, now playing/scrobbling, outbox, favoritos/recentes/rankings e similaridade. Importar recentes não inventa contagens locais.
+- **Listening Insights:** estatísticas Last.fm por período e resumos semanais/mensais/anuais, CSV, cache offline e prévia de playlist com associação conservadora. Salvar playlist e tocar somente uma fila são ações distintas. Requer usuário e chave Last.fm em Integrações. [Guia](docs/listening-insights.md).
 - **Downloads e offline:** tarefas por faixa/coleção/seleção, retry, remoção individual dos permanentes e referências compartilhadas. Abas de permanentes/cache, listas compactas recolhíveis e informações de espaço. Cache padrão 10 GB, cinco próximas faixas e 30 dias sem uso. Offline global usa apenas arquivos presentes e válidos; placeholders OneDrive não contam.
 - **Configurações e dados:** nove categorias redesenhadas pelo Figma, cards e busca, resumo da coleção, cache/downloads separados e colunas selecionáveis. Backup `.mtbackup` seletivo, importação apenas de playlists, capas opcionais e fontes/IDs. Credenciais/sessões são opcionais e exigem criptografia por senha. Músicas/downloads físicos não entram no backup.
 - **Windows:** bandeja, comportamento ao fechar/minimizar e controles de mídia nativos com capa, metadados, play/pause, navegação e seek.
@@ -68,11 +73,13 @@ Editar informações, mesclar entidades ou remover uma ocorrência de playlist *
 
 ## Capturas
 
-As capturas usam os componentes reais da versão atual e uma biblioteca fictícia isolada, com capas e textos criados para demonstração. Não são contas conectadas nem músicas incluídas no download.
+A galeria de interface foi capturada na 2.0 e a tela Listening Insights na 2.2, usando componentes reais e uma biblioteca fictícia isolada, com capas e textos criados para demonstração. Não são contas conectadas nem músicas incluídas no download.
 
 | Biblioteca | Tocando agora e fila |
 | --- | --- |
 | ![Biblioteca](docs/images/library.png) | ![Tocando agora](docs/images/now-playing.png) |
+
+![Estatísticas de escuta com dados fictícios](docs/images/listening-insights.png)
 
 Mais capturas estão no [README em inglês](README.md#screenshots).
 
@@ -89,4 +96,4 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 - Sem timer, ReplayGain, controles de gapless/crossfade, AutoEQ/perfis de fone, saída avançada, início com Windows e sistema completo de atalhos/notificações configuráveis.
 - Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
-Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.0.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.2.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.

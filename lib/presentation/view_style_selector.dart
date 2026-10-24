@@ -1,3 +1,4 @@
+import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'media_card_size.dart';
 
@@ -75,26 +76,30 @@ class ViewStyleButton extends StatelessWidget {
                         const SizedBox(width: 12),
                         SizedBox(
                           width: 160,
-                          child: DropdownButton<String>(
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            key: ValueKey('view.style.${family.key}'),
-                            isExpanded: true,
-                            value: family.value.containsKey(value)
-                                ? value
-                                : family.value.keys.first,
-                            items: [
-                              for (final style in family.value.entries)
-                                DropdownMenuItem(
-                                  value: style.key,
-                                  child: UiText(
-                                    style.value,
-                                    overflow: TextOverflow.ellipsis,
+                          child: RoundedSelect(
+                            child: DropdownButton<String>(
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              key: ValueKey('view.style.${family.key}'),
+                              isExpanded: true,
+                              value: family.value.containsKey(value)
+                                  ? value
+                                  : family.value.keys.first,
+                              items: [
+                                for (final style in family.value.entries)
+                                  DropdownMenuItem(
+                                    value: style.key,
+                                    child: UiText(
+                                      style.value,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                            ],
-                            onChanged: (style) {
-                              if (style != null) Navigator.pop(context, style);
-                            },
+                              ],
+                              onChanged: (style) {
+                                if (style != null) {
+                                  Navigator.pop(context, style);
+                                }
+                              },
+                            ),
                           ),
                         ),
                       ],
@@ -195,20 +200,22 @@ class ViewStyleSelector extends StatelessWidget {
         ),
         SizedBox(
           width: 154,
-          child: DropdownButton<String>(
-            key: const ValueKey('view.style'),
-            isExpanded: true,
-            value: styles.containsKey(value) ? value : styles.keys.first,
-            items: [
-              for (final entry in styles.entries)
-                DropdownMenuItem(
-                  value: entry.key,
-                  child: UiText(entry.value, overflow: TextOverflow.ellipsis),
-                ),
-            ],
-            onChanged: (style) {
-              if (style != null) onChanged(style);
-            },
+          child: RoundedSelect(
+            child: DropdownButton<String>(
+              key: const ValueKey('view.style'),
+              isExpanded: true,
+              value: styles.containsKey(value) ? value : styles.keys.first,
+              items: [
+                for (final entry in styles.entries)
+                  DropdownMenuItem(
+                    value: entry.key,
+                    child: UiText(entry.value, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (style) {
+                if (style != null) onChanged(style);
+              },
+            ),
           ),
         ),
         if (MediaCardSizeScope.of(context) case final sizes?)

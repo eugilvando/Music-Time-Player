@@ -7,7 +7,13 @@ import '../domain/track.dart';
 import '../persistence/library_store.dart';
 import '../settings/app_settings.dart';
 import 'compact_media_card.dart';
-import 'home_page.dart' show HomeCardLayout, homeCompactItem, homeListMode;
+import 'home_page.dart'
+    show
+        HomeCardLayout,
+        HomeCarouselState,
+        homeCarouselButtons,
+        homeCompactItem,
+        homeListMode;
 import 'playlists_dialog.dart' show PlaylistArtwork;
 import 'ui_language.dart';
 
@@ -38,6 +44,7 @@ class HomeFavoritePlaylists extends StatefulWidget {
 }
 
 class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
+  final carouselKey = GlobalKey<HomeCarouselState>();
   late Future<List<({Map<String, Object?> row, List<Track> tracks})>> pending;
   String signature = '';
   void load() {
@@ -130,14 +137,27 @@ class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
   @override
   Widget build(BuildContext context) => Padding(
     key: const ValueKey('home.section.favorite_playlists'),
-    padding: const EdgeInsets.only(top: 24),
+    padding: EdgeInsets.only(
+      top: widget.settings
+          .visualNumber('home_section_spacing', 24)
+          .clamp(0, 96)
+          .toDouble(),
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        UiText(
-          'Playlists favoritas',
-          style: Theme.of(context).textTheme.titleLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
+        Row(
+          children: [
+            Expanded(
+              child: UiText(
+                'Playlists favoritas',
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+            if (widget.mode.startsWith('carousel'))
+              ...homeCarouselButtons(context, carouselKey),
+          ],
         ),
         const SizedBox(height: 24),
         FutureBuilder(
@@ -249,6 +269,7 @@ class _HomeFavoritePlaylistsState extends State<HomeFavoritePlaylists> {
               );
             }).toList();
             return HomeCardLayout(
+              carouselKey: carouselKey,
               mode: widget.mode,
               covers: true,
               children: items,

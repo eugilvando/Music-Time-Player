@@ -1,56 +1,55 @@
 {
-  "version": "2.0.0+44",
-  "date": "2026-10-24",
-  "platform": "Windows x64",
-  "checks": {
-    "pubGet": "passed",
-    "dartAnalysis": "passed; private and public copies; no issues",
-    "baselineTests": {
-      "passed": 314,
-      "failed": 0,
-      "command": "flutter test --no-pub --concurrency=1",
-      "duration": "6m32s"
-    },
-    "finalBackupRegression": {
-      "passed": 4,
-      "failed": 0,
-      "note": "Overlaps the full suite; rerun after final backup selection guard"
-    },
-    "screenshotRendering": {
-      "images": 32,
-      "fixture": "isolated fictional catalog; actual application widgets; capture included in full suite"
-    },
-    "windowsIntegration": "passed; SMTC artwork/play/pause, accent, vault, tray hide/restore, preserved styles, clean exit",
-    "dataRestart": "passed; native backup/restore/reset in temporary profile; original fixture preserved",
-    "runtimeSource": {
-      "identical": true,
-      "files": 202
-    },
-    "runtimeBundle": {
-      "binaryFilesIdentical": true,
-      "files": 48
-    },
-    "installer": "Inno Setup 6 compilation passed",
-    "relativeDocumentationLinks": "passed"
-  },
-  "binaries": [
-    {
-      "file": "music_time.exe",
-      "sha256": "40f0a69d7f91c9a38b4473c9ede7fb13c7e97b414e2b844d4c4c2b5e792f1445"
-    },
-    {
-      "file": "data/app.so",
-      "sha256": "8c17bc1e2a41a1b3e25f087b8f8d8f726c18c1f4b2466bb7b4d699be69cb5770"
-    },
-    {
-      "file": "libmpv-2.dll",
-      "sha256": "0a5a0b476866c91a639a4e511e8153968f8fa23564461b0aa09acdba816164a4"
-    }
-  ],
-  "installer": {
-    "file": "MusicTime-Setup-2.0.0.exe",
-    "bytes": 20307184,
-    "sha256": "4ceff64d228ab23ac64153886c622b187e9a2085f25a54aa7323f1f2e0d68e12"
-  },
-  "limits": "Controlled tests and demo screenshots do not establish real-account acceptance or universal codec/device support. No personal profile is included."
+    "version":  "2.2.0+47",
+    "limits":  "Controlled tests do not establish live Last.fm report acceptance, service certification or universal codec/device support. No personal profile is included.",
+    "checks":  {
+                   "windowsIntegration":  "passed; SMTC artwork/play/pause, accent, vault, tray, player models, window placement, clean exit",
+                   "runtimeSource":  {
+                                         "files":  215,
+                                         "identical":  true
+                                     },
+                   "windowsBuild":  "passed; 130.2s",
+                   "screenshotRendering":  "Listening Insights uses actual application widgets and fictional data; existing interface gallery captured in 2.0",
+                   "finalInsightsRegression":  {
+                                                   "note":  "Overlaps the full suite; repeated after final cancellation/cache guards",
+                                                   "failed":  0,
+                                                   "passed":  15
+                                               },
+                   "dartAnalysis":  "passed; development and public copies, no issues",
+                   "publicInsightsRegression":  {
+                                                    "note":  "Same tests repeated in the public snapshot; not additional unique tests",
+                                                    "failed":  0,
+                                                    "passed":  15
+                                                },
+                   "installer":  "Inno Setup 6; tested runtime bundle with existing dependency notices",
+                   "baselineTests":  {
+                                         "duration":  "6m18s",
+                                         "command":  "flutter test --no-pub --concurrency=1",
+                                         "failed":  0,
+                                         "passed":  338
+                                     },
+                   "dataRestart":  "Not repeated in 2.2.0; prior release validation is historical",
+                   "relativeDocumentationLinks":  "passed",
+                   "pubGet":  "passed; offline, development and public copies"
+               },
+    "binaries":  [
+                     {
+                         "sha256":  "c8dcab0fb4fb0ea7fdad219155c493506fa73d5850797d478e1b3fa6b5528402",
+                         "file":  "music_time.exe"
+                     },
+                     {
+                         "sha256":  "ac383e2e69c2483f1a28970b233e79153f5d56a811068f70ccd2ece91a43451d",
+                         "file":  "data/app.so"
+                     },
+                     {
+                         "sha256":  "0a5a0b476866c91a639a4e511e8153968f8fa23564461b0aa09acdba816164a4",
+                         "file":  "libmpv-2.dll"
+                     }
+                 ],
+    "date":  "2026-10-24",
+    "platform":  "Windows x64",
+    "installer":  {
+                      "sha256":  "316916254bf98f02b2c62fbaeda12c4ec2fd263f7c90567744b99b12c6b1fa18",
+                      "file":  "MusicTime-Setup-2.2.0.exe",
+                      "bytes":  20436396
+                  }
 }

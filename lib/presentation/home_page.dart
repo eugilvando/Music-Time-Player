@@ -1,3 +1,4 @@
+import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'mix_artist_picker.dart';
 import 'media_card_size.dart';
@@ -136,6 +137,7 @@ class HomeCardGrid extends StatelessWidget {
 }
 
 String homeSectionMode(AppSettings settings, String key) {
+  if (key == 'mixes') return 'grid';
   try {
     final modes = jsonDecode(
       settings.visualChoice('home_modes', '{}'),
@@ -154,7 +156,9 @@ class HomeCardLayout extends StatelessWidget {
     required this.mode,
     required this.children,
     this.covers = false,
+    this.carouselKey,
   });
+  final GlobalKey<HomeCarouselState>? carouselKey;
   final String mode;
   final List<Widget> children;
   final bool covers;
@@ -192,7 +196,13 @@ class HomeCardLayout extends StatelessWidget {
       );
     }
     if (mode.startsWith('carousel')) {
-      return HomeCarousel(mode: mode, covers: covers, children: children);
+      return HomeCarousel(
+        key: carouselKey,
+        showControls: carouselKey == null,
+        mode: mode,
+        covers: covers,
+        children: children,
+      );
     }
     if (homeCompactItem(mode)) {
       return LayoutBuilder(
@@ -227,6 +237,22 @@ class HomeCardLayout extends StatelessWidget {
   }
 }
 
+List<Widget> homeCarouselButtons(
+  BuildContext context,
+  GlobalKey<HomeCarouselState> key,
+) => [
+  IconButton(
+    tooltip: ui(context, 'Anterior'),
+    onPressed: () => key.currentState?.move(-1),
+    icon: const MtIcon(Icons.chevron_left),
+  ),
+  IconButton(
+    tooltip: ui(context, 'Próxima'),
+    onPressed: () => key.currentState?.move(1),
+    icon: const MtIcon(Icons.chevron_right),
+  ),
+];
+
 class HomeCarousel extends StatefulWidget {
   final String mode;
   const HomeCarousel({
@@ -234,14 +260,16 @@ class HomeCarousel extends StatefulWidget {
     required this.children,
     this.covers = false,
     this.mode = 'carousel',
+    this.showControls = true,
   });
+  final bool showControls;
   final List<Widget> children;
   final bool covers;
   @override
-  State<HomeCarousel> createState() => _HomeCarouselState();
+  State<HomeCarousel> createState() => HomeCarouselState();
 }
 
-class _HomeCarouselState extends State<HomeCarousel> {
+class HomeCarouselState extends State<HomeCarousel> {
   final controller = ScrollController();
   @override
   void dispose() {
@@ -284,21 +312,22 @@ class _HomeCarouselState extends State<HomeCarousel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
-              tooltip: ui(context, 'Anterior'),
-              onPressed: () => move(-1),
-              icon: const MtIcon(Icons.chevron_left),
-            ),
-            IconButton(
-              tooltip: ui(context, 'Próxima'),
-              onPressed: () => move(1),
-              icon: const MtIcon(Icons.chevron_right),
-            ),
-          ],
-        ),
+        if (widget.showControls)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                tooltip: ui(context, 'Anterior'),
+                onPressed: () => move(-1),
+                icon: const MtIcon(Icons.chevron_left),
+              ),
+              IconButton(
+                tooltip: ui(context, 'Próxima'),
+                onPressed: () => move(1),
+                icon: const MtIcon(Icons.chevron_right),
+              ),
+            ],
+          ),
         SizedBox(
           height: rows * itemHeight + (rows - 1) * 12 + 12,
           child: Scrollbar(
@@ -396,6 +425,36 @@ Future<void> customizeHome(BuildContext context, AppSettings settings) {
                                 onPressed: close,
                               ),
                             ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${ui(context, 'Espaçamento entre seções')}: ${settings.visualNumber('home_section_spacing', 24).round()} px",
+                                  ),
+                                  Slider(
+                                    key: const ValueKey('home.sectionSpacing'),
+                                    value: settings
+                                        .visualNumber(
+                                          'home_section_spacing',
+                                          24,
+                                        )
+                                        .clamp(0, 96)
+                                        .toDouble(),
+                                    min: 0,
+                                    max: 96,
+                                    divisions: 24,
+                                    onChanged: (v) => settings.updateVisual(
+                                      'home_section_spacing',
+                                      v,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             Expanded(
                               child: ReorderableListView.builder(
                                 padding: const EdgeInsets.all(16),
@@ -451,39 +510,45 @@ Future<void> customizeHome(BuildContext context, AppSettings settings) {
                                               );
                                             },
                                           ),
-                                          UiText(
-                                            'Quantidade de itens: ${count.round()}',
-                                          ),
-                                          Slider(
-                                            value: count.toDouble(),
-                                            min: 1,
-                                            max: 100,
-                                            divisions: 99,
-                                            onChanged: (v) =>
-                                                settings.updateVisual(
-                                                  'home_count_$key',
-                                                  v,
-                                                ),
-                                          ),
-                                          MediaCardSizeScope.homeSection(
-                                            settings,
-                                            key,
-                                            ViewStyleSelector(
-                                              key: ValueKey('home.style.$key'),
-                                              value: homeSectionMode(
-                                                settings,
-                                                key,
-                                              ),
-                                              families: homeViewStyles,
-                                              onChanged: (v) {
-                                                modes[key] = v;
-                                                settings.updateVisual(
-                                                  'home_modes',
-                                                  jsonEncode(modes),
-                                                );
-                                              },
+                                          if (key != 'continue') ...[
+                                            UiText(
+                                              'Quantidade de itens: ${count.round()}',
                                             ),
-                                          ),
+                                            Slider(
+                                              value: count.toDouble(),
+                                              min: 1,
+                                              max: 100,
+                                              divisions: 99,
+                                              onChanged: (v) =>
+                                                  settings.updateVisual(
+                                                    'home_count_$key',
+                                                    v,
+                                                  ),
+                                            ),
+                                          ],
+                                          if (key != 'continue' &&
+                                              key != 'mixes')
+                                            MediaCardSizeScope.homeSection(
+                                              settings,
+                                              key,
+                                              ViewStyleSelector(
+                                                key: ValueKey(
+                                                  'home.style.$key',
+                                                ),
+                                                value: homeSectionMode(
+                                                  settings,
+                                                  key,
+                                                ),
+                                                families: homeViewStyles,
+                                                onChanged: (v) {
+                                                  modes[key] = v;
+                                                  settings.updateVisual(
+                                                    'home_modes',
+                                                    jsonEncode(modes),
+                                                  );
+                                                },
+                                              ),
+                                            ),
                                         ],
                                       ),
                                     ),
@@ -532,6 +597,7 @@ class HomePage extends StatefulWidget {
     this.cacheKey,
     this.onSources,
     this.resumeTrack,
+    this.resumePlaying = false,
     this.store,
     this.playlists = const [],
     this.onPlaylist,
@@ -540,6 +606,7 @@ class HomePage extends StatefulWidget {
   final Future<void> Function(String, bool, List<Track>, String)?
   onArtistSelection;
   final Track? resumeTrack;
+  final bool resumePlaying;
   final LibraryStore? store;
   final List<Map<String, Object?>> playlists;
   final void Function(int)? onPlaylist;
@@ -566,9 +633,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final carouselKeys = <String, GlobalKey<HomeCarouselState>>{};
+  GlobalKey<HomeCarouselState> carouselKey(String section) =>
+      carouselKeys.putIfAbsent(section, () => GlobalKey<HomeCarouselState>());
   bool exploring = false;
   String quickFilter = 'all';
   String signature = '';
+  double get sectionSpacing => widget.settings
+      .visualNumber('home_section_spacing', 24)
+      .clamp(0, 96)
+      .toDouble();
   Map<String, List<Track>> mixes = {};
   String get dataSignature =>
       '${identityHashCode(widget.index)}:${widget.cacheKey ?? identityHashCode(widget.tracks)}:${widget.settings.visualNumber('home_mix_size', 20)}';
@@ -963,7 +1037,7 @@ class _HomePageState extends State<HomePage> {
       if (!homeSections.containsKey(key)) return const SizedBox.shrink();
       return Padding(
         key: ValueKey('home.section.$key'),
-        padding: const EdgeInsets.only(top: 24),
+        padding: EdgeInsets.only(top: sectionSpacing),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -1030,6 +1104,16 @@ class _HomePageState extends State<HomePage> {
                         Positioned.fill(child: TrackCover(track: t)),
                         Positioned(
                           top: 0,
+                          left: 0,
+                          child: IconButton(
+                            tooltip: ui(context, 'Reproduzir'),
+                            onPressed: () =>
+                                widget.onPlay(values, values.indexOf(t)),
+                            icon: const MtIcon(Icons.play_arrow),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
                           right: 0,
                           child: widget.trackActions(t),
                         ),
@@ -1054,7 +1138,7 @@ class _HomePageState extends State<HomePage> {
           );
     return Padding(
       key: ValueKey('home.section.$key'),
-      padding: const EdgeInsets.only(top: 24, bottom: 0),
+      padding: EdgeInsets.only(top: sectionSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1071,6 +1155,8 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () => all(homeSections[key]!, values),
                 child: const UiText('Ver tudo'),
               ),
+              if (mode.startsWith('carousel'))
+                ...homeCarouselButtons(context, carouselKey(key)),
             ],
           ),
           const SizedBox(height: 24),
@@ -1105,6 +1191,7 @@ class _HomePageState extends State<HomePage> {
             ...tracks.map(tile)
           else
             HomeCardLayout(
+              carouselKey: carouselKey(key),
               mode: mode,
               covers: true,
               children: tracks.map(card).toList(),
@@ -1190,6 +1277,15 @@ class _HomePageState extends State<HomePage> {
                   Positioned.fill(child: artwork(group)),
                   Positioned(
                     top: 0,
+                    left: 0,
+                    child: IconButton(
+                      tooltip: ui(context, 'Reproduzir'),
+                      onPressed: () => widget.onPlay(group.tracks, 0),
+                      icon: const MtIcon(Icons.play_arrow),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
                     right: 0,
                     child: menu(
                       group.tracks,
@@ -1213,7 +1309,7 @@ class _HomePageState extends State<HomePage> {
     }).toList();
     return Padding(
       key: ValueKey('home.section.$key'),
-      padding: const EdgeInsets.only(top: 24),
+      padding: EdgeInsets.only(top: sectionSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1227,27 +1323,29 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               if (key == 'favorite_artists')
-                DropdownButton<String>(
-                  value: type,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'artists',
-                      child: UiText('Artists'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'albumArtists',
-                      child: UiText('Album artists'),
-                    ),
-                  ],
-                  onChanged: (value) async {
-                    if (value != null) {
-                      await widget.settings.updateVisual(
-                        'home_artist_role',
-                        value,
-                      );
-                      if (mounted) setState(() {});
-                    }
-                  },
+                RoundedSelect(
+                  child: DropdownButton<String>(
+                    value: type,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'artists',
+                        child: UiText('Artists'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'albumArtists',
+                        child: UiText('Album artists'),
+                      ),
+                    ],
+                    onChanged: (value) async {
+                      if (value != null) {
+                        await widget.settings.updateVisual(
+                          'home_artist_role',
+                          value,
+                        );
+                        if (mounted) setState(() {});
+                      }
+                    },
+                  ),
                 ),
               if (groups.isNotEmpty)
                 TextButton(
@@ -1260,13 +1358,20 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: const UiText('Ver tudo'),
                 ),
+              if (mode.startsWith('carousel') && groups.isNotEmpty)
+                ...homeCarouselButtons(context, carouselKey(key)),
             ],
           ),
           const SizedBox(height: 24),
           if (groups.isEmpty)
             const UiText('No items available for this section yet.')
           else
-            HomeCardLayout(mode: mode, covers: true, children: items),
+            HomeCardLayout(
+              carouselKey: carouselKey(key),
+              mode: mode,
+              covers: true,
+              children: items,
+            ),
         ],
       ),
     );
@@ -1279,7 +1384,7 @@ class _HomePageState extends State<HomePage> {
         (track == null || visible.any((t) => t.id == track.id));
     return Card(
       key: const ValueKey('home.section.continue'),
-      margin: const EdgeInsets.only(top: 24),
+      margin: EdgeInsets.only(top: sectionSpacing),
       clipBehavior: Clip.antiAlias,
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: InkWell(
@@ -1323,8 +1428,11 @@ class _HomePageState extends State<HomePage> {
               );
               final play = FilledButton.icon(
                 onPressed: available ? widget.onResume : null,
-                icon: const MtIcon(Icons.play_arrow, size: 20),
-                label: const UiText('Reproduzir'),
+                icon: MtIcon(
+                  widget.resumePlaying ? Icons.pause : Icons.play_arrow,
+                  size: 20,
+                ),
+                label: UiText(widget.resumePlaying ? 'Pausar' : 'Reproduzir'),
               );
               return Row(
                 children: [
@@ -1336,9 +1444,14 @@ class _HomePageState extends State<HomePage> {
                     play
                   else
                     IconButton.filled(
-                      tooltip: ui(context, 'Reproduzir'),
+                      tooltip: ui(
+                        context,
+                        widget.resumePlaying ? 'Pausar' : 'Reproduzir',
+                      ),
                       onPressed: available ? widget.onResume : null,
-                      icon: const MtIcon(Icons.play_arrow),
+                      icon: MtIcon(
+                        widget.resumePlaying ? Icons.pause : Icons.play_arrow,
+                      ),
                     ),
                 ],
               );
@@ -1397,6 +1510,19 @@ class _HomePageState extends State<HomePage> {
       mixes = saved.mixes;
       exploreGroups = saved.explore;
       preparedCollections = saved.collections;
+    }
+    // Reuse only snapshots with the same eligible IDs: hidden sources and
+    // offline filters must never leak tracks from a previous view.
+    if (derivedLists.isEmpty && widget.memory?.isNotEmpty == true) {
+      final previous = widget.memory!.values.last;
+      final oldIds = previous.lists['values']!.map((t) => t.id).toSet();
+      final newIds = widget.tracks.map((t) => t.id).toSet();
+      if (setEquals(oldIds, newIds)) {
+        derivedLists = previous.lists;
+        mixes = previous.mixes;
+        exploreGroups = previous.explore;
+        preparedCollections = previous.collections;
+      }
     }
     if (widget.tracks.length > 1000 && derivedSignature != currentSignature) {
       if (pendingHomeSignature != currentSignature) {
@@ -1564,7 +1690,7 @@ class _HomePageState extends State<HomePage> {
                 : (key == 'mixes')
                 ? Padding(
                     key: ValueKey('home.section.$key'),
-                    padding: const EdgeInsets.only(top: 24, bottom: 0),
+                    padding: EdgeInsets.only(top: sectionSpacing),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1744,7 +1870,7 @@ class _HomePageState extends State<HomePage> {
                   )
                 : (key == 'explore')
                 ? Padding(
-                    padding: const EdgeInsets.only(top: 24, bottom: 0),
+                    padding: EdgeInsets.only(top: sectionSpacing),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

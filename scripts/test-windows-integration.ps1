@@ -52,10 +52,10 @@ try {
   do {
     Start-Sleep -Milliseconds 500
     $events = @(Get-Content $logFile) | Select-Object -Skip $previousLines
-  } until (($events -match 'window_restored') -or [DateTime]::UtcNow -ge $validationDeadline)
+  } until (($events -match 'window_placement_preserved') -or [DateTime]::UtcNow -ge $validationDeadline)
   if ($native.HasExited) { throw ('App exited during tray: '+$native.ExitCode) }
   $events=@(Get-Content $logFile) | Select-Object -Skip $previousLines
-  foreach ($expected in @('system_accent_ready','tray_ready','smtc_ready','vault_ready','styles_session_preserved','window_hidden_tray','window_restored')) {
+  foreach ($expected in @('system_accent_ready','tray_ready','smtc_ready','vault_ready','styles_session_preserved','window_hidden_tray','window_restored','window_placement_preserved')) {
     if (-not ($events -match $expected)) { throw ('Missing event: '+$expected) }
   }
   $events

@@ -23,6 +23,27 @@ class AppSettings extends ChangeNotifier {
     0xFFFFB300: 'Âmbar',
   };
   final SharedPreferences preferences;
+
+  /// Bundled families plus standard Windows families; Flutter supplies fallback
+  /// glyphs if a system family is unavailable on a different platform.
+  static const fontFamilies = <String, String>{
+    'Bricolage Grotesque': 'Bricolage Grotesque',
+    'Inter': 'Inter',
+    'Segoe UI': 'Segoe UI',
+    'Arial': 'Arial',
+    'Verdana': 'Verdana',
+    'Georgia': 'Georgia',
+    'Times New Roman': 'Times New Roman',
+    'Consolas': 'Consolas',
+  };
+  String get primaryFont =>
+      _fontFamily('primary_font_family', 'Bricolage Grotesque');
+  String get secondaryFont => _fontFamily('secondary_font_family', 'Inter');
+  String _fontFamily(String key, String fallback) {
+    final value = visualChoice(key, fallback);
+    return fontFamilies.containsKey(value) ? value : fallback;
+  }
+
   late ThemeMode mode;
   late int accent;
   int? systemAccent;
@@ -68,7 +89,15 @@ class AppSettings extends ChangeNotifier {
 
   String get nowPlayingStyle {
     final value = preferences.getString('visual.style');
-    return {'classic', 'vinyl', 'minimal', 'gallery', 'focus'}.contains(value)
+    if (value == 'gallery') return 'cover_only';
+    if (value == 'focus') return 'lyrics_only';
+    return {
+          'classic',
+          'vinyl',
+          'minimal',
+          'cover_only',
+          'lyrics_only',
+        }.contains(value)
         ? value!
         : 'vinyl';
   }
@@ -183,6 +212,8 @@ class AppSettings extends ChangeNotifier {
     await update(theme: ThemeMode.dark, color: accents.keys.first);
     await resetVisualKeys({
       'system_accent',
+      'primary_font_family',
+      'secondary_font_family',
       'font_title',
       'font_body',
       'font_secondary',
@@ -211,6 +242,8 @@ class AppSettings extends ChangeNotifier {
   }
 
   Future<void> resetInterface() => resetVisualKeys({
+    'primary_font_family',
+    'secondary_font_family',
     'style',
     'cover_shape',
     'cover_position',
@@ -230,6 +263,7 @@ class AppSettings extends ChangeNotifier {
     'bar_items',
     'bar_item_order',
     'bar_icon_spacing',
+    'home_section_spacing',
   });
   Future<void> resetVisualKeys(Set<String> keys) async {
     await _writeTail;

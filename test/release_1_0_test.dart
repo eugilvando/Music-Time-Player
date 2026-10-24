@@ -118,9 +118,12 @@ void main() {
       expect(
         tester
             .widgetList<CompactMediaCard>(find.byType(CompactMediaCard))
+            .take(3)
             .map((c) => c.title),
         ['Old album', 'New album', 'Unknown album'],
       );
+      expect(find.text('Top Tracks'), findsOneWidget);
+      expect(find.text('New track'), findsOneWidget);
       state.openGroup(
         CatalogGroup('New album', 'New album', [songs.first]),
         type: 'albums',

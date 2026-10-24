@@ -1,3 +1,4 @@
+import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'media_card_size.dart';
 import '../library/catalog.dart';
@@ -411,31 +412,37 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
                     selected: filter == entry.key,
                     onSelected: (_) => setState(() => filter = entry.key),
                   ),
-                DropdownButton<String>(
-                  value: {'name', 'descending', 'count', 'year'}.contains(sort)
-                      ? sort
-                      : 'name',
-                  items: [
-                    const DropdownMenuItem(
-                      value: 'name',
-                      child: UiText('Nome A–Z'),
-                    ),
-                    const DropdownMenuItem(
-                      value: 'descending',
-                      child: UiText('Nome Z–A'),
-                    ),
-                    DropdownMenuItem(
-                      value: widget.albums ? 'year' : 'count',
-                      child: Text(
-                        widget.albums ? 'Ano mais recente' : 'Mais músicas',
+                RoundedSelect(
+                  child: DropdownButton<String>(
+                    value:
+                        {'name', 'descending', 'count', 'year'}.contains(sort)
+                        ? sort
+                        : 'name',
+                    items: [
+                      const DropdownMenuItem(
+                        value: 'name',
+                        child: UiText('Nome A–Z'),
                       ),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      widget.settings.updateVisual('${preference}_sort', value);
-                    }
-                  },
+                      const DropdownMenuItem(
+                        value: 'descending',
+                        child: UiText('Nome Z–A'),
+                      ),
+                      DropdownMenuItem(
+                        value: widget.albums ? 'year' : 'count',
+                        child: Text(
+                          widget.albums ? 'Ano mais recente' : 'Mais músicas',
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        widget.settings.updateVisual(
+                          '${preference}_sort',
+                          value,
+                        );
+                      }
+                    },
+                  ),
                 ),
                 IconButton(
                   tooltip: grid ? 'Exibir lista' : 'Exibir grade',

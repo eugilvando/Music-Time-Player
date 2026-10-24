@@ -133,7 +133,7 @@ class _AppShellState extends State<AppShell> {
                                   'font_navigation',
                                   14,
                                 ),
-                                fontFamily: 'Inter',
+                                fontFamily: widget.settings.secondaryFont,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
@@ -167,31 +167,55 @@ class _AppShellState extends State<AppShell> {
               padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
               child: Tooltip(
                 message: ui(context, 'Configurações'),
-                child: ListTile(
-                  key: const ValueKey('navigation.settings'),
-                  minTileHeight: 44,
-                  horizontalTitleGap: 12,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  leading: compact
-                      ? null
-                      : const MtIcon(Icons.settings, size: 20),
-                  contentPadding: compact
-                      ? EdgeInsets.zero
-                      : const EdgeInsets.symmetric(horizontal: 16),
-                  title: compact
-                      ? const Center(child: MtIcon(Icons.settings, size: 20))
-                      : const UiText('Configurações'),
-                  selected: selected == AppSection.settings,
-                  onTap: () {
-                    setState(() {
-                      selected = AppSection.settings;
-                      navigationReset++;
-                    });
-                    if (drawer) scaffoldKey.currentState?.closeDrawer();
-                  },
-                ),
+                child: compact
+                    ? Semantics(
+                        button: true,
+                        selected: selected == AppSection.settings,
+                        label: ui(context, 'Configurações'),
+                        child: InkWell(
+                          key: const ValueKey('navigation.settings'),
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () {
+                            setState(() {
+                              selected = AppSection.settings;
+                              navigationReset++;
+                            });
+                            if (drawer) scaffoldKey.currentState?.closeDrawer();
+                          },
+                          child: const SizedBox.expand(
+                            child: Center(
+                              child: MtIcon(Icons.settings, size: 20),
+                            ),
+                          ),
+                        ),
+                      )
+                    : ListTile(
+                        key: const ValueKey('navigation.settings'),
+                        minTileHeight: 44,
+                        horizontalTitleGap: 12,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        leading: compact
+                            ? null
+                            : const MtIcon(Icons.settings, size: 20),
+                        contentPadding: compact
+                            ? EdgeInsets.zero
+                            : const EdgeInsets.symmetric(horizontal: 16),
+                        title: compact
+                            ? const Center(
+                                child: MtIcon(Icons.settings, size: 20),
+                              )
+                            : const UiText('Configurações'),
+                        selected: selected == AppSection.settings,
+                        onTap: () {
+                          setState(() {
+                            selected = AppSection.settings;
+                            navigationReset++;
+                          });
+                          if (drawer) scaffoldKey.currentState?.closeDrawer();
+                        },
+                      ),
               ),
             ),
           ),
@@ -253,7 +277,7 @@ class _AppShellState extends State<AppShell> {
                                       color: Theme.of(context)
                                           .colorScheme
                                           .surface
-                                          .withValues(alpha: .90),
+                                          .withValues(alpha: .78),
                                       border: Border(
                                         right: BorderSide(
                                           color: Theme.of(context).dividerColor,

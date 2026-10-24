@@ -1,3 +1,4 @@
+import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'design_tokens.dart';
 import '../library/favorite_catalog.dart';
@@ -142,6 +143,7 @@ class CatalogBrowser extends StatefulWidget {
     this.onNowPlaying,
     this.resumeTitle,
     this.resumeTrack,
+    this.resumePlaying = false,
   });
   final Future<void> Function(List<Track>, int, String)? onPlayNamed;
   final Future<void> Function(String, bool, List<Track>, String)?
@@ -156,6 +158,7 @@ class CatalogBrowser extends StatefulWidget {
   final VoidCallback? onNowPlaying;
   final String? resumeTitle;
   final Track? resumeTrack;
+  final bool resumePlaying;
   final String query, initialCategory;
   final String? pageTitle;
   final CatalogMemory? memory;
@@ -457,20 +460,22 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 icon: const MtIcon(Icons.chevron_right),
               ),
               const UiText('Por página: '),
-              DropdownButton<int>(
-                value: pageSize,
-                items: [50, 100, 200]
-                    .map((n) => DropdownMenuItem(value: n, child: Text('$n')))
-                    .toList(),
-                onChanged: (n) async {
-                  if (n != null) {
-                    await widget.settings.updateVisual(
-                      'catalog_page_size',
-                      '$n',
-                    );
-                    if (mounted) setState(() {});
-                  }
-                },
+              RoundedSelect(
+                child: DropdownButton<int>(
+                  value: pageSize,
+                  items: [50, 100, 200]
+                      .map((n) => DropdownMenuItem(value: n, child: Text('$n')))
+                      .toList(),
+                  onChanged: (n) async {
+                    if (n != null) {
+                      await widget.settings.updateVisual(
+                        'catalog_page_size',
+                        '$n',
+                      );
+                      if (mounted) setState(() {});
+                    }
+                  },
+                ),
               ),
             ],
           ),
@@ -662,10 +667,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           cachedIndex = null;
           memory.index = null;
           memory.derived.clear();
-          memory.home.clear();
           dataRevision = ++memory.revision;
         }
-        playlists = nextPlaylists;
+        if (!sameCatalogData(playlists, nextPlaylists)) {
+          playlists = nextPlaylists;
+        }
         refreshing = false;
         memory
           ..ready = true
@@ -707,7 +713,6 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       return cachedIndex!;
     }
     memory.derived.clear();
-    memory.home.clear();
     memory.indexRevision = widget.revision;
     return memory.index = cachedIndex = CatalogIndex(
       tracks: widget.tracks,
@@ -1111,11 +1116,18 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               ),
             ),
             ...columns.map(
-              (c) => Text(
-                {'duration', 'offline', 'favorite'}.contains(c) ||
-                        {'Sem álbum', 'Não informado'}.contains(cell(t, c))
-                    ? ui(context, cell(t, c))
-                    : cell(t, c),
+              (c) => InkWell(
+                onTap: c == 'artist'
+                    ? () => openArtist(t.artistNames.first)
+                    : c == 'album' && t.album.isNotEmpty
+                    ? () => openTrackCollection(t, true)
+                    : null,
+                child: Text(
+                  {'duration', 'offline', 'favorite'}.contains(c) ||
+                          {'Sem álbum', 'Não informado'}.contains(cell(t, c))
+                      ? ui(context, cell(t, c))
+                      : cell(t, c),
+                ),
               ),
             ),
             widget.trackActions(t),
@@ -1435,6 +1447,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     children: [
                       Positioned.fill(child: groupImage(g, type)),
                       Positioned(
+                        top: 0,
+                        left: 0,
+                        child: IconButton(
+                          tooltip: ui(context, 'Reproduzir'),
+                          onPressed: () => widget.onPlay(g.tracks, 0),
+                          icon: const MtIcon(Icons.play_arrow),
+                        ),
+                      ),
+                      Positioned(
                         bottom: 0,
                         right: 0,
                         child: actions(
@@ -1653,8 +1674,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     children: [
                       Positioned.fill(child: groupImage(group, type)),
                       Positioned(
-                        right: 4,
-                        bottom: 4,
+                        left: 4,
+                        top: 4,
                         child: IconButton.filled(
                           tooltip: ui(context, 'Reproduzir'),
                           onPressed: () => batch('play', ordered(group.tracks)),
@@ -1663,7 +1684,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                       ),
                       Positioned(
                         right: 0,
-                        top: 0,
+                        bottom: 0,
                         child: actions(
                           group.tracks,
                           collection: collectionKey(group, type),
@@ -1946,8 +1967,12 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               ),
               SizedBox.square(
                 dimension:
-                    (constraints.maxWidth < 650 ? 96.0 : 256.0) *
-                    (artist
+                    (constraints.maxWidth < 650
+                        ? 96.0
+                        : album
+                        ? 154.0
+                        : 256.0) *
+                    (artist || album
                         ? 1.0
                         : widget.settings
                               .visualNumber('cover_scale', 1)
@@ -2142,6 +2167,60 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           )
           .toList();
       content.add(collectionSliver(albums, 'albums', releaseOrder: true));
+      final top = List<Track>.of(values)
+        ..sort((a, b) {
+          final count = index.plays(b).compareTo(index.plays(a));
+          return count == 0 ? a.title.compareTo(b.title) : count;
+        });
+      final featured = top.take(12).toList();
+      if (featured.isNotEmpty) {
+        content.add(
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 48, bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  UiText(
+                    'Faixas em destaque',
+                    style: Theme.of(context).textTheme.headlineSmall
+                        ?.copyWith(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const UiText(
+                    'Ordenadas pelas reproduções na sua biblioteca.',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+        content.add(
+          SliverLayoutBuilder(
+            builder: (context, constraints) => SliverGrid.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: ((constraints.crossAxisExtent + 12) / 208)
+                    .floor()
+                    .clamp(1, 6),
+                mainAxisExtent: 53 * MediaQuery.textScalerOf(context).scale(1),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+              ),
+              itemCount: featured.length,
+              itemBuilder: (context, i) => MediaCardSizeScope(
+                value: 'Small',
+                onChanged: (_) {},
+                child: CompactMediaCard(
+                  artwork: TrackCover(track: featured[i]),
+                  title: featured[i].title,
+                  subtitle: featured[i].artist,
+                  actions: widget.trackActions(featured[i]),
+                  onTap: () => widget.onPlay(featured, i),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
     } else if ({'genres', 'years', 'decades'}.contains(category)) {
       headers.add(
         Wrap(
@@ -2550,48 +2629,52 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           if (!detail && !favoritesPage)
             SizedBox(
               width: 220,
+              child: RoundedSelect(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: category,
+                  items: [
+                    for (final e in catalogCategories.entries)
+                      DropdownMenuItem(
+                        value: e.key,
+                        child: UiText(e.value, overflow: TextOverflow.ellipsis),
+                      ),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) chooseCategory(v);
+                  },
+                ),
+              ),
+            ),
+          SizedBox(
+            width: detail ? 160 : 220,
+            child: RoundedSelect(
               child: DropdownButton<String>(
                 isExpanded: true,
-                value: category,
+                key: const ValueKey('catalog.sort'),
+                value: sorts.containsKey(activeSort) ? activeSort : 'title',
                 items: [
-                  for (final e in catalogCategories.entries)
+                  for (final e in sorts.entries)
                     DropdownMenuItem(
                       value: e.key,
                       child: UiText(e.value, overflow: TextOverflow.ellipsis),
                     ),
                 ],
                 onChanged: (v) {
-                  if (v != null) chooseCategory(v);
+                  if (v != null) {
+                    setState(() {
+                      if (selectedGroup != null && category == 'albums') {
+                        albumSort = v;
+                      } else {
+                        sort = v;
+                      }
+                    });
+                    if (!(selectedGroup != null && category == 'albums')) {
+                      widget.settings.updateVisual('songs_sort', v);
+                    }
+                  }
                 },
               ),
-            ),
-          SizedBox(
-            width: detail ? 160 : 220,
-            child: DropdownButton<String>(
-              isExpanded: true,
-              key: const ValueKey('catalog.sort'),
-              value: sorts.containsKey(activeSort) ? activeSort : 'title',
-              items: [
-                for (final e in sorts.entries)
-                  DropdownMenuItem(
-                    value: e.key,
-                    child: UiText(e.value, overflow: TextOverflow.ellipsis),
-                  ),
-              ],
-              onChanged: (v) {
-                if (v != null) {
-                  setState(() {
-                    if (selectedGroup != null && category == 'albums') {
-                      albumSort = v;
-                    } else {
-                      sort = v;
-                    }
-                  });
-                  if (!(selectedGroup != null && category == 'albums')) {
-                    widget.settings.updateVisual('songs_sort', v);
-                  }
-                }
-              },
             ),
           ),
           IconButton(
@@ -3034,6 +3117,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     : null,
                 resumeTitle: widget.resumeTitle,
                 resumeTrack: widget.resumeTrack,
+                resumePlaying: widget.resumePlaying,
                 onNowPlaying: widget.onNowPlaying,
                 store: widget.store,
                 playlists: playlists,

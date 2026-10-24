@@ -1,3 +1,4 @@
+import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'media_details_table.dart';
 import 'compact_media_card.dart';
@@ -457,23 +458,25 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
       children: [
         SizedBox(
           width: 170,
-          child: DropdownButton<String>(
-            key: const ValueKey('playlists.sort'),
-            isExpanded: true,
-            value: {'name', 'count', 'added'}.contains(sort) ? sort : 'name',
-            items: const [
-              DropdownMenuItem(value: 'name', child: UiText('Nome')),
-              DropdownMenuItem(
-                value: 'count',
-                child: UiText('Quantidade de faixas'),
-              ),
-              DropdownMenuItem(value: 'added', child: UiText('Inclusão')),
-            ],
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() => sort = value);
-              widget.settings?.updateVisual('playlists_sort', value);
-            },
+          child: RoundedSelect(
+            child: DropdownButton<String>(
+              key: const ValueKey('playlists.sort'),
+              isExpanded: true,
+              value: {'name', 'count', 'added'}.contains(sort) ? sort : 'name',
+              items: const [
+                DropdownMenuItem(value: 'name', child: UiText('Nome')),
+                DropdownMenuItem(
+                  value: 'count',
+                  child: UiText('Quantidade de faixas'),
+                ),
+                DropdownMenuItem(value: 'added', child: UiText('Inclusão')),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => sort = value);
+                widget.settings?.updateVisual('playlists_sort', value);
+              },
+            ),
           ),
         ),
         IconButton(

@@ -7,6 +7,8 @@ import 'ui_language.dart';
 
 import 'package:flutter/material.dart';
 
+import 'settings_card.dart';
+
 import '../settings/app_settings.dart';
 import '../sources/provider_connections.dart';
 import '../domain/track.dart';
@@ -55,7 +57,9 @@ class SettingsPage extends StatefulWidget {
     this.onRestore,
     this.onReset,
     this.canOptimizeArtwork,
+    this.initialCategory = SettingsCategory.general,
   });
+  final SettingsCategory initialCategory;
   final PlayerController? controller;
   final bool Function()? canOptimizeArtwork;
   final Future<void> Function()? onBackup, onRestore, onReset;
@@ -73,7 +77,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  SettingsCategory category = SettingsCategory.general;
+  late SettingsCategory category = widget.initialCategory;
   String subpage = '', search = '';
   final searchController = TextEditingController();
   final sectionKeys = <String, GlobalKey>{};
@@ -92,6 +96,8 @@ class _SettingsPageState extends State<SettingsPage> {
     ],
     SettingsCategory.customization: [
       'Tipografia',
+      'Fonte primária',
+      'Fonte secundária',
       'Página inicial',
       'Now Playing',
       'Capas e fundo',
@@ -135,6 +141,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final title = switch (page) {
+        'Fonte primária' || 'Fonte secundária' => 'Tipografia',
         'Letras — apresentação' => 'Letras',
         'Barra do player' => 'Organizar barra de reprodução',
         _ => page,
@@ -183,7 +190,7 @@ class _SettingsPageState extends State<SettingsPage> {
   ) {
     final value = widget.settings.visualChoice(key, fallback);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: DropdownButtonFormField<String>(
         style: Theme.of(context).textTheme.bodyMedium,
         isExpanded: true,
@@ -208,6 +215,38 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   List<Widget> typography({bool lyrics = false}) => [
+    if (!lyrics) ...[
+      fontChoice(
+        'primary_font_family',
+        'Fonte primária',
+        widget.settings.primaryFont,
+      ),
+      const SizedBox(height: 16),
+      fontChoice(
+        'secondary_font_family',
+        'Fonte secundária',
+        widget.settings.secondaryFont,
+      ),
+      const SizedBox(height: 16),
+      const UiText(
+        'A fonte primária é usada nos títulos; a secundária, nos textos, menus e campos.',
+      ),
+      const SizedBox(height: 8),
+      const UiText(
+        'Inter e Bricolage Grotesque estão incluídas no app. As demais fontes dependem do sistema.',
+      ),
+      const SizedBox(height: 16),
+      Text(
+        'Music Time — Aa Bb Cc 123',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      const SizedBox(height: 8),
+      Text(
+        ui(context, 'Prévia dos textos, menus e campos.'),
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+      const SizedBox(height: 20),
+    ],
     for (final entry in {
       'font_title': 'Títulos',
       'font_body': 'Textos e campos',
@@ -237,31 +276,41 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     ],
   ];
-  Widget subsection(String title, List<Widget> children) => Padding(
-    key: sectionKeys.putIfAbsent(title, () => GlobalKey()),
-    padding: const EdgeInsets.only(bottom: 20),
-    child: Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color:
-            Theme.of(context).cardTheme.color ??
-            Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            UiText(
-              title,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+  Widget fontChoice(String key, String label, String family) =>
+      DropdownButtonFormField<String>(
+        key: ValueKey('$key:$family'),
+        initialValue: family,
+        isExpanded: true,
+        decoration: InputDecoration(labelText: ui(context, label)),
+        items: [
+          for (final entry in AppSettings.fontFamilies.entries)
+            DropdownMenuItem(
+              value: entry.key,
+              child: Text(entry.value, style: TextStyle(fontFamily: entry.key)),
             ),
-            const SizedBox(height: 16),
-            ...children,
-          ],
-        ),
+        ],
+        onChanged: widget.settings.saving
+            ? null
+            : (value) {
+                if (value != null) widget.settings.updateVisual(key, value);
+              },
+      );
+
+  Widget subsection(String title, List<Widget> children) => SettingsCard(
+    key: sectionKeys.putIfAbsent(title, () => GlobalKey()),
+    child: Material(
+      type: MaterialType.transparency,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          UiText(
+            title,
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: SettingsSpacing.controlGap),
+          ...children,
+        ],
       ),
     ),
   );
@@ -634,8 +683,6 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ]),
     subsection('Sua coleção', [
-      if (widget.downloads != null)
-        CollectionSummary(store: widget.downloads!.store),
       visualSwitch(
         'artist_biographies',
         'Artist biographies',
@@ -875,7 +922,8 @@ class _SettingsPageState extends State<SettingsPage> {
       'Movimento e acessibilidade':
           'animation accessibility reduce motion animações',
       'Janela e bandeja': 'window tray close minimize fechar minimizar',
-      'Now Playing': 'model style classic vinyl minimal gallery focus modelo',
+      'Now Playing':
+          'model style classic vinyl minimal cover lyrics modelo capa letras',
       'Capas e fundo':
           'artwork cover background blur size capa fundo desfoque tamanho',
       'Barra do player':
@@ -926,9 +974,9 @@ class _SettingsPageState extends State<SettingsPage> {
         final compact = constraints.maxWidth < 900;
         return Padding(
           padding: EdgeInsets.fromLTRB(
-            compact ? 12 : 24,
-            12,
-            compact ? 12 : 24,
+            compact ? 16 : 24,
+            compact ? 16 : 24,
+            compact ? 16 : 24,
             0,
           ),
           child: Row(
@@ -942,34 +990,39 @@ class _SettingsPageState extends State<SettingsPage> {
                     for (final item in SettingsCategory.values)
                       Tooltip(
                         message: ui(context, item.label),
-                        child: Material(
-                          color: item == category
-                              ? Theme.of(context).colorScheme.secondaryContainer
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                          child: ListTile(
-                            key: ValueKey('settings.${item.name}'),
-                            minTileHeight: 44,
-                            horizontalTitleGap: 8,
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: compact ? 0 : 12,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Material(
+                            color: item == category
+                                ? Theme.of(context)
+                                      .colorScheme
+                                      .secondaryContainer
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
+                            child: ListTile(
+                              key: ValueKey('settings.${item.name}'),
+                              minTileHeight: 44,
+                              horizontalTitleGap: 8,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: compact ? 0 : 12,
+                              ),
+                              leading: compact
+                                  ? null
+                                  : MtIcon(item.icon, size: 20),
+                              title: compact
+                                  ? Center(child: MtIcon(item.icon, size: 20))
+                                  : UiText(
+                                      item.label,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                              selected: item == category,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              onTap: () => navigate(item),
                             ),
-                            leading: compact
-                                ? null
-                                : MtIcon(item.icon, size: 20),
-                            title: compact
-                                ? Center(child: MtIcon(item.icon, size: 20))
-                                : UiText(
-                                    item.label,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium,
-                                  ),
-                            selected: item == category,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            onTap: () => navigate(item),
                           ),
                         ),
                       ),
@@ -1025,7 +1078,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: SettingsSpacing.titleGap),
                     if (widget.settings.saving) const LinearProgressIndicator(),
                     if (widget.settings.error != null)
                       UiText(widget.settings.error!),

@@ -17,8 +17,8 @@ const nowPlayingStyles = {
   'classic': 'Clássico',
   'vinyl': 'Vinil',
   'minimal': 'Minimalista',
-  'gallery': 'Galeria',
-  'focus': 'Foco',
+  'cover_only': 'Somente capa',
+  'lyrics_only': 'Somente letras',
 };
 
 class NowPlayingPage extends StatelessWidget {
@@ -151,7 +151,9 @@ class NowPlayingPage extends StatelessWidget {
           nowPlayingStyles.containsKey(settings.nowPlayingStyle)
           ? settings.nowPlayingStyle
           : 'classic';
-      final style = showLyrics == true
+      final style = selectedStyle == 'lyrics_only'
+          ? selectedStyle
+          : showLyrics == true
           ? 'lyrics'
           : showLyrics == false && selectedStyle == 'lyrics'
           ? 'classic'
@@ -196,7 +198,25 @@ class NowPlayingPage extends StatelessWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: style == 'lyrics'
+                        child: style == 'lyrics_only'
+                            ? LyricsView(
+                                loader: loadLyrics,
+                                controller: controller,
+                                settings: settings,
+                              )
+                            : style == 'cover_only'
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(24),
+                                  child: AspectRatio(
+                                    aspectRatio: 1,
+                                    child: TrackCover(
+                                      track: controller.current,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : style == 'lyrics'
                             ? wide
                                   ? Row(
                                       children: [

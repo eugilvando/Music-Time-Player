@@ -400,11 +400,15 @@ void main() {
         tester,
         () => memory.home.isNotEmpty && !key.currentState!.refreshing,
       );
-      final saved = memory.home.values.single, revision = memory.revision;
+      final saved = Map.of(memory.home), revision = memory.revision;
       await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(build());
       await tester.pump();
-      expect(identical(memory.home.values.single, saved), true);
+      expect(memory.home.keys, saved.keys);
+      for (final entry in saved.entries) {
+        expect(identical(memory.home[entry.key], entry.value), true);
+      }
+      expect(memory.home.length, lessThanOrEqualTo(4));
       expect(memory.revision, revision);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       final state = key.currentState!, generation = state.generation;

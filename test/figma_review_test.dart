@@ -202,7 +202,13 @@ void main() {
           await capture('playlists-compact');
         }
       }
-      for (final style in ['classic', 'vinyl', 'minimal', 'gallery', 'focus']) {
+      for (final style in [
+        'classic',
+        'vinyl',
+        'minimal',
+        'cover_only',
+        'lyrics_only',
+      ]) {
         await settings.updateVisual('style', style);
         await capture('now-$style');
         expect(controller.queue.length, 18);

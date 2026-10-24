@@ -1,3 +1,6 @@
+import 'listening_insights_page.dart';
+import '../library/listening_insights.dart';
+import 'resizable_side_panel.dart';
 import 'design_icon.dart';
 import 'backup_options.dart';
 import '../persistence/backup_archive.dart';
@@ -109,6 +112,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   final historyClaims = <String>{};
   final tracks = <Track>[];
   String query = '';
+  SettingsCategory? settingsDestination;
   int catalogRevision = 0;
   int? selectedPlaylist;
   bool? lyricsOpen;
@@ -135,6 +139,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Timer? saveTimer;
   final catalogKey = GlobalKey<CatalogBrowserState>();
   final catalogMemory = CatalogMemory();
+  late final listeningInsights = ListeningInsightsRepository(
+    widget.store,
+    providers.lastfm,
+  );
   Widget? cachedLibraryPage;
   String cachedLibraryPageKey = '';
   final queueScaffoldKey = GlobalKey<ScaffoldState>();
@@ -1085,7 +1093,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Widget sidePanel({bool drawer = false}) => lyricsActive
       ? Material(
           key: const ValueKey('lyrics.side-panel'),
-          color: Theme.of(context).colorScheme.surface,
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: .82),
           child: Column(
             children: [
               Padding(
@@ -1127,7 +1135,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   Widget queueSidebar({bool drawer = false}) => Material(
     key: const ValueKey("queue.surface"),
-    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+    color: Theme.of(context).colorScheme.surfaceContainerHigh
+        .withValues(alpha: .82),
     child: SafeArea(
       child: Column(
         children: [
@@ -1290,6 +1299,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     AppSection.home,
     AppSection.nowPlaying,
     AppSection.history,
+    AppSection.insights,
   }.contains(widget.section);
   Widget searchField() => CatalogSearchField(
     value: query,
@@ -1313,7 +1323,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   void didUpdateWidget(covariant LibraryScreen old) {
     super.didUpdateWidget(old);
+    if (widget.section != AppSection.settings) settingsDestination = null;
     if (old.navigationReset != widget.navigationReset) {
+      settingsDestination = null;
       query = '';
       selectedPlaylist = null;
       cachedLibraryPage = null;
@@ -1334,7 +1346,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   Widget libraryPage({String? category}) {
     final key =
-        '$category|${widget.section}|$catalogRevision|$loading|$query|${identityHashCode(favorites)}|${controller.current?.id}|${controller.current?.title}';
+        '$category|${widget.section}|$catalogRevision|$loading|$query|${identityHashCode(favorites)}|${controller.current?.id}|${controller.current?.title}|${controller.playing}';
     if (cachedLibraryPage != null && cachedLibraryPageKey == key) {
       return cachedLibraryPage!;
     }
@@ -1361,13 +1373,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
       onAction: catalogAction,
       trackActions: trackActions,
       onAddSource: () => widget.onNavigate(AppSection.settings),
-      onResume: controller.current == null
-          ? null
-          : () {
-              if (!controller.playing) controller.toggle();
-            },
+      onResume: controller.current == null ? null : () => controller.toggle(),
       resumeTitle: controller.current?.title,
       resumeTrack: controller.current,
+      resumePlaying: controller.playing,
       onNowPlaying: () => widget.onNavigate(AppSection.nowPlaying),
       onPlaylist: (id) {
         selectedPlaylist = id;
@@ -1873,6 +1882,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                 AppSection.settings,
                                                 AppSection.nowPlaying,
                                                 AppSection.playlists,
+                                                AppSection.insights,
                                               }.contains(widget.section))
                                                 Padding(
                                                   key: const ValueKey(
@@ -2053,6 +2063,36 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                                   values,
                                                                 ),
                                                           ),
+                                                        AppSection.insights =>
+                                                          ListeningInsightsPage(
+                                                            repository:
+                                                                listeningInsights,
+                                                            settings:
+                                                                widget.settings,
+                                                            store: widget.store,
+                                                            catalog: tracks,
+                                                            catalogRevision:
+                                                                catalogRevision,
+                                                            availableOffline:
+                                                                availableOffline,
+                                                            onPlay: playNamed,
+                                                            onSaved: () {
+                                                              catalogMemory
+                                                                      .dirty =
+                                                                  true;
+                                                            },
+                                                            onConfigure: () {
+                                                              settingsDestination =
+                                                                  SettingsCategory
+                                                                      .lastfm;
+                                                              widget.onNavigate(
+                                                                AppSection
+                                                                    .settings,
+                                                              );
+                                                            },
+                                                            onOpen:
+                                                                openSearchResult,
+                                                          ),
                                                         AppSection.history =>
                                                           HistoryPage(
                                                             store: widget.store,
@@ -2066,6 +2106,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                             embedded: true,
                                                           ),
                                                         AppSection.settings => SettingsPage(
+                                                          initialCategory:
+                                                              settingsDestination ??
+                                                              SettingsCategory
+                                                                  .general,
                                                           key: ValueKey(
                                                             'settings.root.${widget.navigationReset}',
                                                           ),
@@ -2139,13 +2183,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                   'show_queue',
                                                 ) ||
                                                 lyricsActive)) ...[
-                                          SizedBox(
-                                            width: lyricsActive
-                                                ? MtDesign.lyrics.clamp(
-                                                    300.0,
-                                                    constraints.maxWidth * .43,
-                                                  )
+                                          ResizableSidePanel(
+                                            key: ValueKey(
+                                              lyricsActive
+                                                  ? 'lyrics.panel'
+                                                  : 'queue.panel',
+                                            ),
+                                            settings: widget.settings,
+                                            preference: lyricsActive
+                                                ? 'lyrics_panel_width'
+                                                : 'queue_panel_width',
+                                            defaultWidth: lyricsActive
+                                                ? MtDesign.lyrics
                                                 : MtDesign.queue,
+                                            maxWidth: constraints.maxWidth * .6,
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.fromLTRB(
@@ -2155,6 +2206,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                     0,
                                                   ),
                                               child: Card(
+                                                color: Colors.transparent,
                                                 key: const ValueKey(
                                                   "queue.floating",
                                                 ),

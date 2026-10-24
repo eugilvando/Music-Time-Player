@@ -129,6 +129,18 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Estatísticas de escuta': 'Listening Insights',
+  'Somente capa': 'Cover Only',
+  'Somente letras': 'Lyrics Only',
+  'Espaçamento entre seções': 'Section spacing',
+  'Faixas em destaque': 'Top Tracks',
+  'Ordenadas pelas reproduções na sua biblioteca.':
+      'Ordered by plays in your library.',
+  'Prévia dos textos, menus e campos.': 'Preview of text, menus and fields.',
+  'Fonte primária': 'Primary font',
+  'Fonte secundária': 'Secondary font',
+  'A fonte primária é usada nos títulos; a secundária, nos textos, menus e campos.': 'The primary font is used for headings; the secondary font is used for text, menus and fields.',
+  'Inter e Bricolage Grotesque estão incluídas no app. As demais fontes dependem do sistema.': 'Inter and Bricolage Grotesque are bundled with the app. Other fonts depend on your system.',
   'Selecione biblioteca ou playlists para incluir capas.':
       'Select library or playlists to include artwork.',
   'Imagem compartilhada inválida.': 'Invalid shared artwork.',

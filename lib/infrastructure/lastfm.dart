@@ -46,6 +46,7 @@ class LastFmClient implements ScrobbleSink {
       'artist.getTopTracks',
       'album.getInfo',
       'user.getTopTracks',
+      'user.getRecentTracks',
     };
     if (!methods.contains(method)) throw ArgumentError('Método não permitido');
     if (apiKey.trim().isEmpty) throw StateError('Configure a chave Last.fm');
@@ -61,6 +62,8 @@ class LastFmClient implements ScrobbleSink {
           ),
         )
         .timeout(const Duration(seconds: 20));
+    if (response.statusCode == 429) throw const LastFmException(29);
+    if (response.statusCode >= 500) throw const LastFmException(16);
     if (response.statusCode != 200) throw StateError('Last.fm indisponível');
     final body = jsonDecode(response.body) as Map<String, dynamic>;
     if (body['error'] != null) {

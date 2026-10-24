@@ -21,6 +21,10 @@ class MtIcon extends Icon {
 
   static final symbols = <IconData, IconData>{
     Icons.add: const IconData(0xe145, fontFamily: 'Material Symbols Rounded'),
+    Icons.bar_chart: const IconData(
+      0xe26b,
+      fontFamily: 'Material Symbols Rounded',
+    ),
     Icons.album: const IconData(0xe019, fontFamily: 'Material Symbols Rounded'),
     Icons.arrow_back: const IconData(
       0xe5c4,

@@ -103,7 +103,7 @@ class PlayerBar extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontFamily: 'Bricolage Grotesque',
+                fontFamily: settings.primaryFont,
                 fontWeight: FontWeight.w700,
                 fontSize: settings.visualNumber('font_body', 16),
               ),
@@ -213,7 +213,9 @@ class PlayerBar extends StatelessWidget {
     'continuous' => IconButton(
       tooltip: ui(context, 'Play contínuo'),
       isSelected: settings.visualBool('smart_play', fallback: false),
-      icon: const MtIcon(Icons.auto_awesome),
+      icon: const MtIcon(
+        IconData(0xf6b5, fontFamily: 'Material Symbols Rounded'),
+      ),
       onPressed: () => settings.updateVisual(
         'smart_play',
         !settings.visualBool('smart_play', fallback: false),
@@ -399,7 +401,7 @@ class PlayerBar extends StatelessWidget {
     onSecondaryTapDown: controller.current == null ? null : (_) => onDetails(),
     child: DecoratedBox(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: .96),
+        color: Theme.of(context).colorScheme.surface.withValues(alpha: .78),
         border: Border(top: BorderSide(color: Theme.of(context).dividerColor)),
       ),
       child: IconButtonTheme(

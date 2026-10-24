@@ -93,7 +93,7 @@ class MediaBadges extends StatelessWidget {
                     if (playing)
                       Positioned(
                         bottom: 2,
-                        right: 2,
+                        left: 2,
                         child: badge(Icons.graphic_eq, 'Em reprodução'),
                       ),
                   ],

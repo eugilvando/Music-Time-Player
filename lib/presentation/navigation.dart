@@ -10,6 +10,7 @@ enum AppSection {
   playlists('Playlists', Icons.playlist_play),
   downloads('Downloads', Icons.download),
   history('Histórico', Icons.history),
+  insights('Estatísticas de escuta', Icons.bar_chart),
   settings('Configurações', Icons.settings);
 
   const AppSection(this.label, this.icon);

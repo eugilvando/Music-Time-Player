@@ -1,3 +1,5 @@
+import 'tray_window.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -170,8 +172,8 @@ class WindowsIntegration with WindowListener {
             'classic',
             'vinyl',
             'minimal',
-            'gallery',
-            'focus',
+            'cover_only',
+            'lyrics_only',
           ]) {
             await settings.updateVisual('style', style);
             await Future<void>.delayed(const Duration(milliseconds: 150));
@@ -187,9 +189,32 @@ class WindowsIntegration with WindowListener {
           await log(
             preserved ? 'styles_session_preserved' : 'styles_session_failed',
           );
-          await hide();
-          await Future<void>.delayed(const Duration(seconds: 1));
-          if (!_disposed && !_exiting) await show();
+          var placementPreserved = true;
+          for (final maximized in [false, true]) {
+            if (_disposed || _exiting) return;
+            if (maximized) {
+              await windowManager.maximize();
+            } else {
+              await windowManager.unmaximize();
+            }
+            await Future<void>.delayed(const Duration(milliseconds: 250));
+            final before = await windowManager.getBounds();
+            await hide();
+            await Future<void>.delayed(const Duration(milliseconds: 250));
+            await show();
+            await Future<void>.delayed(const Duration(milliseconds: 250));
+            final after = await windowManager.getBounds();
+            placementPreserved =
+                placementPreserved &&
+                await windowManager.isMaximized() == maximized &&
+                (before.width - after.width).abs() <= 1 &&
+                (before.height - after.height).abs() <= 1;
+          }
+          await log(
+            placementPreserved
+                ? 'window_placement_preserved'
+                : 'window_placement_failed',
+          );
         });
       }
       controller.addListener(changed);
@@ -233,10 +258,7 @@ class WindowsIntegration with WindowListener {
   }
 
   Future<void> show() async {
-    await windowManager.setSkipTaskbar(false);
-    await windowManager.show();
-    await windowManager.restore();
-    await windowManager.focus();
+    await showTrayWindow();
     unawaited(log('window_restored'));
   }
 

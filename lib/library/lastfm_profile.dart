@@ -10,7 +10,7 @@ PlaylistImportReport matchLastFmProfile(
       '${searchKey(artist.trim())}\u0000${searchKey(title.trim())}';
   final index = <String, List<Track>>{};
   for (final track in input.$2) {
-    for (final artist in track.artistNames.toSet()) {
+    for (final artist in {...track.artistNames, track.artist}) {
       index.putIfAbsent(key(artist, track.title), () => []).add(track);
     }
   }

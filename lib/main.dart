@@ -299,32 +299,32 @@ ThemeData musicTimeTheme(
     useMaterial3: true,
     textTheme: TextTheme(
       headlineLarge: TextStyle(
-        fontFamily: 'Bricolage Grotesque',
+        fontFamily: settings?.primaryFont ?? 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_title', 32) ?? 32,
       ),
       titleMedium: TextStyle(
-        fontFamily: 'Bricolage Grotesque',
+        fontFamily: settings?.primaryFont ?? 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: (settings?.visualNumber('font_body', 14) ?? 14) * 16 / 14,
       ),
       titleSmall: TextStyle(
-        fontFamily: 'Bricolage Grotesque',
+        fontFamily: settings?.primaryFont ?? 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_body', 14) ?? 14,
       ),
       titleLarge: TextStyle(
-        fontFamily: 'Bricolage Grotesque',
+        fontFamily: settings?.primaryFont ?? 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_title', 22) ?? 22,
       ),
       headlineSmall: TextStyle(
-        fontFamily: 'Bricolage Grotesque',
+        fontFamily: settings?.primaryFont ?? 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_title', 32) ?? 32,
       ),
       headlineMedium: TextStyle(
-        fontFamily: 'Bricolage Grotesque',
+        fontFamily: settings?.primaryFont ?? 'Bricolage Grotesque',
         fontWeight: FontWeight.bold,
         fontSize: settings?.visualNumber('font_title', 32) ?? 32,
       ),
@@ -338,7 +338,7 @@ ThemeData musicTimeTheme(
         fontSize: settings?.visualNumber('font_secondary', 12) ?? 12,
       ),
     ),
-    fontFamily: 'Inter',
+    fontFamily: settings?.secondaryFont ?? 'Inter',
     visualDensity: VisualDensity.compact,
     brightness: brightness,
     colorScheme: scheme,
@@ -413,7 +413,10 @@ ThemeData musicTimeTheme(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         shape: const StadiumBorder(),
-        textStyle: const TextStyle(fontFamily: 'Inter', fontSize: 14),
+        textStyle: TextStyle(
+          fontFamily: settings?.secondaryFont ?? 'Inter',
+          fontSize: 14,
+        ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(

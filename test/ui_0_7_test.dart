@@ -209,30 +209,9 @@ void main() {
       expect(homeScroll.position.pixels, greaterThan(0));
       await tester.binding.setSurfaceSize(const Size(1200, 750));
       await tester.pumpAndSettle();
-      final mixStyle = find.byKey(const ValueKey('home.style.mixes'));
-      final family = find.descendant(
-        of: mixStyle,
-        matching: find.byKey(const ValueKey('view.family')),
-      );
-      await tester.ensureVisible(family);
-      await tester.tap(family);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('List').last);
-      await tester.pumpAndSettle();
-      final styles = find.descendant(
-        of: mixStyle,
-        matching: find.byKey(const ValueKey('view.style')),
-      );
-      await tester.tap(styles);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Detailed').last);
-      await tester.pumpAndSettle();
-      expect(homeSectionMode(settings, 'mixes'), 'detailed');
-      await tester.tap(styles);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Compact List').last);
-      await tester.pumpAndSettle();
-      expect(homeSectionMode(settings, 'mixes'), 'compact');
+      expect(find.byKey(const ValueKey('home.style.mixes')), findsNothing);
+      expect(find.byKey(const ValueKey('home.style.continue')), findsNothing);
+      expect(homeSectionMode(settings, 'mixes'), 'grid');
       await tester.tap(find.byTooltip('Close').last);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);

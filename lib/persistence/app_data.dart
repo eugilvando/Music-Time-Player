@@ -175,6 +175,9 @@ class AppData {
       return value is double && value >= 10 && value <= 40;
     }
     const ranges = {
+      'queue_panel_width': (280.0, 960.0),
+      'lyrics_panel_width': (280.0, 960.0),
+      'home_section_spacing': (0.0, 96.0),
       'bar_icon_spacing': (0.0, 24.0),
       'lyrics_spacing': (1.0, 2.0),
       'cover_scale': (.7, 1.8),

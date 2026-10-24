@@ -43,7 +43,7 @@ void main() {
           ),
         ),
       );
-      final icons = [Icons.offline_pin, Icons.auto_awesome, Icons.lyrics];
+      const items = ['offline', 'continuous', 'lyrics'];
       final info = tester.getRect(
         find.byKey(const ValueKey('player.item.info')),
       );
@@ -52,8 +52,10 @@ void main() {
       );
       expect(previous.left - info.right, 4);
       expect(previous.left, greaterThan(info.left));
-      final positions = icons
-          .map((icon) => tester.getCenter(find.byIcon(icon)))
+      final positions = items
+          .map(
+            (id) => tester.getCenter(find.byKey(ValueKey('player.item.$id'))),
+          )
           .toList();
       expect(positions[0].dx, lessThan(positions[1].dx));
       expect(positions[1].dx, lessThan(positions[2].dx));

@@ -45,6 +45,8 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
     final byId = {for (final t in widget.queue) t.id: t};
     Widget item(int i) {
       final row = values[i], track = byId[values[i]['track_id']];
+      final trackMenu = track == null ? null : widget.trackActions?.call(track);
+      final general = trackMenu is PopupMenuButton<String> ? trackMenu : null;
       final title = row['import_title'] as String? ?? '';
       return ItemActionRegion(
         key: ValueKey(row['id']),
@@ -83,12 +85,11 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (track != null && widget.trackActions != null)
-                  widget.trackActions!(track),
                 PopupMenuButton<String>(
+                  tooltip: ui(context, 'Ações da faixa'),
                   enabled: !widget.busy,
                   onSelected: (action) async {
-                    if (action == 'link') {
+                    if (action == 'playlist_link') {
                       final catalog = await widget.store.loadTracks(
                         includeCovers: false,
                         includeHidden: true,
@@ -103,7 +104,7 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
                           ),
                         );
                       }
-                    } else if (action == 'reference') {
+                    } else if (action == 'playlist_reference') {
                       await showDialog<void>(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -141,28 +142,34 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
                           ],
                         ),
                       );
-                    } else {
+                    } else if (action == 'playlist_remove') {
                       await widget.onChanged(
                         () =>
                             widget.store.removePlaylistEntry(row['id'] as int),
                       );
+                    } else {
+                      general?.onSelected?.call(action);
                     }
                   },
                   itemBuilder: (_) => [
                     if (track == null)
                       const PopupMenuItem(
-                        value: 'link',
+                        value: 'playlist_link',
                         child: UiText('Find in library'),
                       ),
                     if (row['original_reference'] != null)
                       const PopupMenuItem(
-                        value: 'reference',
+                        value: 'playlist_reference',
                         child: UiText('Original reference'),
                       ),
                     const PopupMenuItem(
-                      value: 'remove',
+                      value: 'playlist_remove',
                       child: UiText('Remove from playlist'),
                     ),
+                    if (general != null) ...[
+                      const PopupMenuDivider(),
+                      ...general.itemBuilder(context),
+                    ],
                   ],
                 ),
               ],

@@ -19,6 +19,7 @@ import 'package:music_time/presentation/library_screen.dart';
 import 'package:music_time/presentation/settings_dialog.dart';
 import 'package:music_time/presentation/sources_dialog.dart';
 import 'package:music_time/presentation/now_playing_artwork.dart';
+import 'package:music_time/presentation/design_icon.dart';
 
 Future<Uint8List> demoCover(Color color, int number) async {
   final recorder = ui.PictureRecorder();
@@ -378,6 +379,21 @@ void main() {
       );
       expect(identical(controller.player, player), isTrue);
       expect(controller.queue.length, 6);
+      final settingsFooter = tester.getRect(
+        find.byKey(const ValueKey('navigation.settings.footer')),
+      );
+      final settingsIcon = find.descendant(
+        of: find.byKey(const ValueKey('navigation.settings')),
+        matching: find.byType(MtIcon),
+      );
+      expect(
+        tester.getCenter(settingsIcon).dx,
+        closeTo(settingsFooter.center.dx, .1),
+      );
+      expect(
+        tester.getCenter(settingsIcon).dy,
+        closeTo(settingsFooter.center.dy, .1),
+      );
       await capture('sidebar-compact');
       await tester.tap(find.byTooltip('Expandir barra lateral'));
       await settle();
@@ -385,7 +401,13 @@ void main() {
       expect(settings.preferences.getBool('visual.sidebar_collapsed'), isFalse);
       await navigate('nowPlaying');
       expect(find.byKey(const ValueKey('page.heading')), findsNothing);
-      for (final style in ['classic', 'vinyl', 'minimal', 'gallery', 'focus']) {
+      for (final style in [
+        'classic',
+        'vinyl',
+        'minimal',
+        'cover_only',
+        'lyrics_only',
+      ]) {
         await settings.updateVisual('style', style);
         await settle();
         expect(controller.playing, isFalse);
@@ -395,6 +417,8 @@ void main() {
         expect(tester.takeException(), isNull);
         await capture('now-playing-$style');
       }
+      await settings.updateVisual('style', 'minimal');
+      await settle();
       await tester.tap(find.byTooltip('Ativar letras'));
       await settle();
       controller.position = const Duration(seconds: 5);
@@ -431,7 +455,7 @@ void main() {
       await tester.tap(find.byTooltip('Desativar letras'));
       await settle();
       expect(find.byTooltip('Ativar letras'), findsOneWidget);
-      expect(settings.nowPlayingStyle, 'focus');
+      expect(settings.nowPlayingStyle, 'minimal');
       expect(find.text('Ajuste: 0 ms'), findsNothing);
       expect(controller.position, lyricsPosition);
       expect(controller.queue.length, 6);

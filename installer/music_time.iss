@@ -1,5 +1,5 @@
 #define MyAppName "Music Time"
-#define MyAppVersion "2.0.0"
+#define MyAppVersion "2.2.0"
 [Setup]
 AppId=MusicTime.Experimental
 AppName={#MyAppName}
@@ -21,9 +21,6 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
 [Files]
 Source: "..\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\LICENSES\*"; DestDir: "{app}\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
 [Icons]
 Name: "{group}\Music Time"; Filename: "{app}\music_time.exe"; AppUserModelID: "MusicTime.Desktop"
 Name: "{autodesktop}\Music Time"; Filename: "{app}\music_time.exe"; AppUserModelID: "MusicTime.Desktop"; Tasks: desktopicon

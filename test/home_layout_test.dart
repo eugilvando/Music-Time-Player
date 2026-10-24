@@ -3,10 +3,88 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:music_time/presentation/home_page.dart';
 import 'package:music_time/presentation/home_mix_picker.dart';
 import 'package:music_time/domain/track.dart';
+import 'package:music_time/library/catalog.dart';
 import 'package:music_time/settings/app_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  testWidgets('home See all precedes carousel arrows on the same header row', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'visual.home_sections': <String>['recent'],
+      'visual.home_modes': '{"recent":"carousel"}',
+    });
+    final settings = AppSettings(await SharedPreferences.getInstance());
+    addTearDown(settings.dispose);
+    final tracks = List.generate(
+      12,
+      (i) => Track(
+        id: 'track-$i',
+        title: 'Song $i',
+        artist: 'Artist',
+        album: 'Album',
+        addedAt: DateTime(2026, 10, i + 1),
+      ),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: HomePage(
+            index: CatalogIndex(
+              tracks: tracks,
+              favorites: {},
+              offline: {},
+              stats: {},
+              sources: {},
+            ),
+            tracks: tracks,
+            settings: settings,
+            onAction: (_, _) async {},
+            onPlay: (_, _) async {},
+            trackActions: (_) => const SizedBox(),
+            onExplore: (_, _) {},
+            onAddSource: () {},
+            library: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final section = find.byKey(const ValueKey('home.section.recent'));
+    final all = find
+        .descendant(of: section, matching: find.byType(TextButton))
+        .first;
+    final previous = find.descendant(
+      of: section,
+      matching: find.byTooltip('Anterior'),
+    );
+    final next = find.descendant(
+      of: section,
+      matching: find.byTooltip('Próxima'),
+    );
+    expect(
+      tester.getCenter(all).dy,
+      closeTo(tester.getCenter(previous).dy, .1),
+    );
+    expect(
+      tester.getCenter(next).dy,
+      closeTo(tester.getCenter(previous).dy, .1),
+    );
+    expect(tester.getCenter(all).dx, lessThan(tester.getCenter(previous).dx));
+    expect(tester.getCenter(previous).dx, lessThan(tester.getCenter(next).dx));
+    final carousel = find.descendant(
+      of: section,
+      matching: find.byType(HomeCarousel),
+    );
+    final scroll = tester.state<ScrollableState>(
+      find.descendant(of: carousel, matching: find.byType(Scrollable)),
+    );
+    await tester.tap(next);
+    await tester.pumpAndSettle();
+    expect(scroll.position.pixels, greaterThan(0));
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'modelos de mixes selecionam, ordenam e persistem de forma independente',
     (tester) async {

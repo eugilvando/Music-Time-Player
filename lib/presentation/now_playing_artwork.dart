@@ -56,14 +56,14 @@ class TrackCover extends StatelessWidget {
           (album && state?.currentTrack != null
               ? albumKey(state!.currentTrack!) == albumKey(track!)
               : state?.currentId == track?.id),
-      child: image,
+      child: circular
+          ? ClipOval(child: image)
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(rounded ? 8 : 0),
+              child: image,
+            ),
     );
-    return circular
-        ? ClipOval(child: decorated)
-        : ClipRRect(
-            borderRadius: BorderRadius.circular(rounded ? 8 : 0),
-            child: decorated,
-          );
+    return decorated;
   }
 }
 
