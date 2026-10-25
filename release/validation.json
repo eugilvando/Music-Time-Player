@@ -4,39 +4,43 @@
                  "backupSchema":  17,
                  "container":  2
              },
-    "version":  "2.3.0+49",
+    "version":  "2.4.0+50",
     "checks":  {
-                   "dataRestart":  "Migration, manual artwork backup/reset/resync and legacy cleanup protection covered by tests",
                    "pubGet":  "passed; offline",
+                   "finalPortraitRegression":  {
+                                                   "note":  "Final portrait change checked after the full run; overlapping cases",
+                                                   "failed":  0,
+                                                   "passed":  8
+                                               },
                    "fullSuite":  {
-                                     "note":  "Final full run; includes album-detail refresh regression",
+                                     "note":  "Clean full run before final portrait refinement",
                                      "failed":  0,
-                                     "passed":  355
+                                     "passed":  362
                                  },
                    "relativeDocumentationLinks":  "passed",
-                   "dartAnalysis":  "passed; development and public copies",
+                   "dartAnalysis":  "passed; development and public",
                    "windowsBuild":  "passed",
                    "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, window placement and clean exit",
                    "runtimeSource":  {
-                                         "files":  219,
+                                         "files":  224,
                                          "identical":  true
                                      },
-                   "publicAlbumMemoryRegression":  {
+                   "publicRefinementsRegression":  {
                                                        "note":  "Repeated tests from development validation, not additional unique tests",
                                                        "failed":  0,
                                                        "passed":  7
                                                    }
                },
-    "limits":  "Controlled image measurement is not total process RAM; no personal profile or service acceptance is included. Ubuntu preview is unchanged.",
+    "limits":  "Controlled service responses do not establish personal Last.fm acceptance. No personal profile is published. Ubuntu preview is unchanged.",
     "date":  "2026-10-25",
     "platform":  "Windows x64",
     "binaries":  [
                      {
-                         "sha256":  "7daea2da1ba2950b04bd34291152bc080496375d427e340fa351f77de29ebf63",
+                         "sha256":  "e03855b4f1ac174ec520c264b8510f92c022debc9807d3b0676230cc90dab141",
                          "file":  "music_time.exe"
                      },
                      {
-                         "sha256":  "0a9b522426138d5bac1b0e38ea5e9c7b50679cf4217631e368450ecc5672f740",
+                         "sha256":  "e1b4e96d5e8f9d7378f90980eab53361c67242e202a205604598b4ce4da49339",
                          "file":  "data/app.so"
                      },
                      {
@@ -45,8 +49,8 @@
                      }
                  ],
     "installer":  {
-                      "sha256":  "6becfc326018381652bc6b6055ef9b5bf4656730f64f4d5dbd81a1c383c34a7f",
-                      "file":  "MusicTime-Setup-2.3.0.exe",
-                      "bytes":  20450146
+                      "sha256":  "68656070ba6b4e920f2ac50789c63800f0b5bf1fb2f2d57cf99893d663c4fc84",
+                      "file":  "MusicTime-Setup-2.4.0.exe",
+                      "bytes":  20477295
                   }
 }

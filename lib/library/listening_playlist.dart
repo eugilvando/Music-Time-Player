@@ -27,7 +27,11 @@ ListeningCatalogMatches resolveListeningCatalog(
   final byId = <String, Track>{};
   for (final track in input.$2) {
     byId[track.id] = track;
-    for (final artist in {...track.artistNames, track.artist}) {
+    for (final artist in {
+      ...track.artistNames,
+      ...track.albumArtistNames,
+      track.artist,
+    }) {
       artists.putIfAbsent(searchKey(artist), () => []).add(track.id);
       albums
           .putIfAbsent(listeningTrackKey(artist, track.album), () => [])

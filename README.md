@@ -8,11 +8,15 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.3.0+49.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.4.0+50.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
+
+## New in 2.4.0
+
+Listening Insights adds artist radio, an artist's most played tracks in the selected period, and global Last.fm artist popularity matched to your library. Review expected track names and replacement suggestions before confirming. Save the current queue as a playlist, preserving order and repeats. Insights uses the library's artist images. Reorder/hide sidebar items, enlarge Vinyl artwork, and use larger lyrics with tighter line spacing. [Details and limits](docs/release-2.4.0.md).
 
 ## New in 2.3.0
 
@@ -31,7 +35,7 @@ Multi-disc albums now show ordered disc sections and play in disc/track order. M
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.3.0.exe` from the [2.3.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.3.0).
+1. Download `MusicTime-Setup-2.4.0.exe` from the [2.4.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.0).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -159,9 +163,9 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Validation and development
 
-Version 2.3.0 validation is recorded in [release notes](docs/release-2.3.0.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
+Version 2.4.0 validation is recorded in [release notes](docs/release-2.4.0.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.3.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.4.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 

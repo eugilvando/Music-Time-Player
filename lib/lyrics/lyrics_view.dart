@@ -240,9 +240,16 @@ class _LyricsViewState extends State<LyricsView> {
                                   );
                                 },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 20,
-                              vertical: 12,
+                              vertical:
+                                  ((widget.settings.visualNumber(
+                                                'lyrics_spacing',
+                                                1.25,
+                                              ) -
+                                              .8) *
+                                          24)
+                                      .clamp(2.0, 24.0),
                             ),
                             child: Align(
                               alignment: Alignment.centerLeft,

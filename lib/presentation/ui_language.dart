@@ -1273,4 +1273,14 @@ const englishLabels = <String, String>{
   'Valores diferentes; mantenha desmarcado para preservar':
       'Mixed values; leave unchecked to preserve',
   'Somente campos marcados serão aplicados a todas as faixas. Títulos, artistas de faixa e números de disco/faixa serão preservados. Arquivos originais não serão alterados.': 'Only checked fields apply to every track. Track titles, track artists and disc/track numbers are preserved. Original files are not changed.',
+  'Salvar fila como playlist': 'Save queue as playlist',
+  'Barra lateral': 'Sidebar',
+  'Restaurar barra lateral': 'Restore sidebar',
+  'Organize os itens da barra lateral. Configurações permanece disponível no rodapé.':
+      'Organize sidebar items. Settings remains available in the footer.',
+  'Faixa esperada': 'Expected track',
+  'Usar': 'Use',
+  'As sugestões usam título, artista, duração e nome do arquivo. Confirme a gravação correta.': 'Suggestions use title, artist, duration and file name. Confirm the correct recording.',
+  'Mover para cima': 'Move up',
+  'Mover para baixo': 'Move down',
 };

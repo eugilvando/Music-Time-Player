@@ -1,4 +1,5 @@
 import 'design_icon.dart';
+import 'sidebar_settings.dart';
 import 'artist_selection_settings.dart';
 import 'storage_settings.dart';
 import 'artwork_storage_settings.dart';
@@ -269,9 +270,17 @@ class _SettingsPageState extends State<SettingsPage> {
               ? 12
               : 14,
         ),
-        min: entry.key == 'lyrics_spacing' ? 1 : 10,
-        max: entry.key == 'lyrics_spacing' ? 2 : 40,
-        divisions: entry.key == 'lyrics_spacing' ? 10 : 30,
+        min: entry.key == 'lyrics_spacing' ? .8 : 10,
+        max: entry.key == 'lyrics_spacing'
+            ? 2
+            : entry.key == 'lyrics_font'
+            ? 80
+            : 40,
+        divisions: entry.key == 'lyrics_spacing'
+            ? 24
+            : entry.key == 'lyrics_font'
+            ? 70
+            : 30,
         onChanged: (v) => widget.settings.updateVisual(entry.key, v),
       ),
     ],
@@ -439,10 +448,10 @@ class _SettingsPageState extends State<SettingsPage> {
       }, 'left'),
       const UiText('Tamanho da capa'),
       Slider(
-        value: widget.settings.visualNumber('cover_scale', 1).clamp(.7, 1.8),
+        value: widget.settings.visualNumber('cover_scale', 1).clamp(.7, 2.6),
         min: .7,
-        max: 1.8,
-        divisions: 11,
+        max: 2.6,
+        divisions: 19,
         onChanged: widget.settings.saving
             ? null
             : (value) => widget.settings.updateVisual('cover_scale', value),
@@ -789,6 +798,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ]);
       case SettingsCategory.customization:
         return pageList([
+          subsection('Sidebar', [SidebarSettings(settings: widget.settings)]),
           appearance()[3],
           appearance()[2],
           subsection('Tipografia', typography()),

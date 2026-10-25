@@ -17,6 +17,8 @@ import '../settings/app_settings.dart';
 import 'design_icon.dart';
 import 'listening_playlist_dialog.dart';
 import 'now_playing_artwork.dart';
+import 'artist_portrait.dart';
+import '../library/insight_artist_templates.dart';
 
 String listeningCsvCell(String text) {
   final safe = RegExp(r'^[\s]*[=+\-@]').hasMatch(text) ? "'$text" : text;
@@ -300,6 +302,10 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
           store: widget.store,
           offlineIds: offlineIds,
           offlineOnly: offline,
+          artistTemplates: InsightArtistTemplates(
+            widget.store,
+            widget.repository.api,
+          ),
           onPlay: widget.onPlay,
           onSaved: widget.onSaved,
         ),
@@ -439,9 +445,13 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
                       child: Text('${(take == null ? offset : 0) + i + 1}'),
                     ),
                     if (kind == 'artists')
-                      CircleAvatar(
-                        child: Text(
-                          row.title.isEmpty ? '?' : row.title.characters.first,
+                      SizedBox.square(
+                        dimension: 40,
+                        child: ArtistPortrait(
+                          artist: row.title,
+                          fallbackTrack: found.firstOrNull,
+                          enabled: widget.settings.visualBool('artist_photos'),
+                          cachedOnly: offline,
                         ),
                       )
                     else
@@ -688,13 +698,14 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
         children: [
           title(t('Your top artist', 'Seu artista mais ouvido')),
           const SizedBox(height: 16),
-          CircleAvatar(
-            radius: 32,
-            child: Text(
-              top == null || top.title.isEmpty
-                  ? '♪'
-                  : top.title.characters.first,
-              style: Theme.of(context).textTheme.headlineMedium,
+          SizedBox.square(
+            key: const ValueKey('insights.top-artist-image'),
+            dimension: 64,
+            child: ArtistPortrait(
+              artist: top?.title ?? '',
+              fallbackTrack: artistTracks.firstOrNull,
+              enabled: widget.settings.visualBool('artist_photos'),
+              cachedOnly: offline,
             ),
           ),
           const SizedBox(height: 12),

@@ -1,4 +1,7 @@
 import 'dart:convert';
+
+import '../settings/sidebar_layout.dart';
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -140,6 +143,9 @@ class AppData {
       value is List && value.every((v) => v is String);
 
   static bool validPreferenceType(String key, Object? value) {
+    if (key == 'visual.sidebar_order' || key == 'visual.sidebar_items') {
+      return validSidebarItems(value);
+    }
     if (key.startsWith('visual.details_columns_')) {
       return value is List &&
           value.every((v) => v is String && int.tryParse(v) != null);
@@ -172,15 +178,17 @@ class AppData {
       return modes is Map && modes.values.every((v) => v is String);
     }
     if (name.startsWith('font_') || name == 'lyrics_font') {
-      return value is double && value >= 10 && value <= 40;
+      return value is double &&
+          value >= 10 &&
+          value <= (name == 'lyrics_font' ? 80 : 40);
     }
     const ranges = {
       'queue_panel_width': (280.0, 960.0),
       'lyrics_panel_width': (280.0, 960.0),
       'home_section_spacing': (0.0, 96.0),
       'bar_icon_spacing': (0.0, 24.0),
-      'lyrics_spacing': (1.0, 2.0),
-      'cover_scale': (.7, 1.8),
+      'lyrics_spacing': (.8, 2.0),
+      'cover_scale': (.7, 2.6),
       'background_intensity': (.05, .45),
       'home_count': (4.0, 24.0),
       'home_mix_size': (1.0, 100.0),

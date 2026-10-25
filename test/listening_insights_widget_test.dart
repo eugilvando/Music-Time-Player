@@ -12,6 +12,7 @@ import 'package:music_time/library/listening_insights.dart';
 import 'package:music_time/main.dart';
 import 'package:music_time/persistence/library_store.dart';
 import 'package:music_time/presentation/listening_insights_page.dart';
+import 'package:music_time/presentation/artist_portrait.dart';
 import 'package:music_time/presentation/listening_playlist_dialog.dart';
 import 'package:music_time/presentation/navigation.dart';
 import 'package:music_time/presentation/ui_language.dart';
@@ -143,6 +144,20 @@ void main() {
           );
           await settleInsights(tester);
           expect(find.text('61'), findsOneWidget);
+          expect(
+            find.byKey(const ValueKey('insights.top-artist-image')),
+            findsOneWidget,
+          );
+          expect(
+            find
+                .byType(ArtistPortrait)
+                .evaluate()
+                .where(
+                  (e) => (e.widget as ArtistPortrait).artist == 'Northbound',
+                )
+                .length,
+            greaterThanOrEqualTo(2),
+          );
           expect(
             find.text(
               language == 'en'

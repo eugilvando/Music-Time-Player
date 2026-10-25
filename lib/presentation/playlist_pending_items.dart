@@ -1,6 +1,10 @@
 import 'design_icon.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
+import '../library/m3u8.dart';
+import '../library/playlist_recommendations.dart';
 
 import '../domain/track.dart';
 import '../library/playlist_batch_import.dart';
@@ -95,7 +99,26 @@ class _PlaylistPendingItemsState extends State<PlaylistPendingItems> {
                         includeHidden: true,
                       );
                       if (!context.mounted) return;
-                      final id = await pickPlaylistTrack(context, catalog);
+                      final expected = PlaylistImportEntry(
+                        1,
+                        row['original_reference'] as String? ?? '',
+                        [],
+                        [],
+                        title: title,
+                        artist: row['import_artist'] as String? ?? '',
+                      );
+                      final suggestions = await compute(
+                        recommendPlaylistReplacements,
+                        ([expected], catalog),
+                      );
+                      if (!context.mounted) return;
+                      final id = await pickPlaylistTrack(
+                        context,
+                        catalog,
+                        suggested: suggestions[1] ?? [],
+                        expected:
+                            '${expectedPlaylistTitle(expected)} • ${expected.artist}',
+                      );
                       if (id != null && mounted) {
                         await widget.onChanged(
                           () => widget.store.linkPlaylistOccurrence(

@@ -256,6 +256,8 @@ class AppSettings extends ChangeNotifier {
     'font_body',
     'font_secondary',
     'font_navigation',
+    'sidebar_order',
+    'sidebar_items',
     'lyrics_font',
     'lyrics_spacing',
     'lyrics_auto_scroll',

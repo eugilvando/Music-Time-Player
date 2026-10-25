@@ -343,6 +343,33 @@ void main() {
       state.setState(() {});
       await tester.pump();
       expect(find.text('My playlist'), findsOneWidget);
+      final player = state.controller as PlayerController;
+      player.queue.addAll([song, song]);
+      player.queueKeys.addAll([9001, 9002]);
+      state.setState(() {});
+      await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('queue.save-playlist')));
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        'Saved queue',
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Create'));
+      await drainCatalog(tester);
+      await tester.runAsync(() async {
+        final lists = await store.playlists();
+        final id = lists.firstWhere((p) => p['name'] == 'Saved queue')['id'];
+        final rows = await store.database.query(
+          'playlist_entries',
+          where: 'playlist_id=?',
+          whereArgs: [id],
+          orderBy: 'ordinal',
+        );
+        expect(rows.map((r) => r['track_id']).toList(), ['one', 'one']);
+      });
       await tester.pumpWidget(const SizedBox());
       await drainCatalog(tester);
       // media_kit schedules native handle destruction five seconds after dispose.
@@ -358,36 +385,39 @@ void main() {
   ) async {
     SharedPreferences.setMockInitialValues({
       'visual.style': 'classic',
-      'visual.cover_scale': 1.8,
+      'visual.cover_scale': 2.6,
     });
     final settings = AppSettings(await SharedPreferences.getInstance());
     final controller = (await tester.runAsync(() async => PlayerController()))!;
     controller.current = song;
-    for (final size in [
-      const Size(1100, 460),
-      const Size(480, 620),
-      const Size(900, 900),
-    ]) {
-      await tester.binding.setSurfaceSize(size);
-      await tester.pumpWidget(
-        app(
-          NowPlayingPage(
-            controller: controller,
-            settings: settings,
-            showLyrics: false,
-            favorite: false,
-            onFavorite: () {},
-            onDetails: () {},
+    for (final style in ['classic', 'vinyl']) {
+      await settings.updateVisual('style', style);
+      for (final size in [
+        const Size(1100, 460),
+        const Size(480, 620),
+        const Size(900, 900),
+      ]) {
+        await tester.binding.setSurfaceSize(size);
+        await tester.pumpWidget(
+          app(
+            NowPlayingPage(
+              controller: controller,
+              settings: settings,
+              showLyrics: false,
+              favorite: false,
+              onFavorite: () {},
+              onDetails: () {},
+            ),
           ),
-        ),
-      );
-      await tester.pump();
-      final composition = tester.getRect(
-        find.byKey(const ValueKey('nowPlaying.composition')),
-      );
-      expect(composition.center.dx, closeTo(size.width / 2, 1));
-      expect(composition.center.dy, closeTo((size.height + 16) / 2, 2));
-      expect(tester.takeException(), isNull);
+        );
+        await tester.pump();
+        final composition = tester.getRect(
+          find.byKey(const ValueKey('nowPlaying.composition')),
+        );
+        expect(composition.center.dx, closeTo(size.width / 2, 1));
+        expect(composition.center.dy, closeTo((size.height + 16) / 2, 2));
+        expect(tester.takeException(), isNull);
+      }
     }
     await tester.pumpWidget(const SizedBox());
     controller.dispose();

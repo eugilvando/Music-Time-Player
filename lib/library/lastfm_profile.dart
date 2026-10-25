@@ -33,6 +33,8 @@ PlaylistImportReport matchLastFmProfile(
           '${remote.artist} — ${remote.title}${remote.playedAt == null ? '' : ' • ${remote.playedAt!.toLocal()}'}',
           matches.map((t) => t.id).toSet().toList(),
           const [],
+          title: remote.title,
+          artist: remote.artist,
         );
       })(),
   ]);

@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'library_screen.dart';
 import 'navigation.dart';
+import '../settings/sidebar_layout.dart';
 import '../settings/app_settings.dart';
 import '../persistence/library_store.dart';
 
@@ -103,9 +104,22 @@ class _AppShellState extends State<AppShell> {
             key: const ValueKey('navigation.sidebar'),
             padding: const EdgeInsets.symmetric(vertical: 12),
             children: [
-              for (final section in AppSection.values.where(
-                (s) => s != AppSection.settings && s != AppSection.downloads,
-              ))
+              for (final section
+                  in sidebarOrder(
+                        widget.settings.visualList(
+                          'sidebar_order',
+                          sidebarItems,
+                        ),
+                      )
+                      .where(
+                        (id) => widget.settings
+                            .visualList('sidebar_items', sidebarItems)
+                            .contains(id),
+                      )
+                      .map(
+                        (id) =>
+                            AppSection.values.firstWhere((s) => s.name == id),
+                      ))
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: compact ? 7 : 16,

@@ -43,3 +43,7 @@ Include Windows version, Music Time version, source type, steps, a sanitized err
 ## Listening Insights cache and exports
 
 Listening Insights stores bounded derived reports by Last.fm profile and period in the local database, separately from local listening history. The cache is excluded from backups and discarded on restore/reset. CSV export is explicit and contains profile name, listening metadata, date ranges and coverage, without API keys or sessions. Generated playlists store references to tracks already in the user's library. No report is uploaded to a Music Time server.
+
+## Artist playlist templates — 2.4.0
+
+Artist names are sent to Last.fm only to request global top tracks or similar artists. Personal-period selections use the already loaded report. Rankings have a seven-day cache and at most 50 global artist payloads. Generated playlists save local catalog references only; suggestions require explicit confirmation. Sidebar preferences are included when exporting preferences; older executables can reject the new preference ranges/lists.

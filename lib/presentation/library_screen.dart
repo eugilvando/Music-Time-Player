@@ -1244,6 +1244,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ),
           ),
+          TextButton.icon(
+            key: const ValueKey('queue.save-playlist'),
+            icon: const MtIcon(Icons.playlist_add),
+            label: const UiText('Save queue as playlist'),
+            onPressed: controller.queue.isEmpty
+                ? null
+                : () async {
+                    final snapshot = List<Track>.of(controller.queue);
+                    final saved = await saveSelection(snapshot);
+                    if (saved && mounted) await reloadCatalog();
+                  },
+          ),
           TextButton(
             onPressed: controller.opening || controller.queue.isEmpty
                 ? null
@@ -1591,7 +1603,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     }
   }
 
-  Future<void> saveSelection(List<Track> values) async {
+  Future<bool> saveSelection(List<Track> values) async {
     final input = TextEditingController();
     final name = await showDialog<String>(
       context: context,
@@ -1625,10 +1637,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
         ],
       ),
     );
-    input.dispose();
+    Future<void>.delayed(const Duration(seconds: 1), input.dispose);
     if (name != null) {
       await widget.store.importPlaylist(name, values.map((t) => t.id).toList());
+      return true;
     }
+    return false;
   }
 
   Widget cover(Track track, {bool artist = false}) => track.cover == null

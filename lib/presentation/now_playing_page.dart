@@ -108,23 +108,28 @@ class NowPlayingPage extends StatelessWidget {
     final position = settings.nowPlayingStyle == 'minimal'
         ? 'above'
         : settings.visualChoice('cover_position', 'left');
-    final scale = settings.visualNumber('cover_scale', 1).clamp(.7, 1.8);
+    final scale = settings.visualNumber('cover_scale', 1).clamp(.7, 2.6);
     final horizontal = width >= 740 && position != 'above';
     final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final vinyl = settings.nowPlayingStyle == 'vinyl';
     final availableCover = math.max(
       120.0,
-      height - (horizontal ? 0 : 190 * textScale),
+      (height - (horizontal ? 0 : 190 * textScale)) * (vinyl ? 1.4 : 1),
     );
-    final size = math.min(
-      ((horizontal ? width * .46 : width - 48) * scale).clamp(
-        120.0,
-        horizontal ? width * .70 : 640.0,
-      ),
-      availableCover,
-    );
+    final size = math
+        .min(
+          ((horizontal ? width * .46 : width - 48) * scale).clamp(
+            120.0,
+            horizontal
+                ? math.min(width * (vinyl ? .82 : .70), width - 204)
+                : math.min(width, vinyl ? 960.0 : 640.0),
+          ),
+          availableCover,
+        )
+        .toDouble();
     final cover = SizedBox(
       width: size,
-      height: settings.nowPlayingStyle == 'focus' ? size * .8 : size,
+      height: vinyl ? size / 1.4 : size,
       child: artwork,
     );
     if (horizontal) {

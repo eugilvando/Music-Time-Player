@@ -1,6 +1,9 @@
 import 'design_icon.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
+import '../library/playlist_recommendations.dart';
 
 import '../domain/track.dart';
 import '../library/catalog.dart';
@@ -11,9 +14,11 @@ Future<String?> pickPlaylistTrack(
   BuildContext context,
   List<Track> tracks, {
   List<String> suggested = const [],
+  String? expected,
 }) => showDialog<String>(
   context: context,
-  builder: (_) => _TrackPicker(tracks: tracks, suggested: suggested),
+  builder: (_) =>
+      _TrackPicker(tracks: tracks, suggested: suggested, expected: expected),
 );
 
 class PlaylistImportReview extends StatefulWidget {
@@ -32,12 +37,27 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
   late final byId = {for (final t in widget.tracks) t.id: t};
   late final issues = widget.report.entries.where((e) => e.unresolved).toList();
   final collapsed = <PlaylistImportEntry>{};
+  Map<int, List<String>> recommendations = {};
+  @override
+  void initState() {
+    super.initState();
+    compute(recommendPlaylistReplacements, (issues, widget.tracks)).then((
+      values,
+    ) {
+      if (mounted) setState(() => recommendations = values);
+    });
+  }
+
   Future<void> locate(PlaylistImportEntry entry) async {
     final result = await showDialog<String>(
       context: context,
       builder: (_) => _TrackPicker(
         tracks: widget.tracks,
-        suggested: [...entry.candidates, ...entry.suggestions],
+        suggested:
+            recommendations[entry.line] ??
+            [...entry.candidates, ...entry.suggestions],
+        expected:
+            '${expectedPlaylistTitle(entry)}${entry.artist.isEmpty ? '' : ' • ${entry.artist}'}',
       ),
     );
     if (result != null && mounted) {
@@ -110,6 +130,10 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
+                        '${ui(context, 'Expected track')}: ${expectedPlaylistTitle(e)}${e.artist.isEmpty ? '' : ' • ${e.artist}'}',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
                         '${e.line}: $reference',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -124,6 +148,24 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
                               ? 'Referência ambígua'
                               : 'Faixa não encontrada',
                         ),
+                      for (final id
+                          in (recommendations[e.line] ?? const <String>[]).take(
+                            3,
+                          ))
+                        if (byId[id] != null && !collapsed.contains(e))
+                          TextButton.icon(
+                            icon: const MtIcon(Icons.swap_horiz),
+                            label: Text(
+                              '${ui(context, 'Use')}: ${byId[id]!.title} • ${byId[id]!.artist} • ${byId[id]!.album}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            onPressed: () => setState(() {
+                              e.selected = id;
+                              e.removed = false;
+                              collapsed.add(e);
+                            }),
+                          ),
                       Wrap(
                         spacing: 8,
                         children: [
@@ -175,7 +217,12 @@ class _PlaylistImportReviewState extends State<PlaylistImportReview> {
 }
 
 class _TrackPicker extends StatefulWidget {
-  const _TrackPicker({required this.tracks, required this.suggested});
+  const _TrackPicker({
+    required this.tracks,
+    required this.suggested,
+    this.expected,
+  });
+  final String? expected;
   final List<Track> tracks;
   final List<String> suggested;
   @override
@@ -191,7 +238,15 @@ class _TrackPickerState extends State<_TrackPicker> {
   @override
   Widget build(BuildContext context) {
     final text = searchKey(query);
-    final values = searchable
+    final ordered = List.of(searchable);
+    if (text.isEmpty) {
+      ordered.sort(
+        (a, b) => widget.suggested
+            .indexOf(a.$1.id)
+            .compareTo(widget.suggested.indexOf(b.$1.id)),
+      );
+    }
+    final values = ordered
         .where(
           (e) => text.isEmpty
               ? widget.suggested.contains(e.$1.id)
@@ -211,6 +266,11 @@ class _TrackPickerState extends State<_TrackPicker> {
         height: 420,
         child: Column(
           children: [
+            if (widget.expected != null)
+              Text(
+                '${ui(context, 'Expected track')}: ${widget.expected}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             TextField(
               autofocus: true,
               decoration: InputDecoration(
@@ -223,7 +283,7 @@ class _TrackPickerState extends State<_TrackPicker> {
             ),
             if (text.isEmpty)
               const UiText(
-                'Sugestões pelo nome do arquivo. Pesquise para localizar outras faixas.',
+                'Suggestions use title, artist, duration and file name. Confirm the correct recording.',
               ),
             Expanded(
               child: ListView.builder(
