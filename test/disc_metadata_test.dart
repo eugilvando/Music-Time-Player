@@ -194,7 +194,7 @@ void main() {
             .single
             .values
             .single,
-        17,
+        18,
       );
       final page = await store.catalogPage(
         CatalogSqlQuery(

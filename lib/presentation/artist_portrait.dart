@@ -1,6 +1,7 @@
 import 'media_indicators.dart';
 import 'artwork_placeholder.dart';
 import 'ui_language.dart';
+import 'bounded_artwork.dart';
 
 import 'dart:convert';
 import 'dart:io';
@@ -26,22 +27,62 @@ class ArtistPhotos {
   final Future<Directory> Function() directory;
   static final instance = ArtistPhotos();
   final Map<String, Future<Uint8List?>> pending = {};
+  final _sizes = <String, int>{};
+  int memoryBytes = 0;
+  void clearMemory() {
+    cacheEpoch++;
+    pending.clear();
+    _sizes.clear();
+    memoryBytes = 0;
+  }
+
+  void invalidate(String artist) {
+    for (final key in [
+      artist.toLowerCase().trim(),
+      'offline:${artist.toLowerCase().trim()}',
+    ]) {
+      pending.remove(key);
+      memoryBytes -= _sizes.remove(key) ?? 0;
+    }
+  }
+
   Future<void> tail = Future.value();
   DateTime lastRequest = DateTime.fromMillisecondsSinceEpoch(0);
   int cacheEpoch = 0;
   Future<void> clearDiskCache(Future<void> Function() removeFiles) async {
-    cacheEpoch++;
-    pending.clear();
+    clearMemory();
     await tail;
     await removeFiles();
-    pending.clear();
+    clearMemory();
   }
 
-  Future<Uint8List?> photo(String artist, {bool cachedOnly = false}) =>
-      pending.putIfAbsent(
-        '${cachedOnly ? 'offline:' : ''}${artist.toLowerCase().trim()}',
-        () => load(artist, cachedOnly: cachedOnly),
-      );
+  Future<Uint8List?> photo(String artist, {bool cachedOnly = false}) {
+    final key = '${cachedOnly ? 'offline:' : ''}${artist.toLowerCase().trim()}';
+    final saved = pending.remove(key);
+    if (saved != null) {
+      pending[key] = saved;
+      return saved;
+    }
+    final epoch = cacheEpoch;
+    late final Future<Uint8List?> request;
+    request = load(artist, cachedOnly: cachedOnly).then((bytes) {
+      if (epoch != cacheEpoch || !identical(pending[key], request)) {
+        return bytes;
+      }
+      _sizes[key] = bytes?.length ?? 0;
+      memoryBytes += _sizes[key]!;
+      while (pending.length > 64 || memoryBytes > 8 * 1024 * 1024) {
+        final completed = pending.keys.where(_sizes.containsKey).firstOrNull;
+        if (completed == null) break;
+        pending.remove(completed);
+        memoryBytes -= _sizes.remove(completed)!;
+      }
+      return bytes;
+    });
+    pending[key] = request;
+    return request;
+  }
+
   Future<Uint8List?> load(String artist, {bool cachedOnly = false}) async {
     final requestEpoch = cacheEpoch;
     if (artist.trim().isEmpty) return null;
@@ -147,11 +188,8 @@ class ArtistPortrait extends StatelessWidget {
           builder: (context, snapshot) => snapshot.data == null
               ? fallback(context)
               : ClipOval(
-                  child: Image.memory(
+                  child: BoundedArtwork(
                     snapshot.data!,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
                     errorBuilder: (_, _, _) => fallback(context),
                   ),
                 ),
@@ -194,10 +232,7 @@ Future<bool> customizeArtistImage(BuildContext context, String artist) async {
     final output = File('${root.path}/artist-custom/$key.jpg');
     if (source == 'reset') {
       if (await output.exists()) await output.delete();
-      ArtistPhotos.instance.pending.remove(artist.toLowerCase().trim());
-      ArtistPhotos.instance.pending.remove(
-        'offline:${artist.toLowerCase().trim()}',
-      );
+      ArtistPhotos.instance.invalidate(artist);
       return true;
     }
     Uint8List? bytes;
@@ -307,10 +342,7 @@ Future<bool> customizeArtistImage(BuildContext context, String artist) async {
       throw StateError('Unsafe image path');
     }
     await output.writeAsBytes(normalized, flush: true);
-    ArtistPhotos.instance.pending.remove(artist.toLowerCase().trim());
-    ArtistPhotos.instance.pending.remove(
-      'offline:${artist.toLowerCase().trim()}',
-    );
+    ArtistPhotos.instance.invalidate(artist);
     return true;
   } catch (_) {
     if (context.mounted) {

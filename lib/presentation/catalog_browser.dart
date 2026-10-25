@@ -574,6 +574,18 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         fallback: true,
       );
       mergeAlbums = widget.settings.visualBool('merge_albums', fallback: true);
+      if (category == 'albums' && selectedGroup != null) {
+        final ids = selectedGroup!.tracks.map((t) => t.id).toSet();
+        final updated = widget.tracks.where((t) => ids.contains(t.id)).toList();
+        if (updated.isNotEmpty) {
+          final first = updated.first;
+          selectedGroup = CatalogGroup(
+            albumKey(first),
+            first.album.isEmpty ? 'Sem álbum' : first.album,
+            updated,
+          );
+        }
+      }
       cachedIndex = null;
       scheduleRefresh();
     }
@@ -848,7 +860,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             if (!mounted || request != catalogWorkGeneration) return;
             setState(() {
               memory.derived[signature] = result;
-              while (memory.derived.length > 8) {
+              while (memory.derived.length > 3) {
                 memory.derived.remove(memory.derived.keys.first);
               }
               filteredSignature = signature;
@@ -2095,7 +2107,45 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                         PopupMenuButton<String>(
                           tooltip: ui(context, 'Ações da coleção'),
                           onSelected: (action) async {
-                            if (action == 'image') {
+                            if (album &&
+                                {
+                                  'album_metadata',
+                                  'album_cover',
+                                  'album_cover_reset',
+                                }.contains(action)) {
+                              final keys = original.tracks
+                                  .map(albumKey)
+                                  .toSet();
+                              final albumTracks =
+                                  widget.tracks
+                                      .where((t) => keys.contains(albumKey(t)))
+                                      .toList()
+                                    ..sort(compareAlbumTracks);
+                              var changed = false;
+                              if (action == 'album_metadata') {
+                                changed = await editAlbumMetadata(
+                                  context,
+                                  widget.store,
+                                  albumTracks,
+                                );
+                              } else if (action == 'album_cover') {
+                                changed = await chooseAlbumCover(
+                                  context,
+                                  widget.store,
+                                  albumTracks,
+                                );
+                              } else {
+                                await widget.store.setCatalogAlbumCover(
+                                  albumTracks.map((t) => t.id).toList(),
+                                  null,
+                                );
+                                changed = true;
+                              }
+                              if (changed && mounted) {
+                                await widget.onAction('refresh', []);
+                                await refresh();
+                              }
+                            } else if (action == 'image') {
                               if (await customizeArtistImage(
                                     context,
                                     original.name,
@@ -2129,6 +2179,20 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                             }
                           },
                           itemBuilder: (_) => [
+                            if (album) ...[
+                              const PopupMenuItem(
+                                value: 'album_metadata',
+                                child: UiText('Revisar metadados do álbum'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'album_cover',
+                                child: UiText('Escolher capa do álbum'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'album_cover_reset',
+                                child: UiText('Restaurar capa da fonte'),
+                              ),
+                            ],
                             if (artist && widget.onArtistSelection != null) ...[
                               const PopupMenuItem(
                                 value: 'artist_mix',

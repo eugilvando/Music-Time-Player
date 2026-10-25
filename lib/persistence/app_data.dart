@@ -70,7 +70,7 @@ class AppData {
     final content = jsonEncode({
       'format': 'music_time_backup',
       'version': 1,
-      'schema': 16,
+      'schema': 17,
       'createdAt': DateTime.now().toUtc().toIso8601String(),
       'tables': rows,
       'preferences': preferences(prefs),
@@ -89,7 +89,7 @@ class AppData {
     if (doc is! Map<String, dynamic> ||
         doc['format'] != 'music_time_backup' ||
         doc['version'] != 1 ||
-        !{6, 7, 8, 9, 10, 11, 12, 14, 15, 16}.contains(doc['schema']) ||
+        !{6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17}.contains(doc['schema']) ||
         doc['tables'] is! Map ||
         doc['preferences'] is! Map) {
       throw const FormatException('Formato ou versão de backup incompatível.');

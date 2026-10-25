@@ -547,7 +547,7 @@ void main() {
       expect(
         (await store.database.rawQuery('PRAGMA user_version'))
             .single['user_version'],
-        17,
+        18,
       );
       expect(
         (await store.catalogPage(
@@ -605,7 +605,7 @@ void main() {
         AppData.parse(
           await AppData.backup(store, await SharedPreferences.getInstance()),
         )['schema'],
-        16,
+        17,
       );
     },
   );

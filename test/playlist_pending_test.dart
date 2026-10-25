@@ -217,14 +217,14 @@ void main() {
           .single
           .values
           .single,
-      17,
+      18,
     );
     expect(await store.database.rawQuery('PRAGMA foreign_key_check'), isEmpty);
     await store.appendToPlaylist(id, 'a');
     expect((await store.playlistOccurrences(id)).last['id'], 10);
   });
   test(
-    'schema16 backup roundtrip retains pending metadata and deliberate repeats',
+    'schema17 backup roundtrip retains pending metadata and deliberate repeats',
     () async {
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
@@ -236,7 +236,7 @@ void main() {
         reviewM3u8(content, r'C:\Music\list.m3u8', [a]),
       );
       final backup = await AppData.backup(store, prefs);
-      expect(AppData.parse(backup)['schema'], 16);
+      expect(AppData.parse(backup)['schema'], 17);
       await store.deletePlaylist(id);
       await AppData.restore(store, prefs, backup);
       expect((await store.playlistOccurrences(id)).map((r) => r['track_id']), [

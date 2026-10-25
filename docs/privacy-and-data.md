@@ -32,7 +32,7 @@ Music files, audio downloads/cache and separate custom-artwork files are not inc
 
 Reset still requires three confirmations and preserves original music. SQLite, preferences, secure storage and filesystem are not one universal transaction. Keep separate copies of original music.
 
-The runtime database schema is **17**. The logical backup inner document remains schema **16**, with archive/container format **2**. The first launch of 2.2.1 rebuilds only the derived catalog projection in batches, without recreating playlists or history. Older executables may not understand it. Do not run an older version against the only copy of a newer profile. For an offline physical profile snapshot, exit from the tray first and preserve the complete relevant profile and database auxiliary files consistently; a full snapshot restoration also reverts later changes.
+The runtime database schema is **18**; logical backups use schema **17**, archive/container **2**. Manual catalog artwork references are protected by a database trigger and preserved by current cleanup. Older executables do not understand the feature; the version number alone does not block all older database opens. Downgrade requires a previous compatible profile copy. New schema17 backups are rejected by older parsers. Include Library + Artwork to export manual album covers. For an offline physical profile snapshot, exit from the tray first and preserve the complete relevant profile and database auxiliary files consistently; a full snapshot restoration also reverts later changes.
 
 ## Reporting an issue
 

@@ -1266,4 +1266,11 @@ const englishLabels = <String, String>{
   'Escolher capa da playlist': 'Choose playlist cover',
   'Remover capa personalizada': 'Remove custom cover',
   'Quantidade de faixas': 'Track count',
+  'Revisar metadados do álbum': 'Review album metadata',
+  'Escolher capa do álbum': 'Choose album cover',
+  'Restaurar capa da fonte': 'Restore source cover',
+  'Revisar faixas': 'Review tracks',
+  'Valores diferentes; mantenha desmarcado para preservar':
+      'Mixed values; leave unchecked to preserve',
+  'Somente campos marcados serão aplicados a todas as faixas. Títulos, artistas de faixa e números de disco/faixa serão preservados. Arquivos originais não serão alterados.': 'Only checked fields apply to every track. Track titles, track artists and disc/track numbers are preserved. Original files are not changed.',
 };

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 
 import '../persistence/library_store.dart';
+import 'bounded_artwork.dart';
 
 class CatalogCoverCache {
   CatalogCoverCache(this.store);
@@ -34,7 +35,7 @@ class CatalogCoverCache {
               pending.remove(id);
               values[id] = value;
               bytes += value?.length ?? 0;
-              while (values.length > 128 || bytes > 16 * 1024 * 1024) {
+              while (values.length > 96 || bytes > 8 * 1024 * 1024) {
                 bytes -= values.remove(values.keys.first)?.length ?? 0;
               }
               return value;
@@ -95,11 +96,8 @@ class _LazyCatalogCoverState extends State<LazyCatalogCover> {
     future: value,
     builder: (context, snapshot) => snapshot.data == null
         ? widget.fallback
-        : Image.memory(
+        : BoundedArtwork(
             snapshot.data!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
             errorBuilder: (_, __, ___) => widget.fallback,
           ),
   );

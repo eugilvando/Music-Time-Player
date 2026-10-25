@@ -1,6 +1,11 @@
 import 'ui_language.dart';
 
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui_image;
+import 'dart:math' as math;
+
+import 'package:file_selector/file_selector.dart';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +13,235 @@ import 'package:flutter/material.dart';
 import '../domain/track.dart';
 import '../persistence/library_store.dart';
 import '../library/local_metadata.dart';
+
+Future<bool> editAlbumMetadata(
+  BuildContext context,
+  LibraryStore store,
+  List<Track> tracks,
+) async {
+  if (tracks.isEmpty) return false;
+  const labels = {
+    'album': 'Álbum',
+    'albumArtist': 'Artistas de álbum',
+    'genre': 'Gêneros',
+    'year': 'Ano',
+    'edition': 'Edição',
+  };
+  String value(Track t, String key) => switch (key) {
+    'album' => t.album,
+    'albumArtist' => t.albumArtistNames.join('; '),
+    'genre' => t.genreNames.join('; '),
+    'year' => t.year?.toString() ?? '',
+    _ => t.edition,
+  };
+  final mixed = {
+    for (final key in labels.keys)
+      key: tracks.map((t) => value(t, key)).toSet().length > 1,
+  };
+  final text = {
+    for (final key in labels.keys)
+      key: TextEditingController(
+        text: mixed[key]! ? '' : value(tracks.first, key),
+      ),
+  };
+  final apply = <String>{};
+  final form = GlobalKey<FormState>();
+  final save = await showDialog<bool>(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, update) => AlertDialog(
+        scrollable: true,
+        title: Text(ui(context, 'Revisar metadados do álbum')),
+        content: SizedBox(
+          width: 620,
+          child: Form(
+            key: form,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${tracks.length} ${ui(context, 'faixas')}'),
+                const UiText(
+                  'Somente campos marcados serão aplicados a todas as faixas. Títulos, artistas de faixa e números de disco/faixa serão preservados. Arquivos originais não serão alterados.',
+                ),
+                for (final entry in labels.entries)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 14),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: apply.contains(entry.key),
+                          onChanged: (checked) => update(() {
+                            if (checked == true) {
+                              apply.add(entry.key);
+                            } else {
+                              apply.remove(entry.key);
+                            }
+                          }),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            controller: text[entry.key],
+                            decoration: InputDecoration(
+                              labelText: ui(context, entry.value),
+                              helperText: mixed[entry.key]!
+                                  ? ui(
+                                      context,
+                                      'Valores diferentes; mantenha desmarcado para preservar',
+                                    )
+                                  : null,
+                            ),
+                            onChanged: (_) =>
+                                update(() => apply.add(entry.key)),
+                            validator: (v) {
+                              if (!apply.contains(entry.key)) return null;
+                              if (entry.key == 'album' &&
+                                  (v ?? '').trim().isEmpty) {
+                                return ui(context, 'Informe um título');
+                              }
+                              if (entry.key == 'year' &&
+                                  (v ?? '').trim().isNotEmpty) {
+                                final n = int.tryParse(v!.trim());
+                                if (n == null || n < 1 || n > 9999) {
+                                  return ui(
+                                    context,
+                                    'Use um número de 1 a 9999',
+                                  );
+                                }
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                ExpansionTile(
+                  title: const UiText('Revisar faixas'),
+                  children: [
+                    for (final t in tracks)
+                      ListTile(
+                        dense: true,
+                        title: Text(t.title),
+                        subtitle: Text(
+                          '${t.artist} • ${ui(context, 'Disco')} ${t.discNumber ?? '—'} • ${ui(context, 'Número da faixa')} ${t.trackNumber ?? '—'}',
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const UiText('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (form.currentState!.validate()) Navigator.pop(context, true);
+            },
+            child: const UiText('Salvar no catálogo'),
+          ),
+        ],
+      ),
+    ),
+  );
+  try {
+    if (save != true || apply.isEmpty) return false;
+    final fields = <String, Object?>{};
+    for (final key in apply) {
+      final input = text[key]!.text.trim();
+      fields[key] = key == 'year' ? int.tryParse(input) : input;
+      if (key == 'albumArtist' || key == 'genre') {
+        final names = input
+            .split(';')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList();
+        fields[key == 'albumArtist' ? 'albumArtists' : 'genres'] = names;
+      }
+    }
+    if (apply.contains('album') ||
+        apply.contains('albumArtist') ||
+        apply.contains('edition')) {
+      fields['albumId'] = '';
+    }
+    await store.setUserMetadata(tracks.map((t) => t.id).toList(), fields);
+    return true;
+  } finally {
+    Future<void>.delayed(const Duration(seconds: 1), () {
+      for (final c in text.values) {
+        c.dispose();
+      }
+    });
+  }
+}
+
+Future<bool> chooseAlbumCover(
+  BuildContext context,
+  LibraryStore store,
+  List<Track> tracks,
+) async {
+  final file = await openFile(
+    acceptedTypeGroups: [
+      const XTypeGroup(label: 'PNG / JPEG', extensions: ['png', 'jpg', 'jpeg']),
+    ],
+  );
+  if (file == null) return false;
+  try {
+    if (await file.length() > 4 * 1024 * 1024) {
+      throw const FormatException('Use uma imagem PNG ou JPEG de até 4 MB.');
+    }
+    final bytes = await File(file.path).readAsBytes();
+    final buffer = await ui_image.ImmutableBuffer.fromUint8List(bytes);
+    try {
+      final descriptor = await ui_image.ImageDescriptor.encoded(buffer);
+      try {
+        final scale = math.min(
+          1.0,
+          1024 / math.max(descriptor.width, descriptor.height),
+        );
+        final codec = await descriptor.instantiateCodec(
+          targetWidth: math.max(1, (descriptor.width * scale).round()),
+          targetHeight: math.max(1, (descriptor.height * scale).round()),
+        );
+        try {
+          final frame = await codec.getNextFrame();
+          try {
+            final normalized = (await frame.image.toByteData(
+              format: ui_image.ImageByteFormat.png,
+            ))!.buffer.asUint8List();
+            await store.setCatalogAlbumCover(
+              tracks.map((t) => t.id).toList(),
+              normalized,
+            );
+          } finally {
+            frame.image.dispose();
+          }
+        } finally {
+          codec.dispose();
+        }
+      } finally {
+        descriptor.dispose();
+      }
+    } finally {
+      buffer.dispose();
+    }
+    return true;
+  } catch (_) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ui(context, 'Use uma imagem PNG ou JPEG de até 4 MB.')),
+        ),
+      );
+    }
+    return false;
+  }
+}
 
 Future<bool> editCatalogMetadata(
   BuildContext context,

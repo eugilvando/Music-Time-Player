@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/track.dart';
 import 'cover_scope.dart';
+import 'bounded_artwork.dart';
 
 class TrackCover extends StatelessWidget {
   const TrackCover({
@@ -35,13 +36,7 @@ class TrackCover extends StatelessWidget {
                   fallback: fallback,
                 )
               : fallback
-        : Image.memory(
-            track!.cover!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (_, __, ___) => fallback,
-          );
+        : BoundedArtwork(track!.cover!, errorBuilder: (_, __, ___) => fallback);
     final state = indicators ? MediaIndicatorScope.of(context) : null;
     final decorated = MediaBadges(
       favorite:

@@ -24,6 +24,11 @@ import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Live images are separate from this LRU budget; size-aware decoding keeps
+  // thumbnails small while the expanded player can request a larger variant.
+  PaintingBinding.instance.imageCache
+    ..maximumSize = 400
+    ..maximumSizeBytes = 64 * 1024 * 1024;
   if (arguments.contains('--design-preview')) {
     PathProviderPlatform.instance = DesignPreviewPaths(
       path.join(Directory.systemTemp.path, 'music_time_design_review_1_3'),

@@ -45,7 +45,9 @@ class LibraryStore {
     final db = await databaseFactoryFfi.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 17,
+        // Version18 installs protection for manual references. Older binaries
+        // may still open the file; the trigger also guards their cleanup SQL.
+        version: 18,
         onConfigure: (db) async {
           await db.execute('PRAGMA foreign_keys = ON');
         },
@@ -371,7 +373,7 @@ class LibraryStore {
       whereArgs: [encoded],
     );
     await txn.rawDelete(
-      'DELETE FROM artworks WHERE NOT EXISTS(SELECT 1 FROM tracks WHERE cover_hash=artworks.hash)',
+      "DELETE FROM artworks WHERE NOT EXISTS(SELECT 1 FROM tracks WHERE cover_hash=artworks.hash OR json_extract(metadata,'\$.userOverride.catalogCoverHash')=artworks.hash)",
     );
   }
 
@@ -733,6 +735,53 @@ class LibraryStore {
     bool clear = false,
   }) => _writeUserMetadata({for (final id in ids) id: fields}, clear: clear);
 
+  /// A single shared image, with a separate manual reference per selected track.
+  /// Source sync keeps userOverride; original tags and source covers are intact.
+  Future<void> setCatalogAlbumCover(List<String> ids, Uint8List? bytes) async {
+    if (bytes != null && validatedArtwork(bytes) == null) {
+      throw const FormatException('Use uma imagem PNG ou JPEG de até 4 MB.');
+    }
+    final hash = bytes == null
+        ? null
+        : (await compute(artworkHashes, [bytes])).single;
+    await database.transaction((txn) async {
+      if (hash != null) {
+        await txn.insert('artworks', {
+          'hash': hash,
+          'bytes': bytes,
+          'byte_count': bytes!.length,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+      final rows = await txn.query(
+        'tracks',
+        columns: ['id', 'metadata'],
+        where: 'id IN (SELECT value FROM json_each(?))',
+        whereArgs: [jsonEncode(ids)],
+      );
+      final batch = txn.batch();
+      for (final row in rows) {
+        final metadata =
+            jsonDecode(row['metadata'] as String) as Map<String, dynamic>;
+        final override = Map<String, dynamic>.from(
+          metadata['userOverride'] as Map? ?? {},
+        );
+        if (hash == null) {
+          override.remove('catalogCoverHash');
+        } else {
+          override['catalogCoverHash'] = hash;
+        }
+        metadata['userOverride'] = override;
+        batch.update(
+          'tracks',
+          {'metadata': jsonEncode(metadata)},
+          where: 'id=?',
+          whereArgs: [row['id']],
+        );
+      }
+      await batch.commit(noResult: true);
+    });
+  }
+
   Future<void> setUserMetadataBatch(
     Map<String, Map<String, Object?>> changes,
   ) => _writeUserMetadata(changes);
@@ -790,7 +839,12 @@ class LibraryStore {
           row['metadata'] as String? ?? '{}',
         ) as Map<String, dynamic>;
         final override = clear
-            ? <String, dynamic>{}
+            ? <String, dynamic>{
+                if ((metadata['userOverride'] as Map?)?['catalogCoverHash'] !=
+                    null)
+                  'catalogCoverHash':
+                      (metadata['userOverride'] as Map)['catalogCoverHash'],
+              }
             : Map<String, dynamic>.from(metadata['userOverride'] as Map? ?? {});
         override.addAll(changes[row['id']]!);
         metadata['userOverride'] = override;
@@ -820,7 +874,7 @@ class LibraryStore {
             "SELECT ${trackColumns('tracks', includeCovers: true)} FROM tracks ${includeHidden ? '' : 'WHERE ${catalogVisibility('tracks')}'} ORDER BY rowid",
           )
         : await database.rawQuery(
-            'SELECT ${metadataColumns.join(',')},${ArtworkStorage.available} AS has_cover FROM tracks INDEXED BY tracks_catalog_read_idx ${includeHidden ? '' : 'WHERE ${catalogVisibility('tracks')}'} ORDER BY rowid',
+            'SELECT ${metadataColumns.join(',')},${ArtworkStorage.hasCover('tracks')} AS has_cover FROM tracks INDEXED BY tracks_catalog_read_idx ${includeHidden ? '' : 'WHERE ${catalogVisibility('tracks')}'} ORDER BY rowid',
           );
     return !includeCovers && rows.length > 1000
         ? await compute(decodeCatalogRows, rows)

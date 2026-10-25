@@ -64,7 +64,7 @@ void main() {
     expect(await store.playlistCover(id), png);
     final prefs = await SharedPreferences.getInstance();
     final backup = await AppData.backup(store, prefs);
-    expect(AppData.parse(backup)['schema'], 16);
+    expect(AppData.parse(backup)['schema'], 17);
     await store.setPlaylistCover(id, null);
     await AppData.restore(store, prefs, backup);
     expect(await store.playlistCover(id), png);

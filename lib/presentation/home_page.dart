@@ -1557,7 +1557,7 @@ class _HomePageState extends State<HomePage> {
               final memory = widget.memory;
               if (memory != null) {
                 memory[currentSignature] = result;
-                while (memory.length > 4) {
+                while (memory.length > 2) {
                   memory.remove(memory.keys.first);
                 }
               }
@@ -1608,7 +1608,7 @@ class _HomePageState extends State<HomePage> {
       final memory = widget.memory;
       if (memory != null) {
         memory[currentSignature] = result;
-        while (memory.length > 6) {
+        while (memory.length > 2) {
           memory.remove(memory.keys.first);
         }
       }

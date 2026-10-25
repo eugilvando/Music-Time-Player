@@ -107,7 +107,7 @@ void main() {
     );
     expect(entries.map((e) => e['track_id']).toList(), ['a', 'a', null]);
     expect(entries.last['original_reference'], isNotEmpty);
-    expect(AppData.parse(jsonEncode(archive['document']))['schema'], 16);
+    expect(AppData.parse(jsonEncode(archive['document']))['schema'], 17);
   });
 
   test('credentials require encryption and authenticate password, header and payload', () async {

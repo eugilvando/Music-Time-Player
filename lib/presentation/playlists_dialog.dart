@@ -7,6 +7,7 @@ import 'media_indicators.dart';
 import 'item_action_region.dart';
 import 'view_style_selector.dart';
 import 'ui_language.dart';
+import 'bounded_artwork.dart';
 import '../library/m3u8.dart';
 import '../library/catalog.dart';
 import 'playlist_batch_summary.dart';
@@ -1090,9 +1091,8 @@ class PlaylistArtworkState extends State<PlaylistArtwork> {
         future: cover,
         builder: (context, snapshot) => snapshot.data == null
             ? fallback()
-            : Image.memory(
+            : BoundedArtwork(
                 snapshot.data!,
-                fit: BoxFit.cover,
                 gaplessPlayback: true,
                 errorBuilder: (_, _, _) => fallback(),
               ),

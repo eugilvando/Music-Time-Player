@@ -23,11 +23,12 @@ class ArtworkStorage extends ChangeNotifier {
   ArtworkOptimization? progress;
   void cancel() => cancelled = true;
 
+  // Kept subquery-free because this expression also participates in an index.
   static const available = '(cover IS NOT NULL OR cover_hash IS NOT NULL)';
   static String hasCover(String alias) =>
-      '($alias.cover IS NOT NULL OR $alias.cover_hash IS NOT NULL)';
+      "($alias.cover IS NOT NULL OR $alias.cover_hash IS NOT NULL OR EXISTS (SELECT 1 FROM artworks WHERE hash=json_extract($alias.metadata,'\$.userOverride.catalogCoverHash')))";
   static String cover(String alias) =>
-      'COALESCE($alias.cover,(SELECT bytes FROM artworks WHERE hash=$alias.cover_hash))';
+      "COALESCE((SELECT bytes FROM artworks WHERE hash=json_extract($alias.metadata,'\$.userOverride.catalogCoverHash')),$alias.cover,(SELECT bytes FROM artworks WHERE hash=$alias.cover_hash))";
 
   static Future<void> createSchema(Database db) async {
     await db.execute(
@@ -45,6 +46,15 @@ class ArtworkStorage extends ChangeNotifier {
     await db.execute(
       'CREATE INDEX IF NOT EXISTS tracks_legacy_artwork_idx ON tracks(id) WHERE cover IS NOT NULL',
     );
+    // A previous executable can open a newer SQLite file without a downgrade
+    // callback. Protect manual references even from its old cleanup query.
+    await db.execute("""
+      CREATE TRIGGER IF NOT EXISTS protect_manual_album_artwork
+      BEFORE DELETE ON artworks
+      WHEN EXISTS (SELECT 1 FROM tracks
+        WHERE json_extract(metadata,'\$.userOverride.catalogCoverHash')=OLD.hash)
+      BEGIN SELECT RAISE(ABORT,'Artwork is referenced by a manual album cover'); END
+    """);
     await db.execute('DROP INDEX IF EXISTS tracks_catalog_read_idx');
     await db.execute(
       'CREATE INDEX tracks_catalog_read_idx ON tracks(id,title,artist,album,path,metadata,added_at,$available)',
@@ -121,7 +131,7 @@ class ArtworkStorage extends ChangeNotifier {
       }
       if (cancelled) return;
       await database.execute(
-        'DELETE FROM artworks WHERE NOT EXISTS (SELECT 1 FROM tracks WHERE cover_hash=artworks.hash)',
+        "DELETE FROM artworks WHERE NOT EXISTS (SELECT 1 FROM tracks WHERE cover_hash=artworks.hash OR json_extract(metadata,'\$.userOverride.catalogCoverHash')=artworks.hash)",
       );
       if (compact && !cancelled) {
         compacting = true;

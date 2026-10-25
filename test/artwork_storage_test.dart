@@ -144,7 +144,7 @@ void main() {
     await store.addTracks([track('a', bytes), track('b', bytes)]);
     final backup = await AppData.backup(store, prefs);
     final doc = jsonDecode(backup);
-    expect(doc['schema'], 16);
+    expect(doc['schema'], 17);
     expect(doc['tables']['artworks'].length, 1);
     await AppData.restore(store, prefs, backup);
     expect(await store.trackCover('b'), bytes);

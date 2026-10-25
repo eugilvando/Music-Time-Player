@@ -197,7 +197,7 @@ class BackupArchive {
       final doc = {
         'format': 'music_time_backup',
         'version': 1,
-        'schema': 16,
+        'schema': 17,
         'tables': tables,
         'preferences': preferences,
       };
