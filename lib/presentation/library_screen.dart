@@ -1174,6 +1174,36 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ],
                   ),
                 ),
+                PopupMenuButton<String>(
+                  key: const ValueKey('queue.actions'),
+                  tooltip: ui(context, 'Ações'),
+                  icon: const MtIcon(Icons.more_horiz),
+                  onSelected: (action) async {
+                    if (action == 'save') {
+                      final snapshot = List<Track>.of(controller.queue);
+                      final saved = await saveSelection(snapshot);
+                      if (saved && mounted) await reloadCatalog();
+                    } else if (action == 'clear') {
+                      await controller.clearQueue();
+                      await save();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      key: const ValueKey('queue.save-playlist'),
+                      value: 'save',
+                      enabled: controller.queue.isNotEmpty,
+                      child: const UiText('Save queue as playlist'),
+                    ),
+                    PopupMenuItem(
+                      key: const ValueKey('queue.clear'),
+                      value: 'clear',
+                      enabled:
+                          !controller.opening && controller.queue.isNotEmpty,
+                      child: const UiText('Limpar fila'),
+                    ),
+                  ],
+                ),
                 IconButton(
                   tooltip: ui(context, 'Fechar fila'),
                   icon: const MtIcon(Icons.close),
@@ -1243,27 +1273,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       ),
                     ),
                   ),
-          ),
-          TextButton.icon(
-            key: const ValueKey('queue.save-playlist'),
-            icon: const MtIcon(Icons.playlist_add),
-            label: const UiText('Save queue as playlist'),
-            onPressed: controller.queue.isEmpty
-                ? null
-                : () async {
-                    final snapshot = List<Track>.of(controller.queue);
-                    final saved = await saveSelection(snapshot);
-                    if (saved && mounted) await reloadCatalog();
-                  },
-          ),
-          TextButton(
-            onPressed: controller.opening || controller.queue.isEmpty
-                ? null
-                : () async {
-                    await controller.clearQueue();
-                    await save();
-                  },
-            child: const UiText('Limpar fila'),
           ),
         ],
       ),

@@ -8,11 +8,15 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.4.0+50.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.4.1+51.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
+
+## New in 2.4.1
+
+Save queue as playlist and Clear queue now live in the action menu beside the Queue title. The sidebar and player bar organizers in Settings can be expanded or collapsed and start closed. Existing order and visibility preferences are preserved. [Release notes](docs/release-2.4.1.md).
 
 ## New in 2.4.0
 
@@ -35,7 +39,7 @@ Multi-disc albums now show ordered disc sections and play in disc/track order. M
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.4.0.exe` from the [2.4.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.0).
+1. Download `MusicTime-Setup-2.4.1.exe` from the [2.4.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.

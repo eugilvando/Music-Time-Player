@@ -4,11 +4,15 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.4.0+50.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.4.1+51.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
+
+## Novidades da 2.4.1
+
+Salvar fila como playlist e Limpar fila ficam no menu de ações junto ao título da fila. Os organizadores da sidebar e da barra de reprodução são recolhíveis e começam fechados, preservando suas preferências. [Notas da revisão](docs/release-2.4.1.md).
 
 ## Novidades da 2.4.0
 
@@ -30,7 +34,7 @@ Inclui fontes primária/secundária independentes, refinamentos de Home/capas/a�
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.4.0.exe` na [release 2.4.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.0).
+1. Baixe `MusicTime-Setup-2.4.1.exe` na [release 2.4.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.

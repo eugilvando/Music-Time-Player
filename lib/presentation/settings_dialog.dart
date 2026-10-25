@@ -305,22 +305,42 @@ class _SettingsPageState extends State<SettingsPage> {
               },
       );
 
-  Widget subsection(String title, List<Widget> children) => SettingsCard(
+  Widget subsection(
+    String title,
+    List<Widget> children, {
+    bool collapsible = false,
+  }) => SettingsCard(
     key: sectionKeys.putIfAbsent(title, () => GlobalKey()),
     child: Material(
       type: MaterialType.transparency,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          UiText(
-            title,
-            style: Theme.of(context).textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: SettingsSpacing.controlGap),
-          ...children,
-        ],
-      ),
+      child: collapsible
+          ? ExpansionTile(
+              key: ValueKey('settings.organizer.$title'),
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.only(
+                top: SettingsSpacing.controlGap,
+              ),
+              shape: const Border(),
+              collapsedShape: const Border(),
+              title: UiText(
+                title,
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              children: children,
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                UiText(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: SettingsSpacing.controlGap),
+                ...children,
+              ],
+            ),
     ),
   );
   List<Widget> appearance() => [
@@ -543,7 +563,7 @@ class _SettingsPageState extends State<SettingsPage> {
   List<Widget> controls() => [
     subsection('Organizar barra de reprodução', [
       PlayerBarOrganizer(settings: widget.settings),
-    ]),
+    ], collapsible: true),
     subsection('Play contínuo', [
       visualSwitch(
         'smart_play',
@@ -798,7 +818,9 @@ class _SettingsPageState extends State<SettingsPage> {
         ]);
       case SettingsCategory.customization:
         return pageList([
-          subsection('Sidebar', [SidebarSettings(settings: widget.settings)]),
+          subsection('Sidebar', [
+            SidebarSettings(settings: widget.settings),
+          ], collapsible: true),
           appearance()[3],
           appearance()[2],
           subsection('Tipografia', typography()),

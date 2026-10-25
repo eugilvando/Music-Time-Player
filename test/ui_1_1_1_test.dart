@@ -348,6 +348,10 @@ void main() {
       player.queueKeys.addAll([9001, 9002]);
       state.setState(() {});
       await tester.pump();
+      expect(find.byKey(const ValueKey('queue.save-playlist')), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('queue.actions')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       await tester.tap(find.byKey(const ValueKey('queue.save-playlist')));
       await tester.pump(const Duration(milliseconds: 300));
       await tester.enterText(
