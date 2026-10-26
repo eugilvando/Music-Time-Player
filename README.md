@@ -8,13 +8,17 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.5.0+52.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.5.1+53.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64 preview:** [Download 2.4.1 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1-ubuntu-preview.1). Separate experimental package, 41 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+
+## New in 2.5.1
+
+Home reuses its previous composition when returning to the page during the same app session. When library data changes, compatible content stays visible while its replacement is prepared in the background, then updates together. Cached content respects source visibility and offline/filter changes; initial large-library loads still use a skeleton. [Scope and validation](docs/release-2.5.1.md).
 
 ## New in 2.5.0
 
@@ -45,7 +49,7 @@ Multi-disc albums now show ordered disc sections and play in disc/track order. M
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.5.0.exe` from the [2.4.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.0).
+1. Download `MusicTime-Setup-2.5.1.exe` from the [2.4.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.1).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.

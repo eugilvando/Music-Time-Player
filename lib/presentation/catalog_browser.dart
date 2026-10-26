@@ -3244,7 +3244,33 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                             )
                           : null,
                       memory: memory.home,
-                      cacheKey: filteredSignature,
+                      cacheScope: jsonEncode([
+                        widget.query,
+                        filters.toJson(),
+                        widget.settings.visualBool(
+                          'offline_only',
+                          fallback: false,
+                        ),
+                        mergeArtists,
+                        mergeAlbums,
+                      ]),
+                      cacheKey: jsonEncode([
+                        widget.revision,
+                        dataRevision,
+                        widget.query,
+                        filters.toJson(),
+                        activeSort,
+                        descending,
+                        widget.settings.visualBool(
+                          'offline_only',
+                          fallback: false,
+                        ),
+                        widget.favorites.toList()..sort(),
+                        widget.settings.collectionFavorites.toList()..sort(),
+                        // The prepared catalog may still be replacing its result.
+                        derivingCatalog,
+                        values.length,
+                      ]),
                       index: index,
                       tracks: values,
                       settings: widget.settings,

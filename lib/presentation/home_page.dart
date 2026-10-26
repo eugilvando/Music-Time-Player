@@ -596,6 +596,7 @@ class HomePage extends StatefulWidget {
     this.lastfmMix,
     this.memory,
     this.cacheKey,
+    this.cacheScope = '',
     this.onSources,
     this.resumeTrack,
     this.resumePlaying = false,
@@ -615,6 +616,7 @@ class HomePage extends StatefulWidget {
   final VoidCallback? onSources;
   final Map<String, HomeData>? memory;
   final String? cacheKey;
+  final String cacheScope;
   final List<Track> tracks;
   final AppSettings settings;
   final Future<void> Function(String, List<Track>) onAction;
@@ -646,7 +648,10 @@ class _HomePageState extends State<HomePage> {
       .toDouble();
   Map<String, List<Track>> mixes = {};
   String get dataSignature =>
-      '${identityHashCode(widget.index)}:${widget.cacheKey ?? identityHashCode(widget.tracks)}:${widget.settings.visualNumber('home_mix_size', 20)}';
+      '${widget.cacheKey ?? '${identityHashCode(widget.index)}:${identityHashCode(widget.tracks)}'}:${widget.settings.visualNumber('home_mix_size', 20)}:${widget.lastfmMix != null}';
+  String get snapshotScope => jsonEncode([widget.cacheScope, quickFilter]);
+  String get snapshotKey => '$snapshotScope:$dataSignature';
+  String? displayedScope;
   String derivedSignature = '';
   Map<String, List<Track>> derivedLists = {};
   List<(String, CatalogGroup)> exploreGroups = [];
@@ -673,7 +678,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void regenerate({bool refresh = true}) {
-    if (refresh) widget.memory?.remove('$dataSignature:$quickFilter');
+    if (refresh) widget.memory?.remove(snapshotKey);
     signature = dataSignature;
     derivedSignature = '';
     pendingHomeSignature = null;
@@ -1502,7 +1507,28 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-    final currentSignature = '$dataSignature:$quickFilter';
+    final currentSignature = snapshotKey;
+    final eligibleIds = widget.tracks
+        .where(
+          (t) =>
+              quickFilter != 'offline' || widget.index.offline.contains(t.id),
+        )
+        .map((t) => t.id)
+        .toSet();
+    bool reusable(HomeData data) =>
+        data.lists['values']!.every((t) => eligibleIds.contains(t.id));
+    if (displayedScope != snapshotScope ||
+        (derivedLists.isNotEmpty &&
+            !derivedLists['values']!.every(
+              (t) => eligibleIds.contains(t.id),
+            ))) {
+      derivedLists = {};
+      mixes = {};
+      exploreGroups = [];
+      preparedCollections = {};
+      derivedSignature = '';
+    }
+    displayedScope = snapshotScope;
     final saved = widget.memory?[currentSignature];
     if (derivedSignature != currentSignature && saved != null) {
       homeGeneration++;
@@ -1512,20 +1538,23 @@ class _HomePageState extends State<HomePage> {
       exploreGroups = saved.explore;
       preparedCollections = saved.collections;
     }
-    // Reuse only snapshots with the same eligible IDs: hidden sources and
-    // offline filters must never leak tracks from a previous view.
+    // Reuse the latest compatible view while preparing its replacement.
+    // Removed/hidden tracks and other filter scopes must never leak back in.
     if (derivedLists.isEmpty && widget.memory?.isNotEmpty == true) {
-      final previous = widget.memory!.values.last;
-      final oldIds = previous.lists['values']!.map((t) => t.id).toSet();
-      final newIds = widget.tracks.map((t) => t.id).toSet();
-      if (setEquals(oldIds, newIds)) {
+      final compatible = widget.memory!.entries.where(
+        (entry) =>
+            entry.key.startsWith('$snapshotScope:') && reusable(entry.value),
+      );
+      if (compatible.isNotEmpty) {
+        final previous = compatible.last.value;
         derivedLists = previous.lists;
         mixes = previous.mixes;
         exploreGroups = previous.explore;
         preparedCollections = previous.collections;
       }
     }
-    if (widget.tracks.length > 1000 && derivedSignature != currentSignature) {
+    final background = widget.tracks.length > 1000 || derivedLists.isNotEmpty;
+    if (background && derivedSignature != currentSignature) {
       if (pendingHomeSignature != currentSignature) {
         pendingHomeSignature = currentSignature;
         homeError = null;
@@ -1593,7 +1622,7 @@ class _HomePageState extends State<HomePage> {
               );
       }
     }
-    if (widget.tracks.length <= 1000 && derivedSignature != currentSignature) {
+    if (!background && derivedSignature != currentSignature) {
       final result = prepareHome((
         index: widget.index,
         tracks: widget.tracks,
@@ -1623,8 +1652,17 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       key: const PageStorageKey('home.content'),
       children: [
-        if (widget.tracks.length > 1000 && derivedSignature != currentSignature)
-          const LinearProgressIndicator(),
+        if (derivedSignature != currentSignature && homeError == null)
+          const LinearProgressIndicator(key: ValueKey('home.refreshing')),
+        if (homeError != null)
+          TextButton(
+            key: const ValueKey('home.retry'),
+            onPressed: () => setState(() {
+              homeError = null;
+              pendingHomeSignature = null;
+            }),
+            child: UiText(homeError!),
+          ),
         LayoutBuilder(
           builder: (context, constraints) {
             final heading = UiText(

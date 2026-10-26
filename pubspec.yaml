@@ -1,7 +1,7 @@
 name: music_time
 description: Personal music player with local, cloud and media server sources.
 publish_to: none
-version: 2.5.0+52
+version: 2.5.1+53
 environment:
   sdk: '>=3.13.0 <4.0.0'
 dependencies:

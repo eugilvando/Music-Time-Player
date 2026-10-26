@@ -154,6 +154,11 @@ void main() {
     slider.onChanged!(1);
     await tester.pump();
     await tester.tap(find.text('Salvar'));
+    await tester.pump();
+    await waitForCatalog(
+      tester,
+      () => find.byKey(const ValueKey('home.refreshing')).evaluate().isEmpty,
+    );
     await tester.pumpAndSettle();
     expect(settings.visualNumber('home_mix_size', 20), 1);
     expect(plays.length, 1);
