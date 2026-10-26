@@ -217,23 +217,58 @@ class ListeningInsightsRepository {
   ListeningInsightsRepository(this.store, this.api);
   final LibraryStore store;
   final Future<LastFmClient> Function() api;
+  final _sessionRefreshes = <String>{};
+  final _reports = <String, ListeningReport>{};
+  String selectedPeriod = '30', selectedTab = 'overview';
+  DateTime? selectedFrom, selectedUntil;
+  ListeningReport? peekCached(String user, String period) =>
+      _reports[_key(user, period)];
+  String _key(String user, String period) => '${user.toLowerCase()}|$period';
+  bool beginAutomaticRefresh(String user, String period) =>
+      _sessionRefreshes.add(_key(user, period));
+  void remember(String user, String period, ListeningReport report) {
+    final key = _key(user, period);
+    _reports.remove(key);
+    _reports[key] = report;
+    while (_reports.length > 3) {
+      _reports.remove(_reports.keys.first);
+    }
+  }
+
   Future<void> schema() => store.database.execute(
     'CREATE TABLE IF NOT EXISTS lastfm_profile_cache (user TEXT NOT NULL, kind TEXT NOT NULL, payload TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY(user,kind))',
   );
   Future<ListeningReport?> cached(String user, String period) async {
+    final memory = _reports[_key(user, period)];
+    if (memory != null) return memory;
     await schema();
-    final rows = await store.database.query(
+    var rows = await store.database.query(
       'lastfm_profile_cache',
       where: 'user=? AND kind=? AND length(CAST(payload AS BLOB))<=8388608',
       whereArgs: [user.toLowerCase(), 'insights.v1:$period'],
     );
+    if (rows.isEmpty && !period.startsWith('custom:')) {
+      rows = await store.database.query(
+        'lastfm_profile_cache',
+        where:
+            'user=? AND kind LIKE ? AND length(CAST(payload AS BLOB))<=8388608',
+        whereArgs: [
+          user.toLowerCase(),
+          'insights.v1:${period.split(':').first}:%',
+        ],
+        orderBy: 'updated_at DESC',
+        limit: 1,
+      );
+    }
     if (rows.isEmpty) return null;
     try {
       final report = await compute(
         decodeListening,
         rows.single['payload'] as String,
       );
-      return report.user.toLowerCase() == user.toLowerCase() ? report : null;
+      if (report.user.toLowerCase() != user.toLowerCase()) return null;
+      remember(user, period, report);
+      return report;
     } catch (_) {
       return null;
     }
@@ -389,6 +424,7 @@ class ListeningInsightsRepository {
         request.check();
       });
     }
+    remember(user, period, report);
     return report;
   }
 }

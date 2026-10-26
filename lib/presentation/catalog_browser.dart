@@ -1,3 +1,5 @@
+import 'home_skeleton.dart';
+import 'alphabet_scrollbar.dart';
 import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'design_tokens.dart';
@@ -252,6 +254,16 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   List<Map<String, Object?>> playlists = [];
   int generation = 0;
   List<Track> pageTracks = [];
+  final alphabetScroll = ScrollController();
+  Map<String, int> pageLetters = {};
+  String alphabetSignature = '';
+  bool get alphabetEnabled =>
+      !widget.home &&
+      !favoritesPage &&
+      selectedGroup == null &&
+      activeSort == 'title' &&
+      {'songs', 'albums', 'artists', 'albumArtists'}.contains(category);
+  ScrollController? get rootScroll => alphabetEnabled ? alphabetScroll : null;
   int pageOffset = 0, pageTotal = 0, pageRequest = 0, dataRevision = 0;
   int loadedOffset = 0;
   bool pageLoading = true;
@@ -309,6 +321,19 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         );
       }
       if (!mounted || request != pageRequest) return;
+      if (alphabetEnabled && alphabetSignature != pageSignature) {
+        final query = sqlQuery;
+        final letters = await widget.store.database.rawQuery(
+          "SELECT letter, MIN(position) AS position FROM (SELECT CASE WHEN ltrim(c.title_key) GLOB '[a-z]*' THEN upper(substr(ltrim(c.title_key),1,1)) ELSE '#' END AS letter, ROW_NUMBER() OVER (ORDER BY ${query.order})-1 AS position ${CatalogSqlQuery.from} WHERE ${query.where}) GROUP BY letter",
+          query.arguments,
+        );
+        if (!mounted || request != pageRequest) return;
+        pageLetters = {
+          for (final row in letters)
+            row['letter'] as String: row['position'] as int,
+        };
+        alphabetSignature = pageSignature;
+      }
       setState(() {
         pageTracks = result.tracks;
         pageTotal = result.total;
@@ -598,6 +623,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     refreshTimer?.cancel();
     inputTimer?.cancel();
     quickInput.dispose();
+    alphabetScroll.dispose();
     widget.downloads.removeListener(scheduleAvailability);
     widget.downloads.cache?.removeListener(scheduleAvailability);
     super.dispose();
@@ -1091,6 +1117,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   }) => MediaDetailsTable(
     onChooseColumns: chooseColumns,
     columnKey: 'catalog_tracks',
+    controller: rootScroll,
     headers: [
       if (category == 'albums') '#',
       ui(context, 'Título'),
@@ -1149,6 +1176,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     if (values.isEmpty) return empty();
     if (view == 'compact_card') {
       return GridView.builder(
+        controller: rootScroll,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
           mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
@@ -1173,6 +1201,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     final rows = view == 'detailed'
         ? trackDetails(values, paged: paged)
         : ListView.builder(
+            controller: rootScroll,
             itemCount: values.length,
             itemBuilder: (context, i) {
               final t = values[i];
@@ -1353,6 +1382,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   );
   Widget groupDetails(List<CatalogGroup> values, String type) =>
       MediaDetailsTable(
+        controller: rootScroll,
         columnKey: 'catalog_groups_$type',
         headers: [
           ui(context, 'Título'),
@@ -1398,6 +1428,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     }
     if (smallCards) {
       return GridView.builder(
+        controller: rootScroll,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
           mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
@@ -1413,6 +1444,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     final scale = MediaQuery.textScalerOf(context).scale(1);
     if (!grid) {
       return ListView.builder(
+        controller: rootScroll,
         itemCount: values.length,
         itemBuilder: (context, i) {
           final g = values[i];
@@ -1437,6 +1469,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       );
     }
     return GridView.builder(
+      controller: rootScroll,
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: size + 50,
         mainAxisExtent: size + 90 * scale,
@@ -3031,7 +3064,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         selectedGroup == null &&
         {'songs', 'favorites', 'offline'}.contains(category);
     final values = paged ? <Track>[] : filtered();
-    final body = favoritesPage && selectedGroup == null
+    Widget body = favoritesPage && selectedGroup == null
         ? favoriteResults()
         : derivingCatalog && values.isEmpty
         ? const Center(child: CircularProgressIndicator())
@@ -3044,6 +3077,39 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         : category == 'folders'
         ? folders(values)
         : groups(catalogGroups(values), category);
+    if (alphabetEnabled) {
+      final names = paged
+          ? pageTracks.map((t) => t.title).toList()
+          : category == 'songs'
+          ? values.map((t) => t.title).toList()
+          : catalogGroups(values).map((g) => g.name).toList();
+      body = AlphabetScrollbar(
+        controller: alphabetScroll,
+        positions: paged
+            ? (pageLoading ? const {} : pageLetters)
+            : alphabetPositions(names),
+        itemCount: names.length,
+        onSelect: paged
+            ? (letter) async {
+                final rank = pageLetters[letter];
+                if (rank == null) return null;
+                final signature = pageSignature;
+                final target = (rank ~/ pageSize) * pageSize;
+                if (target != loadedOffset) {
+                  setState(() => pageOffset = target);
+                  await loadPage();
+                }
+                if (!mounted ||
+                    signature != pageSignature ||
+                    pageError != null) {
+                  return null;
+                }
+                return rank - loadedOffset;
+              }
+            : null,
+        child: body,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       child: Column(
@@ -3122,111 +3188,118 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           ],
           if (widget.home)
             Expanded(
-              child: HomePage(
-                key: ValueKey('home.$homeReset'),
-                onArtistSelection: widget.onArtistSelection,
-                onSources: widget.downloads.remote is ProviderConnections
-                    ? () => showDialog<void>(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          insetPadding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 24,
-                          ),
-                          titlePadding: const EdgeInsets.fromLTRB(
-                            24,
-                            24,
-                            24,
-                            16,
-                          ),
-                          contentPadding: const EdgeInsets.fromLTRB(
-                            24,
-                            8,
-                            24,
-                            24,
-                          ),
-                          actionsPadding: const EdgeInsets.fromLTRB(
-                            24,
-                            0,
-                            24,
-                            24,
-                          ),
-                          title: const UiText('Fontes'),
-                          content: SizedBox(
-                            width: 520,
-                            child: SingleChildScrollView(
-                              child: SourceVisibilitySettings(
-                                providers:
-                                    widget.downloads.remote
-                                        as ProviderConnections,
-                                onChanged: () async {
-                                  await widget.onAction('refresh', []);
-                                  await refresh();
-                                },
+              child: widget.loading && widget.tracks.isEmpty
+                  ? const HomeSkeleton()
+                  : HomePage(
+                      key: ValueKey('home.$homeReset'),
+                      onArtistSelection: widget.onArtistSelection,
+                      onSources: widget.downloads.remote is ProviderConnections
+                          ? () => showDialog<void>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                insetPadding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 24,
+                                ),
+                                titlePadding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  24,
+                                  24,
+                                  16,
+                                ),
+                                contentPadding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  8,
+                                  24,
+                                  24,
+                                ),
+                                actionsPadding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  0,
+                                  24,
+                                  24,
+                                ),
+                                title: const UiText('Fontes'),
+                                content: SizedBox(
+                                  width: 520,
+                                  child: SingleChildScrollView(
+                                    child: SourceVisibilitySettings(
+                                      providers:
+                                          widget.downloads.remote
+                                              as ProviderConnections,
+                                      onChanged: () async {
+                                        await widget.onAction('refresh', []);
+                                        await refresh();
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const UiText('Fechar'),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const UiText('Fechar'),
-                            ),
-                          ],
-                        ),
-                      )
-                    : null,
-                memory: memory.home,
-                cacheKey: filteredSignature,
-                index: index,
-                tracks: values,
-                settings: widget.settings,
-                lastfmMix: widget.downloads.remote is ProviderConnections
-                    ? (period) async {
-                        final p =
-                            widget.downloads.remote as ProviderConnections;
-                        final result = await p.profileIndex.tracks(period);
-                        final report = await compute(matchLastFmProfile, (
-                          result,
-                          widget.tracks,
-                        ));
-                        final byId = {for (final t in widget.tracks) t.id: t};
-                        final used = <String>{};
-                        return report.ids
-                            .where(used.add)
-                            .map((id) => byId[id]!)
-                            .toList();
-                      }
-                    : null,
-                onFilters: editFilters,
-                activeFilters: filters.active ? filtersBar() : null,
-                onAction: batch,
-                onPlay: widget.onPlay,
-                onPlayNamed: widget.onPlayNamed,
-                trackActions: widget.trackActions,
-                onExplore: (type, g) {
-                  setState(() {
-                    category = type;
-                    selectedGroup = g;
-                  });
-                },
-                onAddSource: widget.onAddSource,
-                onResume:
-                    values.any(
-                      (t) => widget.resumeTrack != null
-                          ? t.id == widget.resumeTrack!.id
-                          : t.title == widget.resumeTitle,
-                    )
-                    ? widget.onResume
-                    : null,
-                resumeTitle: widget.resumeTitle,
-                resumeTrack: widget.resumeTrack,
-                resumePlaying: widget.resumePlaying,
-                onNowPlaying: widget.onNowPlaying,
-                store: widget.store,
-                playlists: playlists,
-                onPlaylist: widget.onPlaylist,
-                library: body,
-              ),
+                            )
+                          : null,
+                      memory: memory.home,
+                      cacheKey: filteredSignature,
+                      index: index,
+                      tracks: values,
+                      settings: widget.settings,
+                      lastfmMix: widget.downloads.remote is ProviderConnections
+                          ? (period) async {
+                              final p =
+                                  widget.downloads.remote
+                                      as ProviderConnections;
+                              final result = await p.profileIndex.tracks(
+                                period,
+                              );
+                              final report = await compute(matchLastFmProfile, (
+                                result,
+                                widget.tracks,
+                              ));
+                              final byId = {
+                                for (final t in widget.tracks) t.id: t,
+                              };
+                              final used = <String>{};
+                              return report.ids
+                                  .where(used.add)
+                                  .map((id) => byId[id]!)
+                                  .toList();
+                            }
+                          : null,
+                      onFilters: editFilters,
+                      activeFilters: filters.active ? filtersBar() : null,
+                      onAction: batch,
+                      onPlay: widget.onPlay,
+                      onPlayNamed: widget.onPlayNamed,
+                      trackActions: widget.trackActions,
+                      onExplore: (type, g) {
+                        setState(() {
+                          category = type;
+                          selectedGroup = g;
+                        });
+                      },
+                      onAddSource: widget.onAddSource,
+                      onResume:
+                          values.any(
+                            (t) => widget.resumeTrack != null
+                                ? t.id == widget.resumeTrack!.id
+                                : t.title == widget.resumeTitle,
+                          )
+                          ? widget.onResume
+                          : null,
+                      resumeTitle: widget.resumeTitle,
+                      resumeTrack: widget.resumeTrack,
+                      resumePlaying: widget.resumePlaying,
+                      onNowPlaying: widget.onNowPlaying,
+                      store: widget.store,
+                      playlists: playlists,
+                      onPlaylist: widget.onPlaylist,
+                      library: body,
+                    ),
             )
           else
             Expanded(child: body),

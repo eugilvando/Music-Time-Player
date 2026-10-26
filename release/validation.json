@@ -4,38 +4,42 @@
                  "backupSchema":  17,
                  "container":  2
              },
-    "version":  "2.4.1+51",
+    "version":  "2.5.0+52",
     "checks":  {
                    "pubGet":  "passed; offline",
+                   "localInstallation":  "passed; final binaries match, profile hashes unchanged",
+                   "developmentTests":  {
+                                            "broadFailed":  3,
+                                            "note":  "Intermediate failures fixed; complementary runs, not a single final full-suite run",
+                                            "broadPassed":  368,
+                                            "uniquePassing":  371,
+                                            "finalRegressionsFailed":  0,
+                                            "finalRegressionsPassed":  20
+                                        },
                    "relativeDocumentationLinks":  "passed",
-                   "targetedRegression":  {
-                                              "note":  "No new full-suite run; queue, settings and related regressions",
-                                              "failed":  0,
-                                              "passed":  17
-                                          },
-                   "dartAnalysis":  "passed; development and public",
-                   "windowsBuild":  "passed",
+                   "dartAnalysis":  "passed; direct Dart lib/test analysis",
+                   "windowsBuild":  "passed; 217.6 seconds",
                    "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, window placement and clean exit",
                    "runtimeSource":  {
-                                         "files":  225,
+                                         "files":  228,
                                          "identical":  true
                                      },
                    "publicRefinementsRegression":  {
                                                        "note":  "Repeated tests from development validation, not additional unique tests",
                                                        "failed":  0,
-                                                       "passed":  10
+                                                       "passed":  8
                                                    }
                },
-    "limits":  "Targeted validation only for this refinement. See 2.4.0 for previous full-suite evidence. No personal profile is published. Ubuntu preview is unchanged.",
-    "date":  "2026-10-25",
+    "limits":  "No personal Last.fm account acceptance. No personal profile published. Ubuntu preview unchanged.",
+    "date":  "2026-10-26",
     "platform":  "Windows x64",
     "binaries":  [
                      {
-                         "sha256":  "f270ac4d137ea976f403c898170ee4a60dd29d216bf5919b362f6583bf27aaac",
+                         "sha256":  "1f849691511b370d490b45e95554f53ae8d7045f16b943aa98e97a39bc01952a",
                          "file":  "music_time.exe"
                      },
                      {
-                         "sha256":  "b49e9f5a68ddc267e5bd0cd03ed53a8273819ffa77d593ea6de2ab2a940db0dc",
+                         "sha256":  "31ed6b6f9619563626589e596f6b68ca1039be141a8d2ee1bfe1313b5adc600d",
                          "file":  "data/app.so"
                      },
                      {
@@ -44,8 +48,8 @@
                      }
                  ],
     "installer":  {
-                      "sha256":  "7bee3b7df65bb624f848f23b2477b67767bc8c534db473b9c40eaeb668f698ed",
-                      "file":  "MusicTime-Setup-2.4.1.exe",
-                      "bytes":  20476470
+                      "sha256":  "f97f4ba40626356764e5b357bbd8aaf1bd92a02e49eca9b08349abe586dc40b6",
+                      "file":  "MusicTime-Setup-2.5.0.exe",
+                      "bytes":  20484653
                   }
 }

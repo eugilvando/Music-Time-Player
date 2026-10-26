@@ -76,6 +76,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
   Map<String, PlaylistImportEntry> resolvedTracks = {};
   int matchGeneration = 0;
   String period = '30', tab = 'overview', reportGroup = 'month';
+  String? dataKey;
   late String profile;
   late bool offline;
   bool loading = false, openingPlaylist = false, exporting = false;
@@ -92,7 +93,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
   String get cacheKey {
     final now = DateTime.now();
     return custom == null
-        ? '$period:${now.year}-${now.month}-${now.day}:${now.timeZoneOffset.inMinutes}'
+        ? '$period:zone:${now.timeZoneOffset.inMinutes}'
         : 'custom:${custom!.start.toIso8601String()}:${custom!.end.toIso8601String()}:${now.timeZoneOffset.inMinutes}';
   }
 
@@ -101,6 +102,17 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
     super.initState();
     profile = currentProfile;
     offline = currentOffline;
+    period = widget.repository.selectedPeriod;
+    tab = widget.repository.selectedTab;
+    if (widget.repository.selectedFrom != null &&
+        widget.repository.selectedUntil != null) {
+      custom = DateTimeRange(
+        start: widget.repository.selectedFrom!,
+        end: widget.repository.selectedUntil!,
+      );
+    }
+    data = widget.repository.peekCached(profile, cacheKey);
+    if (data != null) dataKey = cacheKey;
     load();
   }
 
@@ -112,6 +124,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
       generation++;
       if (profile != currentProfile) {
         data = null;
+        dataKey = null;
         matches = null;
       }
       profile = currentProfile;
@@ -157,6 +170,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
   }
 
   Future<void> load({bool refresh = false, bool more = false}) async {
+    if (more && dataKey != cacheKey) return;
     request?.cancelled = true;
     final ticket = ++generation;
     final token = ListeningRequest();
@@ -180,17 +194,15 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
     try {
       var cached = more ? data : await widget.repository.cached(user, key);
       if (!mounted || ticket != generation) return;
-      if (!refresh && cached != null) {
+      if (cached != null) {
         setState(() {
           data = cached;
+          dataKey = key;
           matches = null;
         });
         await resolve(cached);
         if (!mounted || ticket != generation) return;
-        if (offline ||
-            (!more &&
-                DateTime.now().toUtc().difference(cached.updatedAt) <
-                    const Duration(minutes: 15))) {
+        if (offline) {
           setState(() => loading = false);
           return;
         }
@@ -203,6 +215,13 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
             'Offline: nenhum relatório salvo para este período.',
           );
         });
+        return;
+      }
+      if (!more &&
+          !refresh &&
+          !widget.repository.beginAutomaticRefresh(user, key) &&
+          cached != null) {
+        setState(() => loading = false);
         return;
       }
       final now = DateTime.now().toUtc();
@@ -256,6 +275,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
       if (!mounted || ticket != generation) return;
       setState(() {
         data = result;
+        dataKey = key;
         matches = null;
         loading = false;
         offset = 0;
@@ -382,13 +402,113 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
     }
     setState(() {
       period = value;
+      widget.repository.selectedPeriod = value;
+      widget.repository.selectedFrom = custom?.start;
+      widget.repository.selectedUntil = custom?.end;
       offset = 0;
-      data = null;
-      matches = null;
     });
     await load();
   }
 
+  Widget reportToolbar() => LayoutBuilder(
+    builder: (context, size) {
+      final filters = Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          for (final entry in {
+            'overview': t('Overview', 'Visão geral'),
+            'artists': t('Artists', 'Artistas'),
+            'albums': t('Albums', 'Álbuns'),
+            'tracks': t('Tracks', 'Faixas'),
+            'reports': t('Reports', 'Relatórios'),
+          }.entries)
+            ChoiceChip(
+              label: Text(entry.value),
+              selected: tab == entry.key,
+              onSelected: (_) => setState(() {
+                tab = entry.key;
+                widget.repository.selectedTab = entry.key;
+                offset = 0;
+              }),
+            ),
+          SizedBox(
+            width: 190,
+            child: DropdownButtonFormField<String>(
+              isExpanded: true,
+              key: ValueKey('insights.period.$period.$periodSelection'),
+              initialValue: period,
+              items: [
+                for (final entry in {
+                  '7': t('Last 7 days', 'Últimos 7 dias'),
+                  '30': t('Last 30 days', 'Últimos 30 dias'),
+                  '90': t('Last 90 days', 'Últimos 90 dias'),
+                  '180': t('Last 180 days', 'Últimos 180 dias'),
+                  '365': t('Last 365 days', 'Últimos 365 dias'),
+                  'all': t('All time', 'Todo o período'),
+                  'custom': t('Custom dates', 'Datas personalizadas'),
+                }.entries)
+                  DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+              ],
+              onChanged: profile.isEmpty
+                  ? null
+                  : (v) {
+                      if (v != null) choosePeriod(v);
+                    },
+            ),
+          ),
+        ],
+      );
+      final status = Wrap(
+        key: const ValueKey('insights.account-status'),
+        spacing: 12,
+        runSpacing: 8,
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          ActionChip(
+            label: Text(
+              profile.isEmpty
+                  ? t('Configure Last.fm', 'Configurar Last.fm')
+                  : 'Last.fm · $profile',
+            ),
+            onPressed: widget.onConfigure,
+          ),
+          if (data != null)
+            Text(
+              '${t('Updated', 'Atualizado')}: ${data!.updatedAt.toLocal().toString().substring(0, 16)}',
+            ),
+          if (offline)
+            Text(t('Offline · saved data', 'Offline · dados salvos')),
+          IconButton(
+            key: const ValueKey('insights.refresh'),
+            tooltip: t('Refresh', 'Atualizar'),
+            onPressed: offline || profile.isEmpty || loading
+                ? null
+                : () => load(refresh: true),
+            icon: const MtIcon(Icons.refresh),
+          ),
+        ],
+      );
+      if (size.maxWidth < 900) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [filters, const SizedBox(height: 12), status],
+        );
+      }
+      return Row(
+        key: const ValueKey('insights.filters-row'),
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(flex: 3, child: filters),
+          const SizedBox(width: 24),
+          Expanded(flex: 2, child: status),
+        ],
+      );
+    },
+  );
   Widget card(Widget child) => Card(
     margin: EdgeInsets.zero,
     child: Padding(padding: const EdgeInsets.all(20), child: child),
@@ -863,87 +983,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
             ],
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              ActionChip(
-                label: Text(
-                  profile.isEmpty
-                      ? t('Configure Last.fm', 'Configurar Last.fm')
-                      : 'Last.fm · $profile',
-                ),
-                onPressed: widget.onConfigure,
-              ),
-              if (report != null)
-                Text(
-                  '${t('Updated', 'Atualizado')}: ${report.updatedAt.toLocal().toString().substring(0, 16)}',
-                ),
-              if (offline)
-                Text(t('Offline · saved data', 'Offline · dados salvos')),
-            ],
-          ),
-          const SizedBox(height: 16),
-          LayoutBuilder(
-            builder: (context, size) => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                for (final entry in {
-                  'overview': t('Overview', 'Visão geral'),
-                  'artists': t('Artists', 'Artistas'),
-                  'albums': t('Albums', 'Álbuns'),
-                  'tracks': t('Tracks', 'Faixas'),
-                  'reports': t('Reports', 'Relatórios'),
-                }.entries)
-                  ChoiceChip(
-                    label: Text(entry.value),
-                    selected: tab == entry.key,
-                    onSelected: (_) => setState(() {
-                      tab = entry.key;
-                      offset = 0;
-                    }),
-                  ),
-                SizedBox(
-                  width: 190,
-                  child: DropdownButtonFormField<String>(
-                    isExpanded: true,
-                    key: ValueKey('insights.period.$period.$periodSelection'),
-                    initialValue: period,
-                    items: [
-                      for (final entry in {
-                        '7': t('Last 7 days', 'Últimos 7 dias'),
-                        '30': t('Last 30 days', 'Últimos 30 dias'),
-                        '90': t('Last 90 days', 'Últimos 90 dias'),
-                        '180': t('Last 180 days', 'Últimos 180 dias'),
-                        '365': t('Last 365 days', 'Últimos 365 dias'),
-                        'all': t('All time', 'Todo o período'),
-                        'custom': t('Custom dates', 'Datas personalizadas'),
-                      }.entries)
-                        DropdownMenuItem(
-                          value: entry.key,
-                          child: Text(entry.value),
-                        ),
-                    ],
-                    onChanged: profile.isEmpty
-                        ? null
-                        : (v) {
-                            if (v != null) choosePeriod(v);
-                          },
-                  ),
-                ),
-                IconButton(
-                  tooltip: t('Refresh', 'Atualizar'),
-                  onPressed: offline || profile.isEmpty || loading
-                      ? null
-                      : () => load(refresh: true),
-                  icon: const MtIcon(Icons.refresh),
-                ),
-              ],
-            ),
-          ),
+          reportToolbar(),
           if (loading) ...[
             const SizedBox(height: 12),
             const LinearProgressIndicator(),
@@ -985,6 +1025,13 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
                 ),
               ),
             ),
+          if (report != null && dataKey != cacheKey)
+            Text(
+              t(
+                'Showing the previously loaded period',
+                'Exibindo o período carregado anteriormente',
+              ),
+            ),
           if (report != null) ...[
             const SizedBox(height: 16),
             Text(
@@ -1002,7 +1049,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
                     ),
                     if (!report.complete)
                       TextButton(
-                        onPressed: loading || offline
+                        onPressed: loading || offline || dataKey != cacheKey
                             ? null
                             : () => load(more: true),
                         child: Text(

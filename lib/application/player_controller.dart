@@ -103,16 +103,9 @@ class PlayerController extends ChangeNotifier {
   String? queueTitle;
   final queueKeys = <int>[];
   int _nextQueueKey = 0;
-  bool get canGoPrevious => shuffle ? _previous.isNotEmpty : queueIndex > 0;
+  bool get canGoPrevious => queueIndex > 0;
   int queueIndex = -1;
-  final _cycle = ShuffleCycle();
   List<Track> upcoming(int count) {
-    if (shuffle) {
-      if (_cycle.remaining.isEmpty && repeat == PlaybackRepeat.queue) {
-        _cycle.reset(queue.length, queueIndex);
-      }
-      return _cycle.remaining.take(count).map((i) => queue[i]).toList();
-    }
     final values = queue.skip(queueIndex + 1).take(count).toList();
     if (repeat == PlaybackRepeat.queue && values.length < count) {
       values.addAll(queue.take(count - values.length));
@@ -120,7 +113,6 @@ class PlayerController extends ChangeNotifier {
     return values;
   }
 
-  final _previous = <int>[];
   PlaybackRepeat repeat = PlaybackRepeat.off;
   bool shuffle = false;
   double volume = 100;
@@ -253,6 +245,7 @@ class PlayerController extends ChangeNotifier {
   Future<void> playQueue(List<Track> tracks, int index, {String? title}) async {
     if (opening || index < 0 || index >= tracks.length) return;
     queueTitle = title?.trim().isNotEmpty == true ? title!.trim() : null;
+    final sameOrder = listEquals(tracks, queue);
     final copy = List<Track>.of(tracks);
     queue
       ..clear()
@@ -261,9 +254,8 @@ class PlayerController extends ChangeNotifier {
     queueKeys
       ..clear()
       ..addAll(List.generate(queue.length, (_) => _nextQueueKey++));
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
-    await open(queue[index]);
+    if (shuffle && !sameOrder) shuffleQueue();
+    await open(queue[queueIndex]);
   }
 
   Future<void> restore(
@@ -281,31 +273,19 @@ class PlayerController extends ChangeNotifier {
     queueKeys
       ..clear()
       ..addAll(List.generate(queue.length, (_) => _nextQueueKey++));
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
     await open(queue[queueIndex], play: false, start: position);
   }
 
-  int get nextIndex => shuffle
-      ? (_cycle.canAdvance(queue.length, repeat == PlaybackRepeat.queue)
-            ? queueIndex
-            : -1)
-      : nextQueueIndex(
-          current: queueIndex,
-          length: queue.length,
-          repeat: repeat,
-          shuffle: false,
-        );
+  int get nextIndex => nextQueueIndex(
+    current: queueIndex,
+    length: queue.length,
+    repeat: repeat,
+    shuffle: false,
+  );
   Future<void> next({bool automatic = false}) async {
     if (opening || extending) return;
     var index = automatic && repeat == PlaybackRepeat.track
         ? queueIndex
-        : shuffle
-        ? _cycle.next(
-            queue.length,
-            queueIndex,
-            repeatAll: repeat == PlaybackRepeat.queue,
-          )
         : nextQueueIndex(
             current: queueIndex,
             length: queue.length,
@@ -336,7 +316,6 @@ class PlayerController extends ChangeNotifier {
           index = queue.length;
           queue.addAll(suggested);
           queueKeys.addAll(suggested.map((_) => _nextQueueKey++));
-          _cycle.reset(queue.length, queueIndex);
         }
       } catch (_) {
         /* Optional recommendations do not alter the existing queue on failure. */
@@ -345,15 +324,28 @@ class PlayerController extends ChangeNotifier {
       }
     }
     if (index < 0) return;
-    if (index != queueIndex) _previous.add(queueIndex);
     queueIndex = index;
     await open(queue[queueIndex]);
   }
 
+  void shuffleQueue() {
+    if (queue.isEmpty) return;
+    final order = shuffledQueueOrder(queue.length, queueIndex);
+    final tracks = [for (final i in order) queue[i]];
+    final keys = [for (final i in order) queueKeys[i]];
+    queue
+      ..clear()
+      ..addAll(tracks);
+    queueKeys
+      ..clear()
+      ..addAll(keys);
+    queueIndex = 0;
+  }
+
   void toggleShuffle() {
+    if (opening) return;
     shuffle = !shuffle;
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
+    if (shuffle) shuffleQueue();
     _notify();
   }
 
@@ -376,9 +368,7 @@ class PlayerController extends ChangeNotifier {
 
   Future<void> previous() async {
     if (opening) return;
-    final index = shuffle
-        ? (_previous.isEmpty ? -1 : _previous.removeLast())
-        : queueIndex - 1;
+    final index = queueIndex - 1;
     if (index < 0) return;
     queueIndex = index;
     await open(queue[queueIndex]);
@@ -390,14 +380,11 @@ class PlayerController extends ChangeNotifier {
       queue.add(track);
       queueKeys.add(_nextQueueKey++);
       queueIndex = 0;
-      _cycle.reset(queue.length, queueIndex);
       await open(track, play: false);
       return;
     }
     queueKeys.insert(asNext ? queueIndex + 1 : queue.length, _nextQueueKey++);
     queue.insert(asNext ? queueIndex + 1 : queue.length, track);
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
     _notify();
   }
 
@@ -413,8 +400,6 @@ class PlayerController extends ChangeNotifier {
       if (newIndex <= queueIndex) queueIndex++;
     }
     queue.insert(newIndex, track);
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
     _notify();
   }
 
@@ -432,8 +417,6 @@ class PlayerController extends ChangeNotifier {
       queueIndex = queueIndex.clamp(0, queue.length - 1);
       await open(queue[queueIndex], play: wasPlaying);
     }
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
     _notify();
   }
 
@@ -450,8 +433,6 @@ class PlayerController extends ChangeNotifier {
     position = Duration.zero;
     duration = Duration.zero;
     playing = false;
-    _cycle.reset(0, -1);
-    _previous.clear();
     _notify();
   }
 
@@ -485,8 +466,6 @@ class PlayerController extends ChangeNotifier {
       ..clear()
       ..addAll(keys);
     queueIndex = before;
-    _cycle.reset(queue.length, queueIndex);
-    _previous.clear();
     _notify();
   }
 

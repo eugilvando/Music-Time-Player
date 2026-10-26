@@ -1,3 +1,4 @@
+import 'home_skeleton.dart';
 import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'mix_artist_picker.dart';
@@ -1581,7 +1582,7 @@ class _HomePageState extends State<HomePage> {
       }
       if (derivedLists.isEmpty) {
         return homeError == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const HomeSkeleton()
             : Center(
                 child: TextButton(
                   onPressed: () => setState(() {

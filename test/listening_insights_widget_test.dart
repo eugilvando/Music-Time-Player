@@ -26,6 +26,8 @@ class CachedInsights extends ListeningInsightsRepository {
     : super(store, () async => throw StateError('Network must not run'));
   final ListeningReport report;
   @override
+  bool beginAutomaticRefresh(String user, String period) => false;
+  @override
   Future<ListeningReport?> cached(String user, String period) async =>
       user == report.user ? report : null;
 }

@@ -2,6 +2,14 @@ import 'dart:math';
 
 enum PlaybackRepeat { off, queue, track }
 
+/// Keep the current occurrence first, with a visible, stable upcoming order.
+List<int> shuffledQueueOrder(int length, int current, {Random? random}) {
+  if (length == 0) return [];
+  final rest = List.generate(length, (i) => i)..remove(current);
+  rest.shuffle(random ?? Random());
+  return current >= 0 && current < length ? [current, ...rest] : rest;
+}
+
 int nextQueueIndex({
   required int current,
   required int length,

@@ -17,18 +17,55 @@ import 'now_playing_artwork.dart';
 String playbackTime(Duration value) =>
     '${value.inMinutes}:${(value.inSeconds % 60).toString().padLeft(2, '0')}';
 
-double playerBarHeight(BuildContext context, AppSettings settings) {
+({double infoWidth, double rowHeight, int rows}) barMetrics(
+  BuildContext context,
+  AppSettings settings,
+  double width,
+) {
   final visible = playerBarVisible(settings);
-  final textScale = MediaQuery.textScalerOf(context);
-  return max(
-        44.0,
-        1.5 *
-            (textScale.scale(settings.visualNumber('font_secondary', 12)) +
-                (visible.contains('info')
-                    ? textScale.scale(settings.visualNumber('font_body', 16))
-                    : 0)),
-      ) +
-      28;
+  final scale = MediaQuery.textScalerOf(context);
+  final height = max(
+    48.0,
+    1.5 *
+        (scale.scale(settings.visualNumber('font_secondary', 12)) +
+            (visible.contains('info')
+                ? scale.scale(settings.visualNumber('font_body', 16))
+                : 0)),
+  );
+  final info = (width * .20).clamp(100.0, 300.0);
+  final spacing = settings.visualNumber('bar_icon_spacing', 4).clamp(0.0, 24.0);
+  var used = 0.0, rows = 1;
+  for (final id in playerBarOrder(settings).where(visible.contains)) {
+    final itemWidth = switch (id) {
+      'info' => info + 10,
+      'cover' => 58.0,
+      'play' => 48.0,
+      'volume' => 128.0,
+      'progress' => 160.0,
+      'elapsed' || 'duration' => scale.scale(42.0),
+      'lyrics' || 'queue' => 44.0,
+      'separator1' || 'separator2' || 'separator3' => 18.0,
+      _ => 32.0,
+    };
+    if (used > 0 && used + spacing + itemWidth > width) {
+      rows++;
+      used = 0;
+    }
+    used += (used > 0 ? spacing : 0) + itemWidth;
+  }
+  return (infoWidth: info, rowHeight: height, rows: rows);
+}
+
+double playerBarHeight(BuildContext context, AppSettings settings) {
+  final layout = barMetrics(
+    context,
+    settings,
+    max(1, MediaQuery.sizeOf(context).width - 32),
+  );
+  return min(
+    layout.rowHeight * layout.rows + (layout.rows - 1) * 8 + 24,
+    max(72, min(240, MediaQuery.sizeOf(context).height * .30)),
+  );
 }
 
 class PlayerBar extends StatelessWidget {
@@ -259,8 +296,9 @@ class PlayerBar extends StatelessWidget {
   List<Widget> barItems(
     BuildContext context,
     List<String> order,
-    double width,
-  ) {
+    double width, {
+    bool wrap = false,
+  }) {
     Widget keyed(String id) => Padding(
       key: ValueKey('player.item.$id'),
       padding: EdgeInsets.only(right: id == 'cover' || id == 'info' ? 10 : 0),
@@ -270,7 +308,11 @@ class PlayerBar extends StatelessWidget {
     for (var i = 0; i < order.length; i++) {
       final id = order[i];
       if (id == 'progress') {
-        result.add(Expanded(child: item(context, id, width)));
+        result.add(
+          wrap
+              ? SizedBox(width: 160, child: item(context, id, width))
+              : Expanded(child: item(context, id, width)),
+        );
       } else if (i + 1 < order.length &&
           {'lyrics', 'queue'}.contains(id) &&
           {'lyrics', 'queue'}.contains(order[i + 1])) {
@@ -300,6 +342,7 @@ class PlayerBar extends StatelessWidget {
         .visualNumber('bar_icon_spacing', 4)
         .clamp(0.0, 24.0)
         .toDouble();
+    if (wrap) return result;
     return [
       for (var i = 0; i < result.length; i++) ...[
         if (i > 0) SizedBox(width: spacing),
@@ -327,8 +370,11 @@ class PlayerBar extends StatelessWidget {
             await onSave();
           },
         ),
+        const SizedBox(width: 8),
         Expanded(
+          key: const ValueKey('player.volume-slider'),
           child: Slider(
+            padding: EdgeInsets.zero,
             value: controller.volume,
             max: 100,
             label: '${controller.volume.round()}%',
@@ -419,29 +465,56 @@ class PlayerBar extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final infoWidth = (constraints.maxWidth * .20).clamp(
-                120.0,
-                300.0,
+              final layout = barMetrics(
+                context,
+                settings,
+                constraints.maxWidth,
               );
               final visible = playerBarVisible(settings);
-              final rowHeight = playerBarHeight(context, settings) - 24;
               final order = playerBarOrder(settings)
                   .where(visible.contains)
                   .toList();
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                  child: IntrinsicWidth(
-                    child: SizedBox(
-                      height: rowHeight,
-                      child: Row(
-                        key: const ValueKey('player.single-line'),
-                        mainAxisSize: MainAxisSize.min,
-                        children: barItems(context, order, infoWidth),
+              if (layout.rows > 1) {
+                return SizedBox(
+                  height: playerBarHeight(context, settings) - 24,
+                  child: SingleChildScrollView(
+                    key: const ValueKey('player.controls.scroll'),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      heightFactor: 1,
+                      child: Wrap(
+                        key: const ValueKey('player.wrapped'),
+                        spacing: settings
+                            .visualNumber('bar_icon_spacing', 4)
+                            .clamp(0, 24),
+                        runSpacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          for (final child in barItems(
+                            context,
+                            order,
+                            layout.infoWidth,
+                            wrap: true,
+                          ))
+                            SizedBox(
+                              height: layout.rowHeight,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: 1,
+                                child: child,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
+                );
+              }
+              return SizedBox(
+                height: layout.rowHeight,
+                child: Row(
+                  key: const ValueKey('player.single-line'),
+                  children: barItems(context, order, layout.infoWidth),
                 ),
               );
             },

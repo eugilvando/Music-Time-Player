@@ -17,6 +17,7 @@ class MediaDetailsTable extends StatefulWidget {
     required this.rowBuilder,
     this.onChooseColumns,
     this.columnKey,
+    this.controller,
   });
   final List<String> headers;
   final List<double> widths;
@@ -24,6 +25,7 @@ class MediaDetailsTable extends StatefulWidget {
   final List<Widget> Function(int) rowBuilder;
   final VoidCallback? onChooseColumns;
   final String? columnKey;
+  final ScrollController? controller;
   @override
   State<MediaDetailsTable> createState() => _MediaDetailsTableState();
 }
@@ -219,6 +221,7 @@ class _MediaDetailsTableState extends State<MediaDetailsTable> {
               ),
               Expanded(
                 child: ListView.builder(
+                  controller: widget.controller,
                   primary: false,
                   itemExtent: rowHeight,
                   itemCount: itemCount,

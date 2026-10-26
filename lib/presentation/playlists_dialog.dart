@@ -1,3 +1,4 @@
+import 'alphabet_scrollbar.dart';
 import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'media_details_table.dart';
@@ -66,6 +67,9 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
   bool busy = false;
   List<Track> playlistQueue = [];
   String? error;
+  final alphabetScroll = ScrollController();
+  ScrollController? get rootScroll =>
+      selected == null && sort == 'name' ? alphabetScroll : null;
   String view = 'compact', sort = 'name';
   bool descending = false, controlsExpanded = false;
   int coverRevision = 0;
@@ -555,6 +559,18 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
   );
 
   Widget content() {
+    final child = playlistContent();
+    if (selected != null || sort != 'name' || playlists.isEmpty) return child;
+    final names = sortedPlaylists.map((p) => p['name'] as String).toList();
+    return AlphabetScrollbar(
+      controller: alphabetScroll,
+      positions: alphabetPositions(names),
+      itemCount: names.length,
+      child: child,
+    );
+  }
+
+  Widget playlistContent() {
     if (loading && (selected != null ? entries.isEmpty : playlists.isEmpty)) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -580,6 +596,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                 .clamp(1, 12);
             final width = (space.maxWidth - (columns - 1) * 24) / columns;
             return GridView.builder(
+              controller: rootScroll,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columns,
                 mainAxisExtent: compact
@@ -650,6 +667,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
       }
       if (view == 'detailed') {
         return MediaDetailsTable(
+          controller: rootScroll,
           columnKey: 'playlists',
           headers: [
             ui(context, 'Título'),
@@ -686,6 +704,7 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
         );
       }
       return ListView.builder(
+        controller: rootScroll,
         itemCount: values.length,
         itemBuilder: (context, index) => ItemActionRegion(
           child: ListTile(
@@ -1001,6 +1020,11 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
       ],
     ),
   );
+  @override
+  void dispose() {
+    alphabetScroll.dispose();
+    super.dispose();
+  }
 }
 
 class PlaylistArtwork extends StatefulWidget {
