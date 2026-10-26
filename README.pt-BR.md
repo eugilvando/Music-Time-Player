@@ -101,7 +101,7 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 
 ## Limitações atuais
 
-- Esta release é para Windows x64; Ubuntu/Linux, Android e macOS não são entregues/validados.
+- A release estável é para Windows x64. Há uma prévia experimental separada para Ubuntu 24.04 x64; Android e macOS não são entregues/validados.
 - Google Drive, WebDAV, Jellyfin, Emby, SMB e envios Last.fm têm implementação/testes controlados, mas ainda precisam de aceites reais mais amplos. Testes não equivalem a certificação por serviço.
 - Sincronização manual/completa; não há política geral automática/incremental. Google oferece um seletor visual de pastas. Não há transcodificação Jellyfin/Emby.
 - Agrupamentos de artistas/álbuns ainda não são integralmente paginados em SQL. Coleções grandes exigem medição na máquina real.
@@ -113,3 +113,7 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 - Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
 Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.4.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+
+## Prévia Ubuntu atualizada
+
+[Baixar Ubuntu 2.4.1 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1-ubuntu-preview.1). Pacote experimental separado, com 41 testes direcionados e abertura gráfica verificados; áudio, contas e VM reais seguem pendentes. [Instalação e limites](docs/ubuntu-preview.md). A release estável Windows permanece independente.

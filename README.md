@@ -14,6 +14,8 @@
 
 Design by **Gilvando Souza**.
 
+**Ubuntu 24.04 x64 preview:** [Download 2.4.1 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1-ubuntu-preview.1). Separate experimental package, 41 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+
 ## New in 2.4.1
 
 Save queue as playlist and Clear queue now live in the action menu beside the Queue title. The sidebar and player bar organizers in Settings can be expanded or collapsed and start closed. Existing order and visibility preferences are preserved. [Release notes](docs/release-2.4.1.md).
@@ -152,7 +154,7 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Current limits
 
-- Windows x64 only in this release. Android, Linux/Ubuntu and macOS are not supplied or validated.
+- The stable release targets Windows x64. A separate experimental Ubuntu 24.04 x64 preview is linked above; Android and macOS are not supplied or validated.
 - No streaming subscription, catalog acquisition, bundled songs, DRM bypass or Music Time backend.
 - Source synchronization is currently manual/full within the selected scope. Checkpoints are not a general automatic/incremental sync system. Google Drive includes a paginated visual folder picker.
 - OneDrive personal playback/reopening has user evidence. Google Drive, WebDAV, Jellyfin, Emby, SMB, multiple-account edge cases and live Last.fm delivery still need broader real-account/device validation. Controlled tests do not imply service certification.
