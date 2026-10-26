@@ -37,6 +37,7 @@ import '../sources/microsoft_auth.dart';
 import 'package:path/path.dart' as path;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -416,6 +417,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
         playback.position,
         title: playback.title,
       );
+      try {
+        final saved = widget.settings.preferences.getString(
+          'playback.shuffle_restore',
+        );
+        if (saved != null) {
+          controller.restoreShuffleSnapshot(
+            jsonDecode(saved) as Map<String, dynamic>,
+          );
+        }
+      } catch (_) {
+        // Older or mismatched snapshots leave the restored visible order intact.
+      }
       if (widget.smokeAudio != null) {
         final fixture = await compute(readLocalTracks, [widget.smokeAudio!]);
         await widget.store.addTracks(fixture);
@@ -450,10 +463,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
       return;
     }
     final queue = List<Track>.of(controller.queue);
+    final shuffle = controller.shuffle;
+    final originalOrder = controller.originalQueueOrder;
     final index = controller.queueIndex;
     final position = controller.position;
     final signature =
-        '${queue.map((track) => track.id).join('|')}:$index:${position.inMilliseconds}:${controller.shuffle}:${controller.repeat.name}:${controller.volume}:${controller.queueTitle}';
+        '${queue.map((track) => track.id).join('|')}:$index:${position.inMilliseconds}:$shuffle:${originalOrder.join(',')}:${controller.repeat.name}:${controller.volume}:${controller.queueTitle}';
     if (signature == lastSaved) return;
     saving = true;
     try {
@@ -461,11 +476,28 @@ class _LibraryScreenState extends State<LibraryScreen> {
         queue,
         index,
         position,
-        shuffle: controller.shuffle,
+        shuffle: shuffle,
         repeat: controller.repeat.name,
         volume: controller.volume,
         title: controller.queueTitle,
       );
+      if (shuffle) {
+        final snapshot = jsonEncode({
+          'queue': queue.map((t) => t.id).toList(),
+          'order': originalOrder,
+        });
+        if (widget.settings.preferences.getString('playback.shuffle_restore') !=
+            snapshot) {
+          await widget.settings.preferences.setString(
+            'playback.shuffle_restore',
+            snapshot,
+          );
+        }
+      } else if (widget.settings.preferences.containsKey(
+        'playback.shuffle_restore',
+      )) {
+        await widget.settings.preferences.remove('playback.shuffle_restore');
+      }
       lastSaved = signature;
     } catch (_) {
       if (mounted) {
@@ -1747,13 +1779,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
     onSave: save,
   );
 
-  bool get sharedBackdrop =>
-      {AppSection.home, AppSection.nowPlaying}.contains(widget.section);
+  bool get sharedBackdrop => true;
   Widget playbackSurface(Widget child) {
     if (!sharedBackdrop) return child;
     final cover = controller.current?.cover;
     final background = widget.settings.visualChoice('background', 'blur');
     return Stack(
+      key: const ValueKey('app.global-background'),
       children: [
         if (cover != null && background != 'solid')
           Positioned.fill(

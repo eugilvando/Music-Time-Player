@@ -1,1 +1,1 @@
-3d3288cde75bc9fa02d29214cf2499fc1d23fd64e144953ab2d827ab4d0c19d0  MusicTime-Setup-2.5.1.exe
+95ed148d2e43b484aa8be9306af9bb7ab36fc5d535c397839b8a8fcda368ac88  MusicTime-Setup-2.5.2.exe

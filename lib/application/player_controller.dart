@@ -102,6 +102,33 @@ class PlayerController extends ChangeNotifier {
   final List<Track> queue = [];
   String? queueTitle;
   final queueKeys = <int>[];
+  final _originalQueueKeys = <int>[];
+  List<int> get originalQueueOrder {
+    final positions = {
+      for (var i = 0; i < queueKeys.length; i++) queueKeys[i]: i,
+    };
+    final ordered = _originalQueueKeys.where(positions.containsKey).toList();
+    final known = ordered.toSet();
+    ordered.addAll(queueKeys.where((key) => !known.contains(key)));
+    return ordered.map((key) => positions[key]!).toList();
+  }
+
+  void restoreShuffleSnapshot(Map<String, dynamic> snapshot) {
+    final ids = snapshot['queue'], order = snapshot['order'];
+    if (!shuffle ||
+        ids is! List ||
+        order is! List ||
+        !listEquals(ids, queue.map((t) => t.id).toList()) ||
+        order.length != queue.length ||
+        order.any((i) => i is! int || i < 0 || i >= queue.length) ||
+        order.toSet().length != queue.length) {
+      return;
+    }
+    _originalQueueKeys
+      ..clear()
+      ..addAll(order.cast<int>().map((i) => queueKeys[i]));
+  }
+
   int _nextQueueKey = 0;
   bool get canGoPrevious => queueIndex > 0;
   int queueIndex = -1;
@@ -251,9 +278,12 @@ class PlayerController extends ChangeNotifier {
       ..clear()
       ..addAll(copy);
     queueIndex = index;
-    queueKeys
-      ..clear()
-      ..addAll(List.generate(queue.length, (_) => _nextQueueKey++));
+    if (!sameOrder) {
+      queueKeys
+        ..clear()
+        ..addAll(List.generate(queue.length, (_) => _nextQueueKey++));
+      _originalQueueKeys.clear();
+    }
     if (shuffle && !sameOrder) shuffleQueue();
     await open(queue[queueIndex]);
   }
@@ -273,6 +303,9 @@ class PlayerController extends ChangeNotifier {
     queueKeys
       ..clear()
       ..addAll(List.generate(queue.length, (_) => _nextQueueKey++));
+    _originalQueueKeys
+      ..clear()
+      ..addAll(queueKeys);
     await open(queue[queueIndex], play: false, start: position);
   }
 
@@ -330,6 +363,9 @@ class PlayerController extends ChangeNotifier {
 
   void shuffleQueue() {
     if (queue.isEmpty) return;
+    _originalQueueKeys
+      ..clear()
+      ..addAll(queueKeys);
     final order = shuffledQueueOrder(queue.length, queueIndex);
     final tracks = [for (final i in order) queue[i]];
     final keys = [for (final i in order) queueKeys[i]];
@@ -345,7 +381,22 @@ class PlayerController extends ChangeNotifier {
   void toggleShuffle() {
     if (opening) return;
     shuffle = !shuffle;
-    if (shuffle) shuffleQueue();
+    if (shuffle) {
+      shuffleQueue();
+    } else if (queue.isNotEmpty) {
+      final currentKey = queueKeys[queueIndex];
+      final order = originalQueueOrder;
+      final tracks = [for (final i in order) queue[i]];
+      final keys = [for (final i in order) queueKeys[i]];
+      queue
+        ..clear()
+        ..addAll(tracks);
+      queueKeys
+        ..clear()
+        ..addAll(keys);
+      queueIndex = queueKeys.indexOf(currentKey);
+      _originalQueueKeys.clear();
+    }
     _notify();
   }
 
@@ -383,7 +434,19 @@ class PlayerController extends ChangeNotifier {
       await open(track, play: false);
       return;
     }
-    queueKeys.insert(asNext ? queueIndex + 1 : queue.length, _nextQueueKey++);
+    final key = _nextQueueKey++;
+    if (shuffle) {
+      final baseline = originalQueueOrder.map((i) => queueKeys[i]).toList();
+      _originalQueueKeys
+        ..clear()
+        ..addAll(baseline);
+      final current = _originalQueueKeys.indexOf(queueKeys[queueIndex]);
+      _originalQueueKeys.insert(
+        asNext && current >= 0 ? current + 1 : _originalQueueKeys.length,
+        key,
+      );
+    }
+    queueKeys.insert(asNext ? queueIndex + 1 : queue.length, key);
     queue.insert(asNext ? queueIndex + 1 : queue.length, track);
     _notify();
   }
@@ -427,6 +490,7 @@ class PlayerController extends ChangeNotifier {
     queue.clear();
     queueTitle = null;
     queueKeys.clear();
+    _originalQueueKeys.clear();
     queueIndex = -1;
     current = null;
     session = null;
@@ -445,9 +509,21 @@ class PlayerController extends ChangeNotifier {
     if (remaining.length == queue.length) return;
     if (active == null || ids.contains(active.id)) {
       final title = queueTitle;
+      final remainingKeys = [
+        for (var i = 0; i < queue.length; i++)
+          if (!ids.contains(queue[i].id)) queueKeys[i],
+      ];
+      final original = [
+        for (final i in originalQueueOrder)
+          if (!ids.contains(queue[i].id)) remainingKeys.indexOf(queueKeys[i]),
+      ];
       await clearQueue();
       if (remaining.isNotEmpty) {
         await restore(remaining, 0, Duration.zero, title: title);
+        restoreShuffleSnapshot({
+          'queue': remaining.map((t) => t.id).toList(),
+          'order': original,
+        });
       }
       return;
     }

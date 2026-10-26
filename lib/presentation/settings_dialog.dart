@@ -1,4 +1,5 @@
 import 'design_icon.dart';
+import 'about_page.dart';
 import 'sidebar_settings.dart';
 import 'artist_selection_settings.dart';
 import 'storage_settings.dart';
@@ -33,7 +34,8 @@ enum SettingsCategory {
   cache('Cache e offline', Icons.storage_outlined),
   downloads('Downloads', Icons.download),
   lastfm('Integrações', Icons.extension_outlined),
-  data('Backup e avançado', Icons.backup_outlined);
+  data('Backup e avançado', Icons.backup_outlined),
+  about('Sobre', Icons.info_outline);
 
   const SettingsCategory(this.label, this.icon);
   final String label;
@@ -100,6 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
       'Fonte primária',
       'Fonte secundária',
       'Página inicial',
+      'Sidebar',
       'Now Playing',
       'Capas e fundo',
       'Informações e painéis',
@@ -132,6 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
     ],
     SettingsCategory.lastfm: ['Last.fm', 'Provedores de letras'],
     SettingsCategory.data: ['Backup e manutenção'],
+    SettingsCategory.about: ['Sobre o Music Time'],
   };
   void navigate(SettingsCategory next, [String page = '']) {
     setState(() {
@@ -818,6 +822,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ]);
       case SettingsCategory.customization:
         return pageList([
+          appearance()[1],
           subsection('Sidebar', [
             SidebarSettings(settings: widget.settings),
           ], collapsible: true),
@@ -830,7 +835,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ]),
           controls()[3],
           controls().first,
-          appearance()[1],
           subsection('Informações e painéis', [
             visualSwitch('show_queue', 'Mostrar fila lateral'),
             visualSwitch('additional_info', 'Mostrar álbum nas informações'),
@@ -919,6 +923,8 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ]),
         ]);
+      case SettingsCategory.about:
+        return pageList([const MusicTimeAbout()]);
       case SettingsCategory.data:
         return widget.onBackup == null ||
                 widget.onRestore == null ||

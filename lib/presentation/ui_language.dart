@@ -129,6 +129,27 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Sobre': 'About',
+  'Sobre o Music Time': 'About Music Time',
+  'Player pessoal para arquivos locais, nuvens e servidores de mídia.':
+      'A personal player for local files, cloud libraries and media servers.',
+  'Design e desenvolvimento: Gilvando Souza':
+      'Design and development: Gilvando Souza',
+  'Projeto pessoal desenvolvido com design engineering e assistência de IA.':
+      'A personal project built with design engineering and AI assistance.',
+  'Código no GitHub': 'Source on GitHub',
+  'Versões e notas': 'Releases and notes',
+  'Relatar um problema': 'Report an issue',
+  'Licença MIT · componentes de terceiros possuem suas próprias licenças.':
+      'MIT license · third-party components have their own licenses.',
+  'Construído com Flutter, Dart, MediaKit/libmpv e SQLite.':
+      'Built with Flutter, Dart, MediaKit/libmpv and SQLite.',
+  'Dados e biblioteca ficam no seu dispositivo. Conexões opcionais consultam os serviços configurados; backups não são enviados ao GitHub.': 'Your data and library stay on your device. Optional connections contact configured services; backups are not sent to GitHub.',
+  'OneDrive e Google Drive exigem seu próprio ID de aplicativo e autorização. A disponibilidade depende das regras de cada provedor.': 'OneDrive and Google Drive require your own application ID and authorization. Availability depends on each provider’s policies.',
+  'Licenças de terceiros': 'Third-party licenses',
+  'Avisos legais': 'Legal notices',
+  'Configurar provedores': 'Provider setup',
+  'Não foi possível abrir o navegador.': 'Could not open the browser.',
   'Estatísticas de escuta': 'Listening Insights',
   'Somente capa': 'Cover Only',
   'Somente letras': 'Lyrics Only',

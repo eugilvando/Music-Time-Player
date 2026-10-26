@@ -74,9 +74,9 @@ void main() {
     expect(player.queueKeys.toSet().length, 8);
     expect(player.nextIndex, 1);
     expect(player.upcoming(7), player.queue.skip(1));
-    final displayed = List.of(player.queueKeys);
     player.toggleShuffle();
-    expect(player.queueKeys, displayed);
+    expect(player.queueKeys, List.generate(8, (i) => i));
+    expect(player.queueIndex, 4);
   });
 
   for (final grid in [false, true]) {

@@ -481,6 +481,10 @@ void main() {
         'settings',
       ]) {
         await navigate(section);
+        expect(
+          find.byKey(const ValueKey('app.global-background')),
+          findsOneWidget,
+        );
         if (section == 'settings' || section == 'nowPlaying') {
           expect(find.byKey(const ValueKey('page.heading')), findsNothing);
         }
@@ -492,7 +496,13 @@ void main() {
       expect(find.text('General and appearance'), findsWidgets);
       expect(find.text('Settings'), findsWidgets);
       await capture('settings-english');
-      for (final section in ['data', 'lastfm', 'onedrive', 'downloads']) {
+      for (final section in [
+        'data',
+        'lastfm',
+        'onedrive',
+        'downloads',
+        'about',
+      ]) {
         final item = find.byKey(ValueKey('settings.$section'));
         await tester.ensureVisible(item);
         await tester.tap(item);

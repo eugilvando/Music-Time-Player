@@ -4,39 +4,39 @@
                  "backupSchema":  17,
                  "container":  2
              },
-    "version":  "2.5.1+53",
+    "version":  "2.5.2+54",
     "checks":  {
                    "pubGet":  "passed; offline",
-                   "localInstallation":  "passed; binaries match, profile hashes unchanged",
+                   "localInstallation":  "pending owner confirmation; app remains in use",
                    "relativeDocumentationLinks":  "passed",
                    "targetedRegression":  {
-                                              "note":  "Final targeted suite; no full-suite rerun for this patch",
+                                              "note":  "Targeted suite, not a full-suite rerun",
                                               "failed":  0,
-                                              "passed":  19
+                                              "passed":  20
                                           },
                    "dartAnalysis":  "passed; direct Dart lib/test analysis",
                    "windowsBuild":  "passed",
                    "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, window placement and clean exit",
                    "runtimeSource":  {
-                                         "files":  229,
+                                         "files":  231,
                                          "identical":  true
                                      },
                    "publicRefinementsRegression":  {
                                                        "note":  "Repeated tests from development validation, not additional unique tests",
                                                        "failed":  0,
-                                                       "passed":  3
+                                                       "passed":  6
                                                    }
                },
-    "limits":  "Home cache lasts for the app session; not persisted to disk. No personal profile published. Ubuntu unchanged.",
+    "limits":  "Older shuffled sessions do not contain their pre-shuffle order. No personal profile published. Ubuntu unchanged.",
     "date":  "2026-10-26",
     "platform":  "Windows x64",
     "binaries":  [
                      {
-                         "sha256":  "68ff91c7299187150f9a3e2036b69e29b2f3ff7625c2f80835a24527e99613d2",
+                         "sha256":  "d9fc6be53284dcb924d4d58bd89fdc08c5cb0cf9d6362e0b12d65738fa43c387",
                          "file":  "music_time.exe"
                      },
                      {
-                         "sha256":  "97d411c6812091d39b905b7aea0fff83b34927f6c40ba63eda42c83c5cc0abdf",
+                         "sha256":  "7ab392ad9a626a87a52ef2518be0274597b7bf53d73ecbf8ed21a00b3219a27e",
                          "file":  "data/app.so"
                      },
                      {
@@ -45,8 +45,8 @@
                      }
                  ],
     "installer":  {
-                      "sha256":  "3d3288cde75bc9fa02d29214cf2499fc1d23fd64e144953ab2d827ab4d0c19d0",
-                      "file":  "MusicTime-Setup-2.5.1.exe",
-                      "bytes":  20486947
+                      "sha256":  "95ed148d2e43b484aa8be9306af9bb7ab36fc5d535c397839b8a8fcda368ac88",
+                      "file":  "MusicTime-Setup-2.5.2.exe",
+                      "bytes":  20535696
                   }
 }
