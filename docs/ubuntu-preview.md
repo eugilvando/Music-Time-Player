@@ -4,13 +4,13 @@
 
 ## Histórico e comportamento preservado
 
-[Baixar Preview 2 pública](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.1-ubuntu-preview.2). Build, análise, 24 testes, instalação via apt e capturas Home/Settings/redimensionamento aprovados em CI nos modos compatibility/software; confirmação na VM VMware do titular ainda pendente.
+[Código histórico da Preview 2](https://github.com/eugilvando/Music-Time-Player/tree/v2.2.1-ubuntu-preview.2). Build, análise, 24 testes, instalação via apt e capturas Home/Settings/redimensionamento aprovados em CI nos modos compatibility/software; confirmação na VM VMware do titular ainda pendente.
 
 Pacote experimental para **Ubuntu Desktop 24.04 x64 (amd64)**. Não instala nem modifica a versão Windows. Não é uma declaração de suporte Linux completo.
 
 Preview 2 corrige o caminho de renderização usado na prévia anterior: Impeller desativado no runner release e launcher padrão com Skia/OpenGL via Mesa por CPU. O titular relatou triângulos/textos distorcidos no VMware com aceleração 3D ativa. Isso sugere incompatibilidade gráfica; ainda precisa de reteste nessa VM. A versão Windows não é alterada.
 
-A [Preview 1 publicada](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.2.1-ubuntu-preview.1) permanece histórica. O GitHub normaliza `~` para `.` no nome dos downloads Debian. O ZIP local usa o nome original com `~`; use o nome efetivo do arquivo ao instalar. A versão interna desta build é `2.4.1-0ubuntu1~preview1` e mantém o mesmo identificador/perfil para permitir atualização sem reset.
+A [código histórico da Preview 1](https://github.com/eugilvando/Music-Time-Player/tree/v2.2.1-ubuntu-preview.1) permanece histórica. O GitHub normaliza `~` para `.` no nome dos downloads Debian. O ZIP local usa o nome original com `~`; use o nome efetivo do arquivo ao instalar. A versão interna desta build é `2.4.1-0ubuntu1~preview1` e mantém o mesmo identificador/perfil para permitir atualização sem reset.
 
 ## Instalar na máquina virtual
 
@@ -79,3 +79,5 @@ Windows 2.4.1 instalado e main pública preservados; macOS continua adiado. Atua
 ## Publicação da prévia 2.4.1
 
 [Baixar no GitHub](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1-ubuntu-preview.1). Tag v2.4.1-ubuntu-preview.1 aponta para o commit compilado e186723c061073f890e11981d0c97e64cc266aa9. Quatro anexos: .deb, SHA256SUMS.txt, README-ubuntu-preview.md e validation-ubuntu.json. O nome remoto usa ponto no lugar de til (~); versão interna Debian preservada. Release latest permanece v2.4.1 Windows. Manifesto local: build/publication-ubuntu-2.4.1.json.
+
+Retenção em 26/10/2026: as releases/anexos 2.2.1 foram removidos a pedido do titular, mantendo 2.4.1, 2.4.0 e 2.3.0. As tags históricas foram preservadas; os links acima apontam para o código. Use a prévia Ubuntu 2.4.1 para baixar o pacote atual.
