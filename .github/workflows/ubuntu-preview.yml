@@ -12,12 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install build and runtime dependencies
-        timeout-minutes: 8
+        timeout-minutes: 12
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          for source in /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources; do
+            if test -f "$source"; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|http://archive.ubuntu.com/ubuntu|g' "$source"
+            fi
+          done
           sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 -o Acquire::https::Timeout=25 update
-          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 -o Acquire::https::Timeout=25 install -y clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-13-dev libsecret-1-dev libx11-dev libxi-dev libxrandr-dev libmpv-dev mpv libsqlite3-dev libglu1-mesa xvfb dbus-x11 gnome-keyring xdotool imagemagick
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=25 -o Acquire::https::Timeout=25 install --no-install-recommends -y clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-13-dev libsecret-1-dev libx11-dev libxi-dev libxrandr-dev libmpv-dev mpv libsqlite3-dev libglu1-mesa xvfb dbus-x11 gnome-keyring xdotool imagemagick
       - name: Install pinned Flutter SDK
         run: |
           git clone --depth 1 --branch 3.47.7 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
