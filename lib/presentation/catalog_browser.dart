@@ -26,6 +26,7 @@ import 'package:flutter/services.dart';
 import '../domain/track.dart';
 import '../library/catalog.dart';
 import '../library/home_catalog.dart';
+import '../library/artist_selection.dart';
 import '../library/catalog_query.dart';
 import '../library/local_metadata.dart';
 import '../offline/download_manager.dart';
@@ -1059,6 +1060,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           value: 'mix',
           child: UiText('Iniciar mix a partir deste item'),
         ),
+      if (collection?.startsWith('artist:') != true)
+        const PopupMenuItem(
+          value: 'radio',
+          child: UiText('Iniciar rádio a partir deste item'),
+        ),
       const PopupMenuItem(
         value: 'shuffle',
         child: UiText('Reproduzir aleatoriamente'),
@@ -1287,16 +1293,27 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     );
   }
 
-  void openTrackCollection(Track track, bool album) {
-    chooseCategory(album ? 'albums' : 'artists');
+  void openTrackCollection(
+    Track track,
+    bool album, {
+    bool preferAlbumArtist = false,
+  }) {
+    chooseCategory(
+      album
+          ? 'albums'
+          : preferAlbumArtist
+          ? 'albumArtists'
+          : 'artists',
+    );
+    final artist = preferAlbumArtist
+        ? navigationArtistName(track)
+        : track.artistNames.first;
     final groups = index.groups(category, widget.tracks);
     final group = groups
         .where(
           (g) => album
               ? g.tracks.any((t) => albumKey(t) == albumKey(track))
-              : g.tracks.any(
-                  (t) => t.artistNames.any(track.artistNames.contains),
-                ),
+              : artistNameKey(g.name) == artistNameKey(artist),
         )
         .firstOrNull;
     if (group != null) setState(() => selectedGroup = group);
@@ -2241,6 +2258,13 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                                 value: 'mix',
                                 child: UiText(
                                   'Iniciar mix a partir deste item',
+                                ),
+                              ),
+                            if (!artist)
+                              const PopupMenuItem(
+                                value: 'radio',
+                                child: UiText(
+                                  'Iniciar rádio a partir deste item',
                                 ),
                               ),
                             const PopupMenuItem(

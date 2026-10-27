@@ -1020,6 +1020,11 @@ class _HomePageState extends State<HomePage> {
             value: 'mix',
             child: UiText('Iniciar mix a partir deste item'),
           ),
+        if (mixName == null && artistName == null)
+          const PopupMenuItem(
+            value: 'radio',
+            child: UiText('Iniciar rádio a partir deste item'),
+          ),
         const PopupMenuItem(
           value: 'shuffle',
           child: UiText('Reproduzir aleatoriamente'),

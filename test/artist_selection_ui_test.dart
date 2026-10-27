@@ -220,7 +220,7 @@ void main() {
       await tester.tap(find.text('Play'));
       await tester.pumpAndSettle();
       expect(queue, [song]);
-      expect(title, 'Artist mix · Main');
+      expect(title, 'Local artist mix · Main');
       expect(saves, 0);
       expect((await tester.runAsync(store.playlists)), isEmpty);
       expect(tester.takeException(), isNull);
@@ -230,7 +230,7 @@ void main() {
     },
   );
   testWidgets(
-    'radio without local similars offers mix, without starting random playback',
+    'radio without local similars previews the automatic seed mix fallback',
     (tester) async {
       final store = (await tester.runAsync(
         () => LibraryStore.open(':memory:'),
@@ -265,14 +265,10 @@ void main() {
       await tester.tap(find.text('Open'));
       await waitForCatalog(
         tester,
-        () => find.text('Use Artist mix').evaluate().isNotEmpty,
-      );
-      expect(plays, 0);
-      await tester.tap(find.text('Use Artist mix'));
-      await waitForCatalog(
-        tester,
         () => find.text('A song').evaluate().isNotEmpty,
       );
+      expect(plays, 0);
+      expect(find.text('Local artist mix · Main'), findsOneWidget);
       await tester.tap(find.text('Play'));
       await tester.pumpAndSettle();
       expect(plays, 1);

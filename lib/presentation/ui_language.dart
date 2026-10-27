@@ -129,6 +129,35 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Mix local do artista': 'Local artist mix',
+  'Mix local do item': 'Local item mix',
+  'artistas relacionados': 'related artists',
+  'Fallback local aplicado automaticamente por gêneros e participações.':
+      'Local fallback applied automatically from genres and artist credits.',
+  'Não havia faixas relacionadas disponíveis; continuando com o artista/item de referência.': 'No related tracks were available; continuing with the seed artist/items.',
+  'Chave Last.fm ausente ou inválida. Correspondência local usada quando possível.': 'Last.fm key is missing or invalid. Local matching is used when possible.',
+  'Last.fm indisponível. Dados salvos ou recomendações locais usados quando possível.': 'Last.fm is unavailable. Saved data or local recommendations are used when possible.',
+  'Last.fm não retornou recomendações. Correspondência local tentada automaticamente.': 'Last.fm returned no recommendations. Local matching was attempted automatically.',
+  'Iniciar rádio a partir deste item': 'Start radio from this item',
+  'Mix do item': 'Item mix',
+  'Rádio do item': 'Item radio',
+  'Rádio local do item': 'Local item radio',
+  'Artista de referência': 'Seed artist',
+  'Nenhum artista relacionado com faixas disponíveis foi encontrado localmente. Use mix de artista.': 'No related artists with eligible tracks were found locally. Use Artist mix.',
+  'Rádio local do artista': 'Local artist radio',
+  'Usar rádio local': 'Use local radio',
+  'Atualizar Last.fm': 'Refresh Last.fm',
+  'artistas similares': 'similar artists',
+  'na sua biblioteca': 'in your library',
+  'Usa todas as fontes visíveis da biblioteca; a busca e os filtros da página não limitam esta seleção. Respeita o modo offline.': 'Uses all visible library sources; page search and filters do not limit this selection. Offline mode is respected.',
+  'Recomendações locais por gêneros e participações; não são similaridade do Last.fm.': 'Local recommendations from shared genres and artist credits; not Last.fm similarity.',
+  'Usando artistas similares salvos.': 'Using saved similar artists.',
+  'Configure uma chave de API Last.fm válida para buscar artistas similares.':
+      'Configure a valid Last.fm API key to fetch similar artists.',
+  'Last.fm temporariamente indisponível. Recomendações salvas continuam disponíveis; tente Atualizar Last.fm ou rádio local.': 'Last.fm is temporarily unavailable. Saved recommendations remain usable; try Refresh Last.fm or local radio.',
+  'Modo offline: apenas artistas similares salvos e recomendações locais estão disponíveis.': 'Offline mode: only saved similar artists and local recommendations are available.',
+  'Last.fm não retornou artistas similares. Tente rádio local ou mix de artista.':
+      'Last.fm returned no similar artists. Try local radio or Artist mix.',
   'Sobre': 'About',
   'Sobre o Music Time': 'About Music Time',
   'Player pessoal para arquivos locais, nuvens e servidores de mídia.':

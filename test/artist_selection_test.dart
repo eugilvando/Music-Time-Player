@@ -14,7 +14,7 @@ import 'package:music_time/settings/app_settings.dart';
 
 void main() {
   test(
-    'ambiguous spelling variants are not merged into radio automatically',
+    'case variants follow the existing catalog artist identity in radio',
     () {
       const main = Track(id: 'main', title: 'Main', artist: 'Seed');
       const a = Track(id: 'a', title: 'A', artist: 'Similar');
@@ -25,8 +25,8 @@ void main() {
           'Seed',
           radio: true,
           similar: ['Similar'],
-        ),
-        isEmpty,
+        ).map((t) => t.id),
+        unorderedEquals(['main', 'a', 'b']),
       );
     },
   );

@@ -360,14 +360,26 @@ class _LibraryScreenState extends State<LibraryScreen> {
     }
   }
 
-  void openCollection(Track track, bool album) {
-    final name = album ? track.album : track.artistNames.first;
+  void openCollection(
+    Track track,
+    bool album, {
+    bool preferAlbumArtist = false,
+  }) {
+    final name = album
+        ? track.album
+        : preferAlbumArtist
+        ? navigationArtistName(track)
+        : track.artistNames.first;
     if (name.isEmpty) return;
     widget.onNavigate(album ? AppSection.albums : AppSection.artists);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final state = catalogKey.currentState;
-      state?.openTrackCollection(track, album);
+      state?.openTrackCollection(
+        track,
+        album,
+        preferAlbumArtist: preferAlbumArtist,
+      );
     });
   }
 
@@ -825,6 +837,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
           value: 'mix',
           child: UiText('Iniciar mix a partir deste item'),
         ),
+        const PopupMenuItem(
+          value: 'radio',
+          child: UiText('Iniciar rádio a partir deste item'),
+        ),
         const PopupMenuItem(value: 'next', child: UiText('Tocar a seguir')),
         const PopupMenuItem(value: 'queue', child: UiText('Adicionar à fila')),
         PopupMenuItem(
@@ -863,6 +879,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
       switch (action) {
         case 'mix':
           await startItemMix([track]);
+        case 'radio':
+          await startItemMix([track], radio: true);
         case 'edit':
           if (await editCatalogMetadata(context, widget.store, track)) {
             await reloadCatalog();
@@ -947,6 +965,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               for (final entry in {
                 'play': 'Reproduzir agora',
                 'mix': 'Iniciar mix a partir deste item',
+                'radio': 'Iniciar rádio a partir deste item',
                 'next': 'Tocar a seguir',
                 'queue': 'Adicionar à fila',
                 'favorite': favorites.contains(track.id)
@@ -1462,7 +1481,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final offline = await availableOffline();
     final only = widget.settings.visualBool('offline_only', fallback: false);
     final eligible = eligibleArtistTracks(
-      candidates,
+      List<Track>.of(tracks),
       offline,
       offlineOnly: only,
     );
@@ -1480,80 +1499,43 @@ class _LibraryScreenState extends State<LibraryScreen> {
     );
   }
 
-  Future<void> startItemMix(List<Track> seeds) async {
+  Future<void> startItemMix(List<Track> seeds, {bool radio = false}) async {
     if (startingItemMix || seeds.isEmpty) return;
     startingItemMix = true;
-    final revision = catalogRevision;
-    final offlineOnly = widget.settings.visualBool(
-      'offline_only',
-      fallback: false,
-    );
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.showSnackBar(SnackBar(content: UiText('Criando mix...')));
     try {
-      final similar = <String>{};
-      if (!offlineOnly) {
-        try {
-          final api = await providers.lastfm();
-          final body = await api
-              .readProfile('artist.getSimilar', {
-                'artist': seeds.length == 1
-                    ? seeds.first.artistNames.first
-                    : seeds.first.albumArtistNames.first,
-                'limit': '100',
-                'autocorrect': '0',
-              })
-              .timeout(const Duration(seconds: 6));
-          final rows = body['similarartists']?['artist'];
-          if (rows is List) {
-            for (final row in rows) {
-              if (row is Map && row['name'] is String) {
-                similar.add(row['name'] as String);
-              }
-            }
-          }
-        } catch (_) {
-          /* Local tags remain available without Last.fm. */
-        }
-      }
       final available = await availableOffline();
-      if (!mounted ||
-          revision != catalogRevision ||
-          offlineOnly !=
-              widget.settings.visualBool('offline_only', fallback: false)) {
-        return;
-      }
-      final work = ItemMixWork(tracks, seeds, similar, available, offlineOnly);
-      final values = tracks.length >= 1000
-          ? await compute(prepareItemMix, work)
-          : prepareItemMix(work);
-      if (!mounted ||
-          revision != catalogRevision ||
-          offlineOnly !=
-              widget.settings.visualBool('offline_only', fallback: false)) {
-        return;
-      }
-      if (values.isEmpty) {
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          SnackBar(
-            content: UiText(
-              'Não há faixas similares disponíveis na biblioteca.',
-            ),
-          ),
-        );
-        return;
-      }
-      await play(
-        values,
-        0,
-        title:
-            'Mix · ${seeds.length == 1 ? seeds.first.title : seeds.first.albumArtistNames.first}',
+      if (!mounted) return;
+      final eligible = eligibleArtistTracks(
+        List<Track>.of(tracks),
+        available,
+        offlineOnly: widget.settings.visualBool(
+          'offline_only',
+          fallback: false,
+        ),
       );
-      if (mounted) {
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(SnackBar(content: UiText('Mix iniciado.')));
-      }
+      final artist = seeds.length == 1
+          ? seeds.first.artistNames.first
+          : navigationArtistName(seeds.first);
+      final album = seeds.first.album;
+      final label = seeds.length == 1
+          ? seeds.first.title
+          : album.isNotEmpty &&
+                seeds.every((t) => albumKey(t) == albumKey(seeds.first))
+          ? album
+          : artist;
+      await showArtistSelection(
+        context,
+        artist: artist,
+        radio: radio,
+        action: 'play',
+        seeds: List<Track>.of(seeds),
+        seedLabel: label,
+        eligible: eligible,
+        settings: widget.settings,
+        similarity: artistSimilarity,
+        onPlay: playNamed,
+        onSave: saveSelection,
+      );
     } finally {
       startingItemMix = false;
     }
@@ -1569,6 +1551,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
       switch (action) {
         case 'mix':
           await startItemMix(values);
+        case 'radio':
+          await startItemMix(values, radio: true);
         case 'play':
           await play(values, 0);
         case 'shuffle':
@@ -1745,7 +1729,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
         : 'Last.fm conectado • envios desativados',
     onArtist: () => controller.current == null
         ? null
-        : openCollection(controller.current!, false),
+        : openCollection(controller.current!, false, preferAlbumArtist: true),
     onAlbum: () => controller.current == null
         ? null
         : openCollection(controller.current!, true),

@@ -4,39 +4,39 @@
                  "backupSchema":  17,
                  "container":  2
              },
-    "version":  "2.5.2+54",
+    "version":  "2.5.3+55",
     "checks":  {
                    "pubGet":  "passed; offline",
-                   "localInstallation":  "pending owner confirmation; app remains in use",
+                   "localInstallation":  "pending confirmation",
                    "relativeDocumentationLinks":  "passed",
                    "targetedRegression":  {
-                                              "note":  "Targeted suite, not a full-suite rerun",
+                                              "note":  "Targeted final run; no full-suite rerun",
                                               "failed":  0,
-                                              "passed":  20
+                                              "passed":  32
                                           },
                    "dartAnalysis":  "passed; direct Dart lib/test analysis",
                    "windowsBuild":  "passed",
                    "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, window placement and clean exit",
                    "runtimeSource":  {
-                                         "files":  231,
+                                         "files":  232,
                                          "identical":  true
                                      },
                    "publicRefinementsRegression":  {
                                                        "note":  "Repeated tests from development validation, not additional unique tests",
                                                        "failed":  0,
-                                                       "passed":  6
+                                                       "passed":  11
                                                    }
                },
-    "limits":  "Older shuffled sessions do not contain their pre-shuffle order. No personal profile published. Ubuntu unchanged.",
-    "date":  "2026-10-26",
+    "limits":  "No personal Last.fm account acceptance; shared-name homonyms remain a limitation. No personal profile published. Ubuntu unchanged.",
+    "date":  "2026-10-27",
     "platform":  "Windows x64",
     "binaries":  [
                      {
-                         "sha256":  "d9fc6be53284dcb924d4d58bd89fdc08c5cb0cf9d6362e0b12d65738fa43c387",
+                         "sha256":  "762c8828eff540974996f09e44badc2e0947ac82743c4ab67c51b0a8ef0d4b11",
                          "file":  "music_time.exe"
                      },
                      {
-                         "sha256":  "7ab392ad9a626a87a52ef2518be0274597b7bf53d73ecbf8ed21a00b3219a27e",
+                         "sha256":  "66d1ec31d94666e1a3f6e9453df172b34bdbbce144ab2e1d3d52ab3523f68e11",
                          "file":  "data/app.so"
                      },
                      {
@@ -45,8 +45,8 @@
                      }
                  ],
     "installer":  {
-                      "sha256":  "95ed148d2e43b484aa8be9306af9bb7ab36fc5d535c397839b8a8fcda368ac88",
-                      "file":  "MusicTime-Setup-2.5.2.exe",
-                      "bytes":  20535696
+                      "sha256":  "7a7db2d058714a0673f411a05585a0ffdc3cf6182537fc8f1b1c35e5cdd2f601",
+                      "file":  "MusicTime-Setup-2.5.3.exe",
+                      "bytes":  20544066
                   }
 }

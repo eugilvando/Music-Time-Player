@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'settings_card.dart';
 import 'ui_language.dart';
 
-const musicTimeVersion = '2.5.2+54';
+const musicTimeVersion = '2.5.3+55';
 const musicTimeRepository = 'https://github.com/eugilvando/Music-Time-Player';
 
 class MusicTimeAbout extends StatelessWidget {
