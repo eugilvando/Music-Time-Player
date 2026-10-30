@@ -136,4 +136,4 @@ Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/bu
 
 ## Prévia Ubuntu atualizada
 
-[Baixar Ubuntu 2.4.1 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1-ubuntu-preview.1). Pacote experimental separado, com 41 testes direcionados e abertura gráfica verificados; áudio, contas e VM reais seguem pendentes. [Instalação e limites](docs/ubuntu-preview.md). A release estável Windows permanece independente.
+[Baixar Ubuntu 2.5.4 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4-ubuntu-preview.1). Pacote experimental separado, com 85 testes direcionados e abertura gráfica verificados; áudio, contas e VM reais seguem pendentes. [Instalação e limites](docs/ubuntu-preview.md). A release estável Windows permanece independente.

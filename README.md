@@ -14,7 +14,7 @@
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64 preview:** [Download 2.4.1 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.4.1-ubuntu-preview.1). Separate experimental package, 41 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64 preview:** [Download 2.5.4 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4-ubuntu-preview.1). Separate experimental package, 85 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## New in 2.5.4
 
