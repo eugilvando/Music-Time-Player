@@ -11,6 +11,12 @@ jobs:
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
+      - name: Check Linux distribution inputs
+        run: |
+          test -f scripts/launch-ubuntu.sh
+          test -f scripts/package-ubuntu.sh
+          test -f scripts/smoke-ubuntu.sh
+          bash -n scripts/launch-ubuntu.sh scripts/package-ubuntu.sh scripts/smoke-ubuntu.sh
       - name: Install build and runtime dependencies
         timeout-minutes: 12
         env:
