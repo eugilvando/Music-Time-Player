@@ -825,10 +825,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
         performTrackAction(track, action, queueIndex: index < 0 ? null : index);
       },
       itemBuilder: (_) => [
-        const PopupMenuItem(
-          value: 'edit',
-          child: UiText('Editar informações no catálogo'),
-        ),
         const PopupMenuItem(value: 'artist', child: UiText('Ir para artista')),
         if (track.album.isNotEmpty)
           const PopupMenuItem(value: 'album', child: UiText('Ir para álbum')),
@@ -866,6 +862,19 @@ class _LibraryScreenState extends State<LibraryScreen> {
             value: 'remove',
             child: UiText('Remover da fila'),
           ),
+        PopupMenuItem(
+          value: track.libraryHidden ? 'unhide' : 'hide',
+          child: UiText(
+            track.libraryHidden
+                ? 'Reexibir na biblioteca'
+                : 'Ocultar da biblioteca',
+          ),
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          value: 'edit',
+          child: UiText('Editar informações no catálogo'),
+        ),
       ],
     );
   }
@@ -881,6 +890,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
           await startItemMix([track]);
         case 'radio':
           await startItemMix([track], radio: true);
+        case 'hide':
+        case 'unhide':
+          await widget.store.setLibraryHidden([track.id], action == 'hide');
+          await reloadCatalog();
         case 'edit':
           if (await editCatalogMetadata(context, widget.store, track)) {
             await reloadCatalog();
@@ -974,6 +987,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 'playlist': 'Adicionar à playlist',
                 'offline': 'Disponibilizar offline',
                 'details': 'Detalhes da faixa',
+                (track.libraryHidden ? 'unhide' : 'hide'): track.libraryHidden
+                    ? 'Reexibir na biblioteca'
+                    : 'Ocultar da biblioteca',
+                'edit': 'Editar informações no catálogo',
               }.entries)
                 ListTile(
                   title: UiText(entry.value),
@@ -1025,6 +1042,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 '${ui(context, 'Origem')}: ${track.localPath == null ? track.provider : ui(context, 'Arquivo local')}',
               ),
               Text('${ui(context, 'Duração')}: ${time(track.duration)}'),
+              const SizedBox(height: 12),
+              UiText('Caminho do arquivo na fonte'),
+              SelectableText(
+                track.sourceFilePath.isEmpty
+                    ? ui(context, 'Não informado')
+                    : track.sourceFilePath,
+              ),
             ],
           ),
         ),
@@ -1369,6 +1393,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   List<Track> get visibleTracks => tracks
       .where(
         (track) =>
+            !track.libraryHidden &&
             (!(favoritesOnly || widget.section == AppSection.favorites) ||
                 favorites.contains(track.id)) &&
             '${track.title} ${track.artist} ${track.album}'
@@ -1549,6 +1574,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (values.isEmpty) return;
     try {
       switch (action) {
+        case 'hide':
+        case 'unhide':
+          await widget.store.setLibraryHidden(
+            values.map((t) => t.id),
+            action == 'hide',
+          );
+          await reloadCatalog();
         case 'mix':
           await startItemMix(values);
         case 'radio':
@@ -1685,7 +1717,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   Widget groupsPage(bool albums) => CollectionBrowser(
     albums: albums,
-    tracks: List.of(tracks),
+    tracks: tracks.where((t) => !t.libraryHidden).toList(),
     query: query,
     settings: widget.settings,
     downloads: downloads,
@@ -1965,16 +1997,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                                 .offlineOnly
                                                             ? tracks
                                                                   .where(
-                                                                    (
-                                                                      t,
-                                                                    ) => catalogMemory
-                                                                        .offline
-                                                                        .contains(
-                                                                          t.id,
-                                                                        ),
+                                                                    (t) =>
+                                                                        !t.libraryHidden &&
+                                                                        catalogMemory
+                                                                            .offline
+                                                                            .contains(
+                                                                              t.id,
+                                                                            ),
                                                                   )
                                                                   .toList()
-                                                            : tracks,
+                                                            : tracks
+                                                                  .where(
+                                                                    (t) => !t
+                                                                        .libraryHidden,
+                                                                  )
+                                                                  .toList(),
                                                         query: query,
                                                         store: widget.store,
                                                         revision:

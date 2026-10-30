@@ -640,13 +640,15 @@ class LibraryStore {
     );
     await database.transaction((txn) async {
       final previousOverrides = <String, Object?>{};
+      final previousHidden = <String, bool>{};
       final previousDates = {
         for (final row in await txn.rawQuery(
-          r"SELECT id,added_at,json_extract(metadata,'$.userOverride') AS user_override FROM tracks WHERE id IN (SELECT value FROM json_each(?))",
+          r"SELECT id,added_at,json_extract(metadata,'$.userOverride') AS user_override,json_extract(metadata,'$.libraryHidden') AS library_hidden FROM tracks WHERE id IN (SELECT value FROM json_each(?))",
           [jsonEncode(tracks.map((t) => t.id).toList())],
         ))
           row['id'] as String: (() {
             previousOverrides[row['id'] as String] = row['user_override'];
+            previousHidden[row['id'] as String] = row['library_hidden'] == 1;
             return row['added_at'] as String?;
           })(),
       };
@@ -674,6 +676,7 @@ class LibraryStore {
           'metadata': jsonEncode({
             if (previousOverrides[track.id] is String)
               'userOverride': jsonDecode(previousOverrides[track.id] as String),
+            'libraryHidden': previousHidden[track.id] ?? track.libraryHidden,
             'duration': track.duration.inMilliseconds,
             'albumArtist': track.albumArtist,
             'genre': track.genre,
@@ -728,6 +731,14 @@ class LibraryStore {
   }
 
   Track trackFromRow(Map<String, Object?> row) => decodeTrackRow(row);
+
+  /// Hides catalog items without changing files, playlists or favorites.
+  Future<void> setLibraryHidden(Iterable<String> ids, bool hidden) async {
+    await database.rawUpdate(
+      "UPDATE tracks SET metadata=json_set(metadata,'\$.libraryHidden',json(?)) WHERE id IN (SELECT value FROM json_each(?))",
+      [hidden ? 'true' : 'false', jsonEncode(ids.toSet().toList())],
+    );
+  }
 
   Future<void> setUserMetadata(
     List<String> ids,
@@ -1400,6 +1411,7 @@ class LibraryStore {
           rows.single['metadata'] as String,
         ) as Map<String, dynamic>;
         data['available'] = false;
+        data['catalogExcluded'] = true;
         await txn.update(
           'tracks',
           {'metadata': jsonEncode(data)},
@@ -1473,8 +1485,17 @@ class LibraryStore {
     Set<String> seen,
   ) async {
     await database.rawUpdate(
-      r"UPDATE tracks SET metadata=json_set(metadata,'$.catalogExcluded',json('false'),'$.available',json(CASE WHEN id IN (SELECT value FROM json_each(?)) THEN 'true' ELSE 'false' END)) WHERE json_extract(metadata,'$.driveId')=? AND (?='' OR json_extract(metadata,'$.sourcePath')=? OR substr(json_extract(metadata,'$.sourcePath'),1,length(?)+1)=?||'/')",
-      [jsonEncode(seen.toList()), account, folder, folder, folder, folder],
+      "UPDATE tracks SET metadata=json_set(metadata,'\$.catalogExcluded',json(CASE WHEN id IN (SELECT value FROM json_each(?)) THEN 'false' ELSE 'true' END),'\$.available',json(CASE WHEN id IN (SELECT value FROM json_each(?)) THEN 'true' ELSE 'false' END)) WHERE ${cloudAccountMatch("json_extract(metadata,'\$.driveId')", '?')} AND (?='' OR json_extract(metadata,'\$.sourcePath')=? OR substr(json_extract(metadata,'\$.sourcePath'),1,length(?)+1)=?||'/')",
+      [
+        jsonEncode(seen.toList()),
+        jsonEncode(seen.toList()),
+        account,
+        account,
+        folder,
+        folder,
+        folder,
+        folder,
+      ],
     );
   }
 }
@@ -1499,6 +1520,7 @@ Track decodeTrackRow(Map<String, Object?> row, {bool applyUser = true}) {
     cloudCoverEmbedded: metadata['cloudCoverEmbedded'] as bool? ?? false,
     revision: metadata['revision'] as String? ?? '',
     available: metadata['available'] as bool? ?? true,
+    libraryHidden: metadata['libraryHidden'] == true,
     itemId: metadata['itemId'] as String?,
     duration: Duration(milliseconds: metadata['duration'] as int? ?? 0),
     albumArtist: metadata['albumArtist'] as String? ?? '',

@@ -4,11 +4,15 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.5.3+55.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.5.4+56.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
+
+## Novidades da 2.5.4
+
+Varreduras concluídas retiram arquivos ausentes da biblioteca e atualizam os caminhos de itens renomeados. Detalhes mostram o caminho selecionável na fonte. Ocultar/reexibir faixas ou faixas de uma coleção, com filtros persistentes de visibilidade. Organizador da sidebar com arraste, interruptores e menu de movimento. Edição no final das ações da faixa. [Detalhes e validação](docs/release-2.5.4.md).
 
 ## Novidades da 2.5.3
 
@@ -50,7 +54,7 @@ Inclui fontes primária/secundária independentes, refinamentos de Home/capas/a�
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.5.3.exe` na [release 2.4.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.3).
+1. Baixe `MusicTime-Setup-2.5.4.exe` na [release 2.4.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.

@@ -998,6 +998,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       'save',
       'edit',
       'merge',
+      'hide',
+      'unhide',
     }.contains(action)) {
       await refresh();
     }
@@ -1097,8 +1099,24 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         value: 'offline',
         child: UiText('Disponibilizar offline'),
       ),
+      PopupMenuItem(
+        value: values.every((t) => t.libraryHidden) ? 'unhide' : 'hide',
+        child: UiText(
+          values.every((t) => t.libraryHidden)
+              ? 'Reexibir na biblioteca'
+              : 'Ocultar da biblioteca',
+        ),
+      ),
     ],
   );
+  List<Track> get catalogItems => widget.tracks
+      .where(
+        (t) =>
+            filters.visibility == 'all' ||
+            t.libraryHidden == (filters.visibility == 'hidden'),
+      )
+      .toList();
+
   String cell(Track t, String column) => switch (column) {
     'artist' => t.artistNames.join('; '),
     'album' => t.album.isEmpty ? 'Sem álbum' : t.album,
@@ -1308,7 +1326,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     final artist = preferAlbumArtist
         ? navigationArtistName(track)
         : track.artistNames.first;
-    final groups = index.groups(category, widget.tracks);
+    final groups = index.groups(category, catalogItems);
     final group = groups
         .where(
           (g) => album
@@ -1561,7 +1579,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   List<Track> ordered(List<Track> values) =>
       List.of(values)..sort(compareAlbumTracks);
   void openArtist(String name) {
-    final values = widget.tracks
+    final values = catalogItems
         .where(
           (t) => [
             ...t.artistNames,
@@ -2231,10 +2249,6 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                           itemBuilder: (_) => [
                             if (album) ...[
                               const PopupMenuItem(
-                                value: 'album_metadata',
-                                child: UiText('Revisar metadados do álbum'),
-                              ),
-                              const PopupMenuItem(
                                 value: 'album_cover',
                                 child: UiText('Escolher capa do álbum'),
                               ),
@@ -2289,6 +2303,23 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                                 value: 'merge',
                                 child: UiText('Mesclar no catálogo'),
                               ),
+                            PopupMenuItem(
+                              value: values.every((t) => t.libraryHidden)
+                                  ? 'unhide'
+                                  : 'hide',
+                              child: UiText(
+                                values.every((t) => t.libraryHidden)
+                                    ? 'Reexibir na biblioteca'
+                                    : 'Ocultar da biblioteca',
+                              ),
+                            ),
+                            if (album) ...[
+                              const PopupMenuDivider(),
+                              const PopupMenuItem(
+                                value: 'album_metadata',
+                                child: UiText('Revisar metadados do álbum'),
+                              ),
+                            ],
                           ],
                         ),
                       ],
@@ -2436,7 +2467,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     }
     if (album && artists.isNotEmpty) {
       final names = artists.map(searchKey).toSet();
-      final other = widget.tracks
+      final other = catalogItems
           .where(
             (t) => t.albumArtistNames.any((n) => names.contains(searchKey(n))),
           )
@@ -2472,7 +2503,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                   ? original.name
                   : artists.firstOrNull ?? values.firstOrNull?.artist ?? '',
               album: album ? original.name : null,
-              catalog: artist ? widget.tracks : values,
+              catalog: artist ? catalogItems : values,
               onArtist: openArtist,
             ),
           ),
@@ -2617,12 +2648,19 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         initialValue: options.containsKey(value) ? value : '',
         decoration: InputDecoration(labelText: ui(context, label)),
         items: [
-          const DropdownMenuItem(value: '', child: UiText('Tudo')),
+          DropdownMenuItem(
+            value: '',
+            child: UiText(
+              label == 'Visibilidade na biblioteca' ? 'Itens visíveis' : 'Tudo',
+            ),
+          ),
           for (final e in options.entries)
             DropdownMenuItem(
               value: e.key,
               child: Text(
-                label == 'Escuta' ? ui(context, e.value) : e.value,
+                {'Escuta', 'Visibilidade na biblioteca'}.contains(label)
+                    ? ui(context, e.value)
+                    : e.value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -2715,6 +2753,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                     options(all.map(trackFormat)),
                     (v) => draft.format = v,
                   ),
+                pick(
+                  'Visibilidade na biblioteca',
+                  draft.visibility == 'visible' ? '' : draft.visibility,
+                  {
+                    'all': 'Incluir itens ocultos',
+                    'hidden': 'Somente itens ocultos',
+                  },
+                  (v) => draft.visibility = v.isEmpty ? 'visible' : v,
+                ),
                 pick('Escuta', draft.heard == 'all' ? '' : draft.heard, {
                   'heard': 'Ouvidas',
                   'unheard': 'Não ouvidas',
@@ -2950,7 +2997,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           (e) =>
               e.value is String &&
               (e.value as String).isNotEmpty &&
-              e.value != 'all',
+              e.value != 'all' &&
+              !(e.key == 'visibility' && e.value == 'visible'),
         ))
           InputChip(
             label: Text(
@@ -2963,6 +3011,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                           .firstOrNull
                           ?.name ??
                       'Álbum',
+                'visibility' => ui(context, 'Somente itens ocultos'),
                 'heard' => ui(
                   context,
                   e.value == 'heard' ? 'Ouvidas' : 'Não ouvidas',

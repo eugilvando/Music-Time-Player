@@ -823,6 +823,13 @@ const englishLabels = <String, String>{
   'Ações da seleção': 'Selection actions',
   'Dados Last.fm indisponíveis. Confira a chave e a conexão.':
       'Last.fm data is unavailable. Check the API key and connection.',
+  'Ocultar da biblioteca': 'Hide from library',
+  'Reexibir na biblioteca': 'Show in library',
+  'Visibilidade na biblioteca': 'Library visibility',
+  'Itens visíveis': 'Visible items',
+  'Incluir itens ocultos': 'Include hidden items',
+  'Somente itens ocultos': 'Hidden items only',
+  'Caminho do arquivo na fonte': 'File path in source',
   'Editar informações no catálogo': 'Edit catalog information',
   'Filtros da página': 'Page filters',
   'Ações da fonte': 'Source actions',

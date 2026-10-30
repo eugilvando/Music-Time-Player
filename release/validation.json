@@ -1,42 +1,43 @@
 {
+    "version":  "2.5.4+56",
+    "date":  "2026-10-30",
+    "platform":  "Windows x64",
     "data":  {
                  "runtimeSchema":  18,
                  "backupSchema":  17,
                  "container":  2
              },
-    "version":  "2.5.3+55",
     "checks":  {
                    "pubGet":  "passed; offline",
-                   "localInstallation":  "pending confirmation",
-                   "relativeDocumentationLinks":  "passed",
-                   "targetedRegression":  {
-                                              "note":  "Targeted final run; no full-suite rerun",
-                                              "failed":  0,
-                                              "passed":  32
-                                          },
                    "dartAnalysis":  "passed; direct Dart lib/test analysis",
+                   "targetedRegression":  {
+                                              "passed":  51,
+                                              "failed":  0,
+                                              "note":  "Targeted final run; no full-suite rerun"
+                                          },
+                   "versionConsistency":  "passed; one package/About check",
                    "windowsBuild":  "passed",
-                   "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, window placement and clean exit",
+                   "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, placement and clean exit",
+                   "localInstallation":  "passed; authorized update, binaries matched and profile preserved",
+                   "relativeDocumentationLinks":  "passed",
                    "runtimeSource":  {
-                                         "files":  232,
+                                         "files":  233,
                                          "identical":  true
                                      },
                    "publicRefinementsRegression":  {
                                                        "note":  "Repeated tests from development validation, not additional unique tests",
                                                        "failed":  0,
-                                                       "passed":  11
+                                                       "passed":  14
                                                    }
                },
-    "limits":  "No personal Last.fm account acceptance; shared-name homonyms remain a limitation. No personal profile published. Ubuntu unchanged.",
-    "date":  "2026-10-27",
-    "platform":  "Windows x64",
+    "limits":  "Real collection acceptance requires source synchronization after updating. No personal profile published. Ubuntu unchanged.",
     "binaries":  [
                      {
-                         "sha256":  "762c8828eff540974996f09e44badc2e0947ac82743c4ab67c51b0a8ef0d4b11",
+                         "sha256":  "a98c66298b63ad600f9745d1a05e0edd995cbc039989149de4673a429e9d6a9d",
                          "file":  "music_time.exe"
                      },
                      {
-                         "sha256":  "66d1ec31d94666e1a3f6e9453df172b34bdbbce144ab2e1d3d52ab3523f68e11",
+                         "sha256":  "947e906c3b06c4ca12e9237a16d74d177eb5aba008291092ea3f27dfb82796ec",
                          "file":  "data/app.so"
                      },
                      {
@@ -45,8 +46,8 @@
                      }
                  ],
     "installer":  {
-                      "sha256":  "7a7db2d058714a0673f411a05585a0ffdc3cf6182537fc8f1b1c35e5cdd2f601",
-                      "file":  "MusicTime-Setup-2.5.3.exe",
-                      "bytes":  20544066
+                      "sha256":  "8dfadaaa271531139f9de1bd491c21627d4ebd461bcb04db7df4bad041123992",
+                      "file":  "MusicTime-Setup-2.5.4.exe",
+                      "bytes":  20547196
                   }
 }

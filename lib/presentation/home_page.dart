@@ -1516,7 +1516,8 @@ class _HomePageState extends State<HomePage> {
     final eligibleIds = widget.tracks
         .where(
           (t) =>
-              quickFilter != 'offline' || widget.index.offline.contains(t.id),
+              !t.libraryHidden &&
+              (quickFilter != 'offline' || widget.index.offline.contains(t.id)),
         )
         .map((t) => t.id)
         .toSet();

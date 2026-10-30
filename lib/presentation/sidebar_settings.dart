@@ -30,48 +30,69 @@ class SidebarSettings extends StatelessWidget {
           const UiText(
             'Organize sidebar items. Settings remains available in the footer.',
           ),
-          for (var i = 0; i < order.length; i++)
-            Builder(
-              builder: (context) {
-                final id = order[i];
-                final section = AppSection.values.firstWhere(
-                  (s) => s.name == id,
-                );
-                return ListTile(
-                  key: ValueKey('sidebar.setting.$id'),
-                  contentPadding: EdgeInsets.zero,
-                  leading: Checkbox(
-                    value: visible.contains(id),
-                    onChanged: (value) {
-                      if (value == true) {
-                        visible.add(id);
-                      } else {
-                        visible.remove(id);
-                      }
-                      settings.updateVisual('sidebar_items', visible.toList());
-                    },
+          const SizedBox(height: 12),
+          ReorderableListView.builder(
+            key: const ValueKey('sidebar.organizer'),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            buildDefaultDragHandles: false,
+            itemCount: order.length,
+            onReorderItem: move,
+            itemBuilder: (context, i) {
+              final id = order[i];
+              final section = AppSection.values.firstWhere((s) => s.name == id);
+              return ListTile(
+                key: ValueKey('sidebar.setting.$id'),
+                contentPadding: EdgeInsets.zero,
+                leading: ReorderableDragStartListener(
+                  index: i,
+                  child: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: MtIcon(Icons.drag_handle),
                   ),
-                  title: UiText(section.label),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        tooltip: ui(context, 'Move up'),
-                        onPressed: i == 0 ? null : () => move(i, i - 1),
-                        icon: const MtIcon(Icons.arrow_upward),
-                      ),
-                      IconButton(
-                        tooltip: ui(context, 'Move down'),
-                        onPressed: i == order.length - 1
-                            ? null
-                            : () => move(i, i + 1),
-                        icon: const MtIcon(Icons.arrow_downward),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                ),
+                title: UiText(section.label),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PopupMenuButton<int>(
+                      tooltip: ui(context, 'Mover item'),
+                      icon: const MtIcon(Icons.swap_vert),
+                      onSelected: (to) => move(i, to),
+                      itemBuilder: (_) => [
+                        if (i > 0)
+                          PopupMenuItem(
+                            value: i - 1,
+                            child: const UiText('Move up'),
+                          ),
+                        if (i < order.length - 1)
+                          PopupMenuItem(
+                            value: i + 1,
+                            child: const UiText('Move down'),
+                          ),
+                      ],
+                    ),
+                    Switch(
+                      key: ValueKey('sidebar.visibility.$id'),
+                      value: visible.contains(id),
+                      onChanged: (enabled) {
+                        final next = Set<String>.of(visible);
+                        if (enabled) {
+                          next.add(id);
+                        } else {
+                          next.remove(id);
+                        }
+                        settings.updateVisual(
+                          'sidebar_items',
+                          order.where(next.contains).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
           TextButton(
             onPressed: () =>
                 settings.resetVisualKeys({'sidebar_order', 'sidebar_items'}),

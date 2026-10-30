@@ -38,13 +38,15 @@ HomeData prepareHome(HomeWork work) {
   final index = work.index;
   final values = work.tracks
       .where(
-        (t) => switch (work.quick) {
-          'favorites' => index.isFavorite(t),
-          'offline' => index.offline.contains(t.id),
-          'recent' => t.addedAt != null,
-          'unheard' => index.plays(t) == 0,
-          _ => true,
-        },
+        (t) =>
+            !t.libraryHidden &&
+            switch (work.quick) {
+              'favorites' => index.isFavorite(t),
+              'offline' => index.offline.contains(t.id),
+              'recent' => t.addedAt != null,
+              'unheard' => index.plays(t) == 0,
+              _ => true,
+            },
       )
       .toList();
   final recent = values.where((t) => t.addedAt != null).toList()

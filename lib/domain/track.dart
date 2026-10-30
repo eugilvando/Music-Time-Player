@@ -12,6 +12,7 @@ class Track {
     this.cloudCoverEmbedded = false,
     this.revision = '',
     this.available = true,
+    this.libraryHidden = false,
     this.albumArtist = '',
     this.genre = '',
     this.year,
@@ -36,7 +37,7 @@ class Track {
   final String id, title, artist, album;
   final Duration duration;
   final String albumArtist, genre, sourcePath, revision, fileName;
-  final bool available;
+  final bool available, libraryHidden;
   final int? year, trackNumber, discNumber;
   final Uint8List? cover;
   final String? localPath, driveId, itemId;
@@ -46,6 +47,17 @@ class Track {
   final bool coverAvailable;
   final int cloudTagsVersion;
   final bool cloudCoverEmbedded;
+  String get sourceFilePath {
+    if (provider == 'local') {
+      return localPath ?? sourcePath;
+    }
+    if (fileName.isEmpty) return sourcePath;
+    final folder = sourcePath
+        .replaceAll(r'\', '/')
+        .replaceFirst(RegExp(r'/+$'), '');
+    return '$folder/$fileName';
+  }
+
   bool get hasArtwork => cover != null || coverAvailable;
   Track withCover(Uint8List? value) => Track(
     id: id,
@@ -58,6 +70,7 @@ class Track {
     cloudCoverEmbedded: cloudCoverEmbedded,
     revision: revision,
     available: available,
+    libraryHidden: libraryHidden,
     albumArtist: albumArtist,
     genre: genre,
     year: year,

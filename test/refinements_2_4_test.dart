@@ -215,13 +215,13 @@ void main() {
       );
       final row = find.byKey(const ValueKey('sidebar.setting.library'));
       await tester.tap(
-        find.descendant(of: row, matching: find.byTooltip('Move up')),
+        find.descendant(of: row, matching: find.byType(PopupMenuButton<int>)),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Move up').last);
+      await tester.pumpAndSettle();
       expect(settings.visualList('sidebar_order', sidebarItems)[1], 'library');
-      await tester.tap(
-        find.descendant(of: row, matching: find.byType(Checkbox)),
-      );
+      await tester.tap(find.descendant(of: row, matching: find.byType(Switch)));
       await tester.pumpAndSettle();
       expect(
         settings.visualList('sidebar_items', sidebarItems),

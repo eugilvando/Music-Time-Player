@@ -764,9 +764,15 @@ class ProviderConnections extends ChangeNotifier
       final visited = ((checkpoint?['visited'] as List?) ?? [])
           .cast<String>()
           .toSet();
+      final stableIds = {
+        for (final entry in existingByItem.entries)
+          'onedrive:$driveId:${entry.key}': entry.value.id,
+      };
       final processed = checkpoint == null
           ? <String>{}
-          : await store.cloudSeen(checkpointKey);
+          : (await store.cloudSeen(checkpointKey))
+                .map((id) => stableIds[id] ?? id)
+                .toSet();
       imported = processed.length;
       while (pending.isNotEmpty) {
         final current = pending.removeLast();
@@ -985,11 +991,12 @@ class ProviderConnections extends ChangeNotifier
                   : known ?? const [];
             }
 
-            processed.add('onedrive:$drive:$id');
-            pageSeen.add('onedrive:$drive:$id');
+            final catalogId = previous?.id ?? 'onedrive:$drive:$id';
+            processed.add(catalogId);
+            pageSeen.add(catalogId);
             tracks.add(
               Track(
-                id: previous?.id ?? 'onedrive:$drive:$id',
+                id: catalogId,
                 title: tag(
                   'title',
                   previous?.title ?? name.replaceFirst(RegExp(r'\.[^.]+$'), ''),

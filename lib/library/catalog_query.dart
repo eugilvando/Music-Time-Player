@@ -9,7 +9,7 @@ String cloudAccountMatch(String a, String b) =>
     "($a=$b OR (length($a)=16 AND $a NOT GLOB '*[^0-9a-fA-F]*' AND upper($a)=upper($b)))";
 
 String catalogVisibility(String t) =>
-    "($t.id NOT IN (SELECT track_id FROM local_source_tracks) OR $t.id IN (SELECT m.track_id FROM local_source_tracks m JOIN local_sources s ON s.id=m.source_id WHERE s.active=1 AND s.visible=1 AND m.present=1)) AND (CASE WHEN EXISTS(SELECT 1 FROM cloud_sources s WHERE ${cloudAccountMatch('s.account', "json_extract($t.metadata,'\$.driveId')")}) THEN EXISTS(SELECT 1 FROM cloud_sources s WHERE ${cloudAccountMatch('s.account', "json_extract($t.metadata,'\$.driveId')")} AND s.active=1 AND (json_extract($t.metadata,'\$.sourcePath')=s.folder OR substr(json_extract($t.metadata,'\$.sourcePath'),1,length(s.folder)+1)=s.folder||'/')) ELSE COALESCE(json_extract($t.metadata,'\$.catalogExcluded'),0)=0 END)";
+    "COALESCE(json_extract($t.metadata,'\$.catalogExcluded'),0)=0 AND ($t.id NOT IN (SELECT track_id FROM local_source_tracks) OR $t.id IN (SELECT m.track_id FROM local_source_tracks m JOIN local_sources s ON s.id=m.source_id WHERE s.active=1 AND s.visible=1 AND m.present=1)) AND (CASE WHEN EXISTS(SELECT 1 FROM cloud_sources s WHERE ${cloudAccountMatch('s.account', "json_extract($t.metadata,'\$.driveId')")}) THEN EXISTS(SELECT 1 FROM cloud_sources s WHERE ${cloudAccountMatch('s.account', "json_extract($t.metadata,'\$.driveId')")} AND s.active=1 AND (json_extract($t.metadata,'\$.sourcePath')=s.folder OR substr(json_extract($t.metadata,'\$.sourcePath'),1,length(s.folder)+1)=s.folder||'/')) ELSE COALESCE(json_extract($t.metadata,'\$.catalogExcluded'),0)=0 END)";
 
 class CatalogPage {
   const CatalogPage(this.tracks, this.total, this.offset);
@@ -59,6 +59,11 @@ class CatalogSqlQuery {
     Set<String> collectionFavorites = const {},
   }) {
     clauses.add(catalogVisibility('t'));
+    if (filters.visibility != 'all') {
+      add("COALESCE(json_extract(t.metadata,'\$.libraryHidden'),0)=?", [
+        filters.visibility == 'hidden' ? 1 : 0,
+      ]);
+    }
     final query = searchKey(text);
     if (query.isNotEmpty) add('instr(c.searchable,?)>0', [query]);
     if (filters.source.isNotEmpty) {

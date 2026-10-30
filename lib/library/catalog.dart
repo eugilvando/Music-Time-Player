@@ -95,7 +95,8 @@ class CatalogFilters {
       genre = '',
       year = '',
       format = '',
-      heard = 'all';
+      heard = 'all',
+      visibility = 'visible';
   bool favorites = false, offline = false;
   Map<String, Object> toJson() => {
     'source': source,
@@ -107,6 +108,7 @@ class CatalogFilters {
     'year': year,
     'format': format,
     'heard': heard,
+    'visibility': visibility,
     'favorites': favorites,
     'offline': offline,
   };
@@ -121,6 +123,9 @@ class CatalogFilters {
     year = values['year'] as String? ?? '';
     format = values['format'] as String? ?? '';
     heard = values['heard'] as String? ?? 'all';
+    visibility = {'all', 'hidden'}.contains(values['visibility'])
+        ? values['visibility'] as String
+        : 'visible';
     favorites = values['favorites'] == true;
     offline = values['offline'] == true;
   }
@@ -134,6 +139,7 @@ class CatalogFilters {
       year.isNotEmpty ||
       format.isNotEmpty ||
       heard != 'all' ||
+      visibility != 'visible' ||
       favorites ||
       offline;
 }
@@ -236,7 +242,9 @@ class CatalogIndex {
                 trackFolder(t),
               ].join(' '),
             );
-      return queries.every(searchable.contains) &&
+      return (filters.visibility == 'all' ||
+              t.libraryHidden == (filters.visibility == 'hidden')) &&
+          queries.every(searchable.contains) &&
           (filters.source.isEmpty || sourceIds(t).contains(filters.source)) &&
           (filters.account.isEmpty || t.account == filters.account) &&
           (filters.folder.isEmpty ||
