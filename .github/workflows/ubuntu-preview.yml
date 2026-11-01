@@ -6,6 +6,7 @@ on:
       - '.github/workflows/ubuntu-preview.yml'
       - 'linux/**'
       - 'lib/**'
+      - 'test/**'
       - 'pubspec.*'
       - 'scripts/*ubuntu.sh'
   workflow_dispatch:

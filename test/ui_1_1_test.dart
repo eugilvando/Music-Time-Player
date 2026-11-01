@@ -58,11 +58,13 @@ void main() {
           key: settings.preferences.get(key),
       };
       await tester.runAsync(() async {
-        final windows = Platform.environment['WINDIR']!;
-        final font = await File('$windows/Fonts/segoeui.ttf').readAsBytes();
-        await (FontLoader(
-          'Segoe UI',
-        )..addFont(Future.value(ByteData.sublistView(font)))).load();
+        if (Platform.isWindows) {
+          final windows = Platform.environment['WINDIR']!;
+          final font = await File('$windows/Fonts/segoeui.ttf').readAsBytes();
+          await (FontLoader(
+            'Segoe UI',
+          )..addFont(Future.value(ByteData.sublistView(font)))).load();
+        }
         final icons = await File(materialIconFontPath()).readAsBytes();
         await (FontLoader(
           'MaterialIcons',
