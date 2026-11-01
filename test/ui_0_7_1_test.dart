@@ -201,6 +201,14 @@ void main() {
       300,
       scrollable: find.byType(Scrollable).first,
     );
+    // Provider status can settle after the initial scroll and change card height.
+    await tester.pumpAndSettle();
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Advanced')),
+      alignment: 0.5,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Advanced').hitTestable(), findsOneWidget);
     await tester.tap(find.text('Advanced'));
     await tester.pumpAndSettle();
     expect(

@@ -1,4 +1,5 @@
 import 'tray_window.dart';
+import 'linux_tray_host.dart';
 
 import 'dart:async';
 import 'dart:io';
@@ -57,7 +58,9 @@ class WindowsIntegration with WindowListener {
       if (_mediaReleased) {
         controller.addListener(changed);
         _mediaReleased = false;
-        unawaited(session.activate().catchError((Object _) {}));
+        if (Platform.isWindows) {
+          unawaited(session.activate().catchError((Object _) {}));
+        }
       }
       unawaited(
         windowManager.setPreventClose(icon != null).catchError((Object _) {}),
@@ -88,7 +91,14 @@ class WindowsIntegration with WindowListener {
             )
           : await getApplicationSupportDirectory();
       await dir.create(recursive: true);
-      await File(path.join(dir.path, 'windows_diagnostics.log')).writeAsString(
+      await File(
+        path.join(
+          dir.path,
+          Platform.isLinux
+              ? 'linux_diagnostics.log'
+              : 'windows_diagnostics.log',
+        ),
+      ).writeAsString(
         '${DateTime.now().toUtc().toIso8601String()} $event\n',
         mode: FileMode.append,
       );
@@ -96,18 +106,26 @@ class WindowsIntegration with WindowListener {
   }
 
   Future<void> initialize() async {
-    if (!Platform.isWindows) return;
-    unawaited(
-      systemAccent.initialize().then(
-        (ready) =>
-            log(ready ? 'system_accent_ready' : 'system_accent_unavailable'),
-      ),
-    );
+    if (!Platform.isWindows && !Platform.isLinux) return;
+    if (Platform.isWindows) {
+      unawaited(
+        systemAccent.initialize().then(
+          (ready) =>
+              log(ready ? 'system_accent_ready' : 'system_accent_unavailable'),
+        ),
+      );
+    }
     windowManager.addListener(this);
     try {
+      if (Platform.isLinux && !await linuxTrayHostAvailable()) {
+        throw StateError('No StatusNotifier host');
+      }
+      if (_disposed) return;
       icon = tray.TrayIcon.create();
       if (icon == null) throw StateError('Bandeja indisponível');
-      final image = tray.ImageAsset.fromAsset('assets/tray_icon.ico');
+      final image = tray.ImageAsset.fromAsset(
+        Platform.isLinux ? 'assets/branding/icon.png' : 'assets/tray_icon.ico',
+      );
       if (image == null) throw StateError('Ícone indisponível');
       icon!.icon = image;
       icon!.setTooltip('Music Time');
@@ -137,6 +155,7 @@ class WindowsIntegration with WindowListener {
       await log('tray_unavailable');
       onError('Bandeja indisponível; fechar a janela encerrará o aplicativo.');
     }
+    if (Platform.isLinux) return;
     try {
       await session.setWindowsAppUserModelId(
         validation ? 'MusicTime.Desktop.Validation' : 'MusicTime.Desktop',
@@ -264,6 +283,11 @@ class WindowsIntegration with WindowListener {
 
   Future<void> hide() async {
     if (icon == null) return;
+    if (Platform.isLinux && !await linuxTrayHostAvailable()) {
+      await show();
+      onError('Ative a extensão AppIndicator do Ubuntu para usar a bandeja.');
+      return;
+    }
     await windowManager.hide();
     await windowManager.setSkipTaskbar(true);
     unawaited(log('window_hidden_tray'));
@@ -425,7 +449,7 @@ class WindowsIntegration with WindowListener {
     _validationTimer?.cancel();
     controller.removeListener(changed);
     windowManager.removeListener(this);
-    session.clearActionHandler();
+    if (Platform.isWindows) session.clearActionHandler();
     icon?.dispose();
     menu?.dispose();
   }

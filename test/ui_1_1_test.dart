@@ -40,7 +40,7 @@ Widget app(Widget child) => MaterialApp(
 
 void main() {
   testWidgets(
-    'nine settings categories and subpages retain preferences and searchable lyrics destinations',
+    'ten settings categories including About and subpages retain preferences and searchable lyrics destinations',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(1400, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -82,7 +82,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(SettingsCategory.values.length, 9);
+      expect(SettingsCategory.values.length, 10);
       for (final category in SettingsCategory.values) {
         final target = find.byKey(ValueKey('settings.${category.name}'));
         await tester.ensureVisible(target);

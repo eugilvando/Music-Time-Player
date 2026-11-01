@@ -1132,7 +1132,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   Future<void> favorite(Track track) async {
     try {
-      await widget.store.setFavorite(track.id, !favorites.contains(track.id));
+      final adding = !favorites.contains(track.id);
+      await widget.store.setFavorite(track.id, adding);
+      if (adding) unawaited(providers.exportFavorites([track]));
       final ids = await widget.store.favoriteIds();
       if (mounted) setState(() => favorites = ids);
     } catch (_) {
@@ -1606,6 +1608,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
             values.map((t) => t.id).toList(),
             action == 'favorite',
           );
+          if (action == 'favorite') {
+            unawaited(providers.exportFavorites(values));
+          }
           final ids = await widget.store.favoriteIds();
           if (mounted) setState(() => favorites = ids);
         case 'offline':

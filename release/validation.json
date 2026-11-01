@@ -1,53 +1,33 @@
 {
-    "version":  "2.5.4+56",
-    "date":  "2026-10-30",
-    "platform":  "Windows x64",
-    "data":  {
-                 "runtimeSchema":  18,
-                 "backupSchema":  17,
-                 "container":  2
-             },
-    "checks":  {
-                   "pubGet":  "passed; offline",
-                   "dartAnalysis":  "passed; direct Dart lib/test analysis",
-                   "targetedRegression":  {
-                                              "passed":  51,
-                                              "failed":  0,
-                                              "note":  "Targeted final run; no full-suite rerun"
-                                          },
-                   "versionConsistency":  "passed; one package/About check",
-                   "windowsBuild":  "passed",
-                   "windowsIntegration":  "passed; isolated profile, media/artwork, tray, vault, accent, models, placement and clean exit",
-                   "localInstallation":  "passed; authorized update, binaries matched and profile preserved",
-                   "relativeDocumentationLinks":  "passed",
-                   "runtimeSource":  {
-                                         "files":  233,
-                                         "identical":  true
-                                     },
-                   "publicRefinementsRegression":  {
-                                                       "note":  "Repeated tests from development validation, not additional unique tests",
-                                                       "failed":  0,
-                                                       "passed":  14
-                                                   }
-               },
-    "limits":  "Real collection acceptance requires source synchronization after updating. No personal profile published. Ubuntu unchanged.",
-    "binaries":  [
-                     {
-                         "sha256":  "a98c66298b63ad600f9745d1a05e0edd995cbc039989149de4673a429e9d6a9d",
-                         "file":  "music_time.exe"
-                     },
-                     {
-                         "sha256":  "947e906c3b06c4ca12e9237a16d74d177eb5aba008291092ea3f27dfb82796ec",
-                         "file":  "data/app.so"
-                     },
-                     {
-                         "sha256":  "0a5a0b476866c91a639a4e511e8153968f8fa23564461b0aa09acdba816164a4",
-                         "file":  "libmpv-2.dll"
-                     }
-                 ],
-    "installer":  {
-                      "sha256":  "8dfadaaa271531139f9de1bd491c21627d4ebd461bcb04db7df4bad041123992",
-                      "file":  "MusicTime-Setup-2.5.4.exe",
-                      "bytes":  20547196
-                  }
+  "version": "2.5.5+57",
+  "date": "2026-11-01",
+  "platform": "Windows x64",
+  "checks": {
+    "dartAnalysis": "passed",
+    "testCoverage": {
+      "uniquePassed": 402,
+      "fullRunPassed": 400,
+      "fullRunFailed": 2,
+      "finalUIRegressionPassed": 8,
+      "note": "Two test-harness failures corrected and passed in targeted rerun; not a wholly green full-suite run"
+    },
+    "publicRegression": {
+      "passed": 20,
+      "failed": 0,
+      "note": "Repeated subset; not additional unique tests"
+    },
+    "windowsBuild": "passed",
+    "windowsIntegration": "passed; isolated validation profile",
+    "localInstallation": "passed; executable/app.so match build, database/preferences/vault unchanged",
+    "sourceSnapshot": {
+      "files": 270,
+      "identical": true
+    }
+  },
+  "installer": {
+    "file": "MusicTime-Setup-2.5.5.exe",
+    "sha256": "aa8e89cb5128dad09a629ac70482a3f9dbadc8d2a359d3b53aa2335d6c9c3a2d",
+    "bytes": 20551614
+  },
+  "limits": "Real Last.fm account acceptance and Linux build/desktop acceptance pending in a separate VM/partition. Ubuntu download remains 2.5.4 Preview 1. No personal data or credentials included."
 }

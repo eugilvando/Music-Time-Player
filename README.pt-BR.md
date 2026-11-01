@@ -4,11 +4,15 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.5.4+56.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.5.5+57.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
+
+## Novidades da 2.5.5
+
+Novos favoritos de faixas são enviados ao Last.fm conectado, com tentativas persistentes e opção de desativar. Correções de bandeja e ícone Ubuntu incluídas no código; validação Linux e novo pacote Ubuntu pendentes. [Detalhes](docs/release-2.5.5.md).
 
 ## Novidades da 2.5.4
 

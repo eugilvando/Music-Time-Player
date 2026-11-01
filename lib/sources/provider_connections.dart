@@ -21,6 +21,7 @@ import 'onedrive_verification.dart';
 import '../library/cloud_metadata.dart';
 import '../library/local_metadata.dart' show metadataPosition;
 import '../library/lastfm_profile_index.dart';
+import '../library/lastfm_favorite_sync.dart';
 import 'microsoft_sources.dart';
 import 'additional_sources.dart';
 
@@ -36,10 +37,10 @@ class ProviderConnections extends ChangeNotifier
   }) : vault = vault ?? const SystemVault(),
        client = client ?? http.Client() {
     _worker = accountRoot == null
-        ? Timer.periodic(
-            const Duration(seconds: 30),
-            (_) => unawaited(flushScrobbles()),
-          )
+        ? Timer.periodic(const Duration(seconds: 30), (_) {
+            unawaited(flushScrobbles());
+            unawaited(favoriteSync.flush());
+          })
         : null;
     if (accountRoot == null) {
       _profileIndex = LastFmProfileIndex(preferences, store, api: lastfm)
@@ -1233,6 +1234,22 @@ class ProviderConnections extends ChangeNotifier
     );
     _notify();
     await registerMicrosoftFolder();
+  }
+
+  late final favoriteSync = LastFmFavoriteSync(
+    store,
+    api: lastfm,
+    allowed: () =>
+        !_disposed &&
+        !suspended &&
+        (preferences.getBool('lastfm.sync_favorites') ?? true),
+    online: () => !(preferences.getBool('visual.offline_only') ?? false),
+    changed: _notify,
+  );
+
+  Future<void> exportFavorites(Iterable<Track> tracks) async {
+    await favoriteSync.enqueue(tracks);
+    unawaited(favoriteSync.flush());
   }
 
   Future<LastFmClient> lastfm() async => LastFmClient(

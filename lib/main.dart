@@ -52,7 +52,7 @@ Future<Widget> initializeMusicTime(
 ) async {
   progress('Preparando o motor de áudio…');
   MediaKit.ensureInitialized();
-  if (Platform.isWindows) {
+  if (Platform.isWindows || Platform.isLinux) {
     await windowManager.ensureInitialized();
     await windowManager.setTitleBarStyle(
       TitleBarStyle.hidden,
@@ -179,7 +179,8 @@ Future<Widget> initializeMusicTime(
     settings: settings,
     store: store,
     startupNotice: startupNotice,
-    nativeIntegration: Platform.isWindows && !designPreview,
+    nativeIntegration:
+        (Platform.isWindows || Platform.isLinux) && !designPreview,
     designPreview: designPreview,
     validation: validation,
     smokeAudio: validation

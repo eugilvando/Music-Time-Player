@@ -8,13 +8,17 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.5.4+56.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.5.5+57.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64 preview:** [Download 2.5.4 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4-ubuntu-preview.1). Separate experimental package, 85 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+
+## New in 2.5.5
+
+New track favorites can be exported to the connected Last.fm account, with persistent retry and an opt-out. Ubuntu tray and desktop icon fixes are included in source; Linux acceptance and an updated Ubuntu package are pending. [Details](docs/release-2.5.5.md).
 
 ## New in 2.5.4
 

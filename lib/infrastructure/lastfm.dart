@@ -244,6 +244,12 @@ class LastFmClient implements ScrobbleSink {
     };
   }
 
+  /// Additive export: local unfavorites never remove existing Last.fm loves.
+  Future<void> love(Track track) async {
+    final fields = _trackFields(track)..remove('album');
+    await _call('track.love', fields);
+  }
+
   @override
   Future<void> nowPlaying(Track track) async {
     await _call('track.updateNowPlaying', _trackFields(track));

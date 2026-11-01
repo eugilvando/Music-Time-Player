@@ -129,6 +129,26 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Enviar novos favoritos ao Last.fm': 'Send new favorites to Last.fm',
+  'Ao favoritar uma faixa no app, marcar também no Last.fm conectado. Desfavoritar no app não remove o favorito no Last.fm.': 'Favoriting a track in the app also loves it on the connected Last.fm account. Unfavoriting in the app does not remove the Last.fm love.',
+  'Novos favoritos serão enviados ao Last.fm conectado.':
+      'New favorites will be sent to the connected Last.fm account.',
+  'Favorito salvo no app. Conecte o Last.fm para enviar novos favoritos.':
+      'Favorite saved in the app. Connect Last.fm to send new favorites.',
+  'Faixas sem artista ou título não foram enviadas ao Last.fm.':
+      'Tracks missing an artist or title were not sent to Last.fm.',
+  'Favoritos aguardando envio ao Last.fm.':
+      'Favorites waiting to be sent to Last.fm.',
+  'Favorito salvo no app; não foi possível agendar o envio ao Last.fm.':
+      'Favorite saved in the app; could not queue it for Last.fm.',
+  'Favoritos enviados ao Last.fm.': 'Favorites sent to Last.fm.',
+  'Reconecte o Last.fm para enviar os favoritos pendentes.':
+      'Reconnect Last.fm to send pending favorites.',
+  'Envio ao Last.fm pendente; uma nova tentativa será feita.':
+      'Last.fm delivery pending; it will be retried.',
+  'Ative a extensão AppIndicator do Ubuntu para usar a bandeja.':
+      'Enable the Ubuntu AppIndicator extension to use the tray.',
+
   'Mix local do artista': 'Local artist mix',
   'Mix local do item': 'Local item mix',
   'artistas relacionados': 'related artists',

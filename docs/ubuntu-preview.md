@@ -1,5 +1,7 @@
 # Music Time — Ubuntu 24.04 x64 Preview 2.5.4
 
+> 01 November 2026: source 2.5.5 includes tray/icon fixes pending Linux validation. The published package described below remains 2.5.4 Preview 1. Build the current main source for the new behavior; do not treat the older download as containing these fixes.
+
 Experimental Ubuntu package based on Music Time **2.5.4+56**. The same preview application ID (`app.musictime.preview`) and Debian package name (`music-time-preview`) are preserved for in-place upgrades from 2.4.1. Windows installation and the stable Windows release remain independent.
 
 Includes the Windows 2.5.4 catalog/UI features: reversible shuffle and visible queue order, Home/Insights session caching, artist radio/mix improvements, source reconciliation for missing/renamed tracks, selectable source paths, hidden-item filters, and sidebar drag ordering. Linux-specific desktop limitations remain below.

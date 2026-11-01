@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'design_icon.dart';
 import 'settings_card.dart';
 import 'ui_language.dart';
@@ -632,6 +634,20 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
               ? 'Sessão Last.fm salva no cofre'
               : 'Last.fm desconectado',
         ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const UiText('Enviar novos favoritos ao Last.fm'),
+          subtitle: const UiText(
+            'Ao favoritar uma faixa no app, marcar também no Last.fm conectado. Desfavoritar no app não remove o favorito no Last.fm.',
+          ),
+          value: p.preferences.getBool('lastfm.sync_favorites') ?? true,
+          onChanged: (value) async {
+            await p.preferences.setBool('lastfm.sync_favorites', value);
+            if (value) unawaited(p.favoriteSync.flush());
+            if (mounted) setState(() {});
+          },
+        ),
+        UiText(p.favoriteSync.status),
         const Divider(height: 32),
         UiText(
           'Dados do perfil',
