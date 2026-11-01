@@ -14,11 +14,11 @@
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64 preview:** [Download 2.5.4 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4-ubuntu-preview.1). Separate experimental package, 85 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64 preview:** [Download 2.5.5 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1). Separate experimental package, 101 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## New in 2.5.5
 
-New track favorites can be exported to the connected Last.fm account, with persistent retry and an opt-out. Ubuntu tray and desktop icon fixes are included in source; Linux acceptance and an updated Ubuntu package are pending. [Details](docs/release-2.5.5.md).
+New track favorites can be exported to the connected Last.fm account, with persistent retry and an opt-out. Ubuntu tray and desktop icon fixes are included in the published 2.5.5 Preview 1 package; real desktop acceptance remains pending. [Details](docs/release-2.5.5.md).
 
 ## New in 2.5.4
 

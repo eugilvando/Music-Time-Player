@@ -12,7 +12,7 @@ Design: **Gilvando Souza**.
 
 ## Novidades da 2.5.5
 
-Novos favoritos de faixas são enviados ao Last.fm conectado, com tentativas persistentes e opção de desativar. Correções de bandeja e ícone Ubuntu incluídas no código; validação Linux e novo pacote Ubuntu pendentes. [Detalhes](docs/release-2.5.5.md).
+Novos favoritos de faixas são enviados ao Last.fm conectado, com tentativas persistentes e opção de desativar. Correções de bandeja e ícone Ubuntu incluídas na [prévia 2.5.5 publicada](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1); validação real na VM/partição pendente. [Detalhes](docs/release-2.5.5.md).
 
 ## Novidades da 2.5.4
 
@@ -140,4 +140,4 @@ Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/bu
 
 ## Prévia Ubuntu atualizada
 
-[Baixar Ubuntu 2.5.4 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4-ubuntu-preview.1). Pacote experimental separado, com 85 testes direcionados e abertura gráfica verificados; áudio, contas e VM reais seguem pendentes. [Instalação e limites](docs/ubuntu-preview.md). A release estável Windows permanece independente.
+[Baixar Ubuntu 2.5.5 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1). Pacote experimental separado, com 85 testes direcionados e abertura gráfica verificados; áudio, contas e VM reais seguem pendentes. [Instalação e limites](docs/ubuntu-preview.md). A release estável Windows permanece independente.

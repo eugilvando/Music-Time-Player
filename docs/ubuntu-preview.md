@@ -39,3 +39,7 @@ Prévia **2.5.5+57** com favoritos enviados ao Last.fm e correções do ícone/b
 ## Build from source
 
 Use the public main branch on Ubuntu 24.04 with Flutter 3.47.7/Dart 3.13 and the dependencies in `.github/workflows/ubuntu-preview.yml`. Run `flutter pub get`, `flutter analyze`, `flutter build linux --release`, then `bash scripts/package-ubuntu.sh`.
+
+## Published package
+
+[Download 2.5.5 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1). [Ubuntu CI](https://github.com/eugilvando/Music-Time-Player/actions/runs/41329999422): 101 targeted tests, analysis, release build, apt installation and controlled graphical checks passed; six screenshots reviewed. Runtime acceptance in your VM remains pending. SHA256: `32af5d2a8fadbb6d88997342c76a8b8a803561fd95dcb8b5f3c5fc79ce10df62`.
