@@ -13,6 +13,12 @@ sleep 15
 kill -0 "$pid"
 window="$(xdotool search --name 'Music Time' | head -n 1)"
 test -n "$window"
+xprop -id "$window" WM_CLASS > "build/ubuntu-smoke/window-class-$mode.txt"
+grep -qi 'app.musictime.preview' "build/ubuntu-smoke/window-class-$mode.txt"
+if test "$binary" = /usr/bin/music-time-preview; then
+  xprop -id "$window" _NET_WM_ICON > "build/ubuntu-smoke/window-icon-$mode.txt"
+  grep -q 'CARDINAL' "build/ubuntu-smoke/window-icon-$mode.txt"
+fi
 import -window "$window" "build/ubuntu-smoke/home-$mode.png"
 xdotool mousemove --window "$window" 75 620 click 1
 sleep 3
