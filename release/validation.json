@@ -1,33 +1,24 @@
 {
-  "version": "2.5.5+57",
-  "date": "2026-11-01",
+  "version": "2.6.0+58",
   "platform": "Windows x64",
+  "sourceCommit": "a812b8de661c1d0bd1bc33a099114956e4a84f35",
   "checks": {
-    "dartAnalysis": "passed",
-    "testCoverage": {
-      "uniquePassed": 402,
-      "fullRunPassed": 400,
-      "fullRunFailed": 2,
-      "finalUIRegressionPassed": 8,
-      "note": "Two test-harness failures corrected and passed in targeted rerun; not a wholly green full-suite run"
-    },
-    "publicRegression": {
-      "passed": 20,
-      "failed": 0,
-      "note": "Repeated subset; not additional unique tests"
-    },
-    "windowsBuild": "passed",
-    "windowsIntegration": "passed; isolated validation profile",
-    "localInstallation": "passed; executable/app.so match build, database/preferences/vault unchanged",
-    "sourceSnapshot": {
-      "files": 270,
-      "identical": true
-    }
+    "analysis": "passed",
+    "targetedCasesAcrossRuns": 35,
+    "finalFeatureTests": 6,
+    "nativeOverlapModes": [
+      "fixed",
+      "smart",
+      "mix"
+    ],
+    "nativeIntegration": "SMTC, seek, tray, placement, clean exit passed",
+    "releaseBuild": "passed"
   },
+  "testScope": "31 passes and 3 overlap failures in regression run, then all 6 feature cases passed after duration-readiness correction and native library test setup. Counts overlap; no full-suite claim. Real service accounts and speaker/Ubuntu device acceptance remain separate.",
   "installer": {
-    "file": "MusicTime-Setup-2.5.5.exe",
-    "sha256": "aa8e89cb5128dad09a629ac70482a3f9dbadc8d2a359d3b53aa2335d6c9c3a2d",
-    "bytes": 20551614
+    "file": "MusicTime-Setup-2.6.0.exe",
+    "bytes": 20573560,
+    "sha256": "6e5e3e2d5c14a3da4bec73f09a1cfac105eec23e1ca07705ebeceb654dd4549e"
   },
-  "limits": "Real Last.fm account acceptance and Linux build/desktop acceptance pending in a separate VM/partition. Ubuntu download remains 2.5.4 Preview 1. No personal data or credentials included."
+  "limits": "Smart fades analysis currently covers local 16-bit PCM WAV. Other formats use configured fades. Mix only requires supported local analysis and EQ disabled. Ubuntu final designation requested by owner; actual Linux playback remains for VM acceptance."
 }

@@ -192,7 +192,7 @@ These images render actual application widgets using a **fictional, isolated dem
 - Listening Insights reads up to 250 pages per operation, with continuation and partial coverage labels. Live-account acceptance remains pending. Generated playlists are manual snapshots; PDF reports and automatic playlist updates are not included.
 - No smart-playlist AND/OR rule engine, playlist tags, named queue manager or independent resume position per album/playlist.
 - No automatic offline-playlist membership refresh, rule-driven downloads, byte-range download resumption or general configurable download directory/concurrency.
-- No sleep timer, ReplayGain, gapless/crossfade controls, AutoEQ/headphone profiles or advanced output selection. No Windows startup option, fully configurable global hotkeys or full notification system.
+- No sleep timer, ReplayGain, gapless guarantee, AutoEQ/headphone profiles or advanced output selection. Crossfade scope is described in the 2.6.0 release notes. No Windows startup option, fully configurable global hotkeys or full notification system.
 - Backups are limited to 128 MiB after decompression; optional artwork is capped at 64 MiB before export. Music files, managed audio and separate custom-image files are not included. Credentials require encryption; provider sessions may still need reconnection. Older versions cannot read the new archive format.
 
 ## Validation and development

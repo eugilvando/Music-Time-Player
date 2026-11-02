@@ -12,4 +12,4 @@ Smart fades currently analyzes bounded peak envelopes of local 16-bit PCM WAV fi
 
 Pause, seek, changing tracks and clearing the queue cancel the outgoing tail. Listening sessions retain separate timing and existing duplicate prevention. Icon packs were excluded from this update.
 
-Validation results are recorded in the release manifest after the build checks.
+Windows validation passed. 35 unique targeted cases passed across runs, including six final feature tests. Analysis, release build and native SMTC/tray checks passed. The first regression run exposed a next-track duration readiness issue, corrected and retested. No full-suite claim. See the release manifest for scope and installer checksum.
