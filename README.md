@@ -8,7 +8,7 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.6.0+58.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.6.1+58.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
@@ -16,9 +16,9 @@ Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64 preview:** [Download 2.5.5 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1). Separate experimental package, 101 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
 
-## New in 2.6.0
+## New in 2.6.1
 
-Drag tracks into the queue, select modes through the existing Continuous play button, and create genre/mood playlists in Insights. Playback settings add crossfade and bounded WAV-based smart/mix transitions. [Behavior and limits](docs/release-2.6.0.md).
+Drag tracks into the queue, select modes through the existing Continuous play button, and create genre/mood playlists in Insights. Playback settings add crossfade and bounded WAV-based smart/mix transitions. [Behavior and limits](docs/release-2.6.1.md).
 
 ## New in 2.5.5
 
@@ -192,7 +192,7 @@ These images render actual application widgets using a **fictional, isolated dem
 - Listening Insights reads up to 250 pages per operation, with continuation and partial coverage labels. Live-account acceptance remains pending. Generated playlists are manual snapshots; PDF reports and automatic playlist updates are not included.
 - No smart-playlist AND/OR rule engine, playlist tags, named queue manager or independent resume position per album/playlist.
 - No automatic offline-playlist membership refresh, rule-driven downloads, byte-range download resumption or general configurable download directory/concurrency.
-- No sleep timer, ReplayGain, gapless guarantee, AutoEQ/headphone profiles or advanced output selection. Crossfade scope is described in the 2.6.0 release notes. No Windows startup option, fully configurable global hotkeys or full notification system.
+- No sleep timer, ReplayGain, gapless guarantee, AutoEQ/headphone profiles or advanced output selection. Crossfade scope is described in the 2.6.1 release notes. No Windows startup option, fully configurable global hotkeys or full notification system.
 - Backups are limited to 128 MiB after decompression; optional artwork is capped at 64 MiB before export. Music files, managed audio and separate custom-image files are not included. Credentials require encryption; provider sessions may still need reconnection. Older versions cannot read the new archive format.
 
 ## Validation and development

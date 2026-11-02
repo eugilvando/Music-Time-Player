@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'fade_analysis.dart';
 
@@ -81,6 +82,18 @@ class PlayerController extends ChangeNotifier {
     );
   }
 
+  Future<void> _configureNative(NativePlayer native) async {
+    // Lyrics are handled by Music Time, without native sidecar loading.
+    await native.setProperty('sub-auto', 'no');
+    if (Platform.isWindows) {
+      // Restrict the backend list (no trailing comma): the bundled OpenAL
+      // fallback can pass a null renderer string to strstr and crash the
+      // process when opening 32-bit audio without a valid OpenAL context.
+      // WASAPI failure must surface as a playback error, not select OpenAL.
+      await native.setProperty('ao', 'wasapi');
+    }
+  }
+
   final void Function(ListeningSession)? onListening;
   final MediaSourceResolver? resolver;
   final Future<Uint8List?> Function(String)? coverLoader;
@@ -161,7 +174,7 @@ class PlayerController extends ChangeNotifier {
       incoming = staged;
       await staged.setVolume(0);
       if (staged.platform is NativePlayer) {
-        await (staged.platform as NativePlayer).setProperty('sub-auto', 'no');
+        await _configureNative(staged.platform as NativePlayer);
       }
       final source = resolver == null
           ? Uri.file(next.localPath!)
@@ -471,8 +484,7 @@ class PlayerController extends ChangeNotifier {
     _notify();
     try {
       if (!_nativeConfigured && player.platform is NativePlayer) {
-        // Lyrics are parsed by Music Time; libmpv must not autoload sidecar subtitles.
-        await (player.platform as NativePlayer).setProperty('sub-auto', 'no');
+        await _configureNative(player.platform as NativePlayer);
         _nativeConfigured = true;
       }
       final source = resolver != null
