@@ -192,6 +192,16 @@ class PlayerController extends ChangeNotifier {
     Player? incoming;
     try {
       final outgoingKey = queueKeys[queueIndex];
+      // Queue entries omit artwork bytes. Hydrate the staged track just as in
+      // open(), before publishing it to the player bar and OS media controls.
+      if (next.cover == null && next.hasArtwork && coverLoader != null) {
+        try {
+          next = next.withCover(await coverLoader!(next.id));
+        } catch (_) {
+          // Optional artwork must never prevent playback.
+        }
+        if (_disposed || generation != _generation) return;
+      }
       final staged = Player();
       incoming = staged;
       await staged.setVolume(0);
