@@ -155,7 +155,16 @@ void main() {
       await controller.playQueue([
         Track(id: 'x', title: 'X', artist: 'Fixture', localPath: file.path),
       ], 0);
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      // Audio output initialization can take longer on a headless Linux runner.
+      for (
+        var attempt = 0;
+        attempt < 50 &&
+            controller.position.inMilliseconds <= 100 &&
+            controller.error == null;
+        attempt++
+      ) {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+      }
       expect(controller.error, isNull);
       expect(controller.position.inMilliseconds, greaterThan(100));
       final native = controller.player.platform as NativePlayer;
