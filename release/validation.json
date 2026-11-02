@@ -1,34 +1,27 @@
 {
-  "testScope": "425 unique full-suite tests passed. 21 targeted and 5 final AutoEQ checks overlap the full suite and are not additional unique tests.",
-  "version": "2.7.0+60",
-  "platform": "Windows x64",
-  "limits": "AutoEQ imports ParametricEQ.txt profiles. Smart analysis supports local PCM16 WAV; automatic duration fallback covers other formats. Mix requires analysis and EQ disabled. Real Linux desktop/audio/tray acceptance remains pending.",
-  "sourceCommit": "5eb54cf3ea08d9d9c4af1d1225b7d9765105e5ce",
   "checks": {
-    "analysis": "passed",
-    "visualReview": "Settings wide/narrow, output profile and native autoplay alignment inspected",
-    "finalAutoEqRegressionTests": 5,
-    "fullSuiteTests": 425,
-    "releaseBuild": "passed",
-    "nativeIntegration": "SMTC, tray, placement and clean exit passed",
+    "nativeIntegration": "SMTC thumbnail present, play/pause, tray, placement and clean exit passed",
     "nativeOverlapModes": [
-      "manual",
-      "automatic",
+      "fixed",
       "smart",
-      "mix"
+      "mix",
+      "auto"
     ],
-    "targetedTests": 21,
-    "installation": "installed 2.7.0+60; binary hashes matched; database, preferences and vault unchanged",
-    "personalProfile": {
-      "responding": true,
-      "observedSeconds": 54,
-      "scope": "Startup observed in personal profile; listening quality not asserted",
-      "newCrashEvents": 0
-    }
+    "targetedTests": 5,
+    "installation": "binary hashes matched; database, preferences and vault unchanged",
+    "regressionReproduced": "incoming crossfade artwork was null before the fix",
+    "releaseBuild": "passed",
+    "artwork": "incoming track and listening session retain artwork; previous/next retains artwork",
+    "analysis": "passed"
   },
+  "platform": "Windows x64",
+  "sourceCommit": "3525cfb464876270e2ef267dc6e6130e2427b6ab",
   "installer": {
-    "bytes": 46275852,
-    "file": "MusicTime-Setup-2.7.0.exe",
-    "sha256": "462588c67b8b72e0927b6f4cfd7a60f7eac0d681df71218f95ca07be0fb6997b"
-  }
+    "sha256": "5353ee063691c8898e353a61ae0477e90e1e1e8b7ec3f483759ddcbee5abb279",
+    "bytes": 46271410,
+    "file": "MusicTime-Setup-2.7.1.exe"
+  },
+  "version": "2.7.1+61",
+  "limits": "Acceptance with the user album remains pending. Ubuntu package remains 2.7.0.",
+  "testScope": "Five targeted regression tests; no full-suite rerun. Native SMTC smoke checks thumbnail presence; artwork identity is checked in the playback-controller regressions."
 }

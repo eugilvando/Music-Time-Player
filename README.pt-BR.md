@@ -4,13 +4,17 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.7.0+60.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.7.1+61.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [versão final 2.7.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
+
+## Novidades da 2.7.1
+
+Corrige a capa ausente nos controles de mídia do Windows após o crossfade. [Detalhes](docs/release-2.7.1.md).
 
 ## Novidades da 2.7.0
 

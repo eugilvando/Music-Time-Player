@@ -8,13 +8,17 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.7.0+60.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.7.1+61.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [Download 2.7.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+
+## New in 2.7.1
+
+Fixes missing album artwork in Windows media controls after crossfade. [Details](docs/release-2.7.1.md).
 
 ## New in 2.7.0
 
