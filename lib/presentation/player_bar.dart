@@ -252,12 +252,22 @@ class PlayerBar extends StatelessWidget {
       child: VerticalDivider(indent: 8, endIndent: 8),
     ),
     'continuous' => PopupMenuButton<String>(
+      padding: const EdgeInsets.all(6),
+      iconSize: 20,
+      style: IconButton.styleFrom(
+        minimumSize: const Size(32, 32),
+        maximumSize: const Size(32, 32),
+        padding: const EdgeInsets.all(6),
+        visualDensity: VisualDensity.standard,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       tooltip: ui(context, 'Play contínuo'),
       initialValue: settings.visualBool('smart_play', fallback: false)
           ? settings.visualChoice('continuous_mode', 'related')
           : 'off',
       icon: MtIcon(
         const IconData(0xf6b5, fontFamily: 'Material Symbols Rounded'),
+        size: 20,
         color: settings.visualBool('smart_play', fallback: false)
             ? Theme.of(context).colorScheme.primary
             : null,

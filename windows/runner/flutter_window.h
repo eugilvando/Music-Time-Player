@@ -36,6 +36,8 @@ class FlutterWindow : public Win32Window {
   winrt::event_token accent_changed_{};
   bool appearance_apartment_initialized_ = false;
   flutter::EncodableValue SystemAccent() noexcept;
+  flutter::EncodableValue DefaultAudioOutput() noexcept;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> audio_output_channel_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

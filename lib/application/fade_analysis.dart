@@ -86,3 +86,11 @@ Future<int?> smartOverlapMs(
   }
   return mixOnly ? 0 : min(500, limit * 100);
 }
+
+/// A bounded automatic duration; unknown metadata does not prevent fading.
+int automaticOverlapMs(Duration from, Duration to) {
+  final known = [from.inMilliseconds, to.inMilliseconds].where((n) => n > 0);
+  if (known.isEmpty) return 4000;
+  final shortest = known.reduce(min);
+  return min(6000, min(max(1500, (shortest * .03).round()), shortest ~/ 4));
+}

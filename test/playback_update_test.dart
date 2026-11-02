@@ -8,6 +8,9 @@ import 'package:music_time/application/player_controller.dart';
 import 'package:music_time/application/fade_analysis.dart';
 import 'package:music_time/library/smart_play.dart';
 import 'package:music_time/domain/track.dart';
+import 'package:music_time/settings/parametric_eq.dart';
+
+import 'parametric_eq_test.dart' show autoEqFixture;
 
 void main() {
   const a = Track(id: 'a', artist: 'One', title: 'A', year: 1993);
@@ -39,7 +42,7 @@ void main() {
     );
   });
   final lib = Platform.environment['MUSIC_TIME_LIBMPV'];
-  for (final mode in ['fixed', 'smart', 'mix']) {
+  for (final mode in ['fixed', 'smart', 'mix', 'auto']) {
     test(
       'native local overlap, queue identity, seek and pause: $mode',
       () async {
@@ -79,6 +82,12 @@ void main() {
             await smartOverlapMs(file.path, file.path, 2, mixOnly: true),
             2000,
           );
+          if (mode == 'auto') {
+            await controller.setParametricEqualizer(
+              true,
+              ParametricEqProfile.parse(autoEqFixture, 'Overlap'),
+            );
+          }
           await controller.playQueue(tracks, 0);
           final original = controller.player;
           final session = controller.session;
@@ -97,6 +106,11 @@ void main() {
             isNot(same(original)),
             reason: 'should overlap before ordinary EOF',
           );
+          if (mode == 'auto') {
+            final native = controller.player.platform as NativePlayer;
+            expect(await native.getProperty('af'), contains('bass'));
+            expect(await native.getProperty('af'), contains('treble'));
+          }
           expect(controller.current!.id, 'b');
           expect(controller.queueIndex, 2);
           await controller.seek(const Duration(milliseconds: 300));

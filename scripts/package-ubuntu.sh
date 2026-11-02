@@ -38,7 +38,7 @@ Architecture: amd64
 Maintainer: Gilvando Souza
 Section: sound
 Priority: optional
-Depends: libc6 (>= 2.39), libstdc++6, libgtk-3-0t64, libsecret-1-0, libmpv2, libsqlite3-0, libx11-6, libxi6, libblkid1, liblzma5, libglu1-mesa, libasound2t64, gnome-keyring, xdg-utils, libglib2.0-bin
+Depends: libc6 (>= 2.39), libstdc++6, libgtk-3-0t64, libsecret-1-0, libmpv2, libsqlite3-0, libx11-6, libxi6, libblkid1, liblzma5, libglu1-mesa, libasound2t64, gnome-keyring, xdg-utils, libglib2.0-bin, pulseaudio-utils
 Recommends: gnome-shell-extension-appindicator
 Description: Music Time Ubuntu 24.04 desktop player
  Local and cloud music catalog, audio playback and playlists.

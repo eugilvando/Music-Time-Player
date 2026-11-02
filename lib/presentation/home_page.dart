@@ -1,3 +1,4 @@
+import 'album_queue_drag.dart';
 import 'home_skeleton.dart';
 import 'rounded_select.dart';
 import 'design_icon.dart';
@@ -174,14 +175,16 @@ class HomeCardLayout extends StatelessWidget {
         rowBuilder: (i) {
           final card = cards.elementAt(i);
           return [
-            InkWell(
-              onTap: card.onTap,
-              child: Row(
-                children: [
-                  SizedBox.square(dimension: 32, child: card.artwork),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(card.title)),
-                ],
+            card.withDrag(
+              InkWell(
+                onTap: card.onTap,
+                child: Row(
+                  children: [
+                    SizedBox.square(dimension: 32, child: card.artwork),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(card.title)),
+                  ],
+                ),
               ),
             ),
             Text(card.subtitle),
@@ -1237,12 +1240,19 @@ class _HomePageState extends State<HomePage> {
               fallback: false,
             ),
           );
+    Widget dragAlbum(CatalogGroup group, String type, Widget child) =>
+        AlbumQueueDrag(
+          tracks: type == 'albums' ? group.tracks : null,
+          title: group.name,
+          child: child,
+        );
     final items = groups.take(count).map((group) {
       final subtitle = type == 'albums'
           ? group.tracks.first.albumArtistNames.join('; ')
           : '${group.tracks.length} ${ui(context, 'faixas')}';
       if (homeCompactItem(mode) || mode == 'detailed') {
         return CompactMediaCard(
+          dragTracks: type == 'albums' ? group.tracks : null,
           artwork: artwork(group),
           title: group.name,
           subtitle: subtitle,
@@ -1254,67 +1264,75 @@ class _HomePageState extends State<HomePage> {
         );
       }
       if (mode == 'compact') {
-        return ItemActionRegion(
-          child: ListTile(
-            dense: true,
-            leading: SizedBox.square(dimension: 44, child: artwork(group)),
-            title: Text(
-              group.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+        return dragAlbum(
+          group,
+          type,
+          ItemActionRegion(
+            child: ListTile(
+              dense: true,
+              leading: SizedBox.square(dimension: 44, child: artwork(group)),
+              title: Text(
+                group.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: menu(
+                group.tracks,
+                artistName: type == 'albums' ? null : group.name,
+              ),
+              onTap: () => open(group),
             ),
-            subtitle: Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: menu(
-              group.tracks,
-              artistName: type == 'albums' ? null : group.name,
-            ),
-            onTap: () => open(group),
           ),
         );
       }
-      return InkWell(
-        onTap: () => open(group),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Stack(
-                children: [
-                  Positioned.fill(child: artwork(group)),
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: IconButton(
-                      tooltip: ui(context, 'Reproduzir'),
-                      onPressed: () => widget.onPlay(group.tracks, 0),
-                      icon: const MtIcon(Icons.play_arrow),
+      return dragAlbum(
+        group,
+        type,
+        InkWell(
+          onTap: () => open(group),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
+                aspectRatio: 1,
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: artwork(group)),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: IconButton(
+                        tooltip: ui(context, 'Reproduzir'),
+                        onPressed: () => widget.onPlay(group.tracks, 0),
+                        icon: const MtIcon(Icons.play_arrow),
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: menu(
-                      group.tracks,
-                      artistName: type == 'albums' ? null : group.name,
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: menu(
+                        group.tracks,
+                        artistName: type == 'albums' ? null : group.name,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              group.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                group.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ],
+          ),
         ),
       );
     }).toList();

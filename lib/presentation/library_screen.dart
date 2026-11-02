@@ -1,3 +1,4 @@
+import '../platform/output_equalizer.dart';
 import 'listening_insights_page.dart';
 import '../library/listening_insights.dart';
 import 'resizable_side_panel.dart';
@@ -271,16 +272,21 @@ class _LibraryScreenState extends State<LibraryScreen> {
     cachedLibraryPage = null;
   }
 
+  OutputEqualizer? outputEqualizer;
+
   void configurePlayback() {
     if (shutdownRequested) return;
-    controller.fadeMode = widget.settings.visualChoice(
-      'crossfade_mode',
-      'fixed',
+    final fadeSetting = widget.settings.crossfadeSetting;
+    controller.configureFade(
+      mode: fadeSetting == 'auto'
+          ? 'auto'
+          : widget.settings.visualChoice('crossfade_mode', 'fixed'),
+      seconds: fadeSetting == 'off'
+          ? 0
+          : fadeSetting == 'auto'
+          ? 6
+          : widget.settings.crossfadeDuration,
     );
-    controller.fadeSeconds = widget.settings
-        .visualNumber('crossfade_seconds', 0)
-        .round()
-        .clamp(0, 12);
     cachedLibraryPage = null;
     final configuration = [
       widget.settings.visualBool('offline_only', fallback: false),
@@ -419,19 +425,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
       );
       await controller.setVolume(playback.volume);
       try {
-        await controller.setEqualizer(
-          widget.settings.visualBool('eq_enabled', fallback: false),
-          [
-            for (final f in PlayerController.equalizerFrequencies)
-              widget.settings.visualNumber('eq_$f', 0),
-          ],
-        );
+        await applyConfiguredEqualizer(controller, widget.settings);
       } catch (_) {
         if (mounted) {
           setState(
             () => storageError = 'Não foi possível restaurar o equalizador.',
           );
         }
+      }
+      if (widget.nativeIntegration && outputEqualizer == null) {
+        outputEqualizer = OutputEqualizer(controller, widget.settings)..start();
       }
       await controller.restore(
         playback.queue,
@@ -556,6 +559,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   Future<void> prepareExit() async {
     shutdownRequested = true;
+    outputEqualizer?.suspended = true;
     localSync.cancel();
     downloads.suspended = true;
     if (downloads.current != null) downloads.cancelled.add(downloads.current!);
@@ -574,6 +578,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   void resumeAfterExit() {
     shutdownRequested = false;
+    outputEqualizer?.suspended = false;
+    outputEqualizer?.refresh();
     downloads.suspended = false;
     providers.suspended = false;
     providers.profileIndex.suspended = false;
@@ -1405,6 +1411,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     mediaCache.removeListener(scheduleAvailability);
     mediaCache.dispose();
     windows?.dispose();
+    outputEqualizer?.dispose();
     controller.dispose();
     downloads.dispose();
     providers.dispose();
@@ -2235,6 +2242,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                             embedded: true,
                                                           ),
                                                         AppSection.settings => SettingsPage(
+                                                          outputEqualizer:
+                                                              outputEqualizer,
                                                           initialCategory:
                                                               settingsDestination ??
                                                               SettingsCategory

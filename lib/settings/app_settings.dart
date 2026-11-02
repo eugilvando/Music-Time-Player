@@ -114,6 +114,15 @@ class AppSettings extends ChangeNotifier {
       (_pending['visual.$key'] as double?) ??
       preferences.getDouble('visual.$key') ??
       fallback;
+  String get crossfadeSetting {
+    final value = visualChoice('crossfade_setting', '');
+    if (const {'off', 'auto', 'manual'}.contains(value)) return value;
+    return visualNumber('crossfade_seconds', 0) > 0 ? 'manual' : 'off';
+  }
+
+  int get crossfadeDuration =>
+      visualNumber('crossfade_seconds', 4).round().clamp(1, 12);
+
   Set<String> get collectionFavorites =>
       (preferences.getStringList('collections.favorites') ?? []).toSet();
   int lyricsOffset(String trackId) =>

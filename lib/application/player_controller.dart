@@ -1,3 +1,5 @@
+import '../settings/parametric_eq.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -85,6 +87,7 @@ class PlayerController extends ChangeNotifier {
   Future<void> _configureNative(NativePlayer native) async {
     // Lyrics are handled by Music Time, without native sidecar loading.
     await native.setProperty('sub-auto', 'no');
+    await native.setProperty('vid', 'no');
     if (Platform.isWindows) {
       // Restrict the backend list (no trailing comma): the bundled OpenAL
       // fallback can pass a null renderer string to strstr and crash the
@@ -102,6 +105,23 @@ class PlayerController extends ChangeNotifier {
   Player player = Player();
   int fadeSeconds = 0;
   String fadeMode = 'fixed';
+  void configureFade({required String mode, required int seconds}) {
+    if (fadeMode == mode && fadeSeconds == seconds) return;
+    fadeMode = mode;
+    fadeSeconds = seconds;
+    unawaited(_finishFade());
+  }
+
+  int get _transitionSeconds => fadeMode == 'auto'
+      ? (automaticOverlapMs(
+                  duration,
+                  queueIndex >= 0 && queueIndex + 1 < queue.length
+                      ? queue[queueIndex + 1].duration
+                      : Duration.zero,
+                ) /
+                1000)
+            .ceil()
+      : fadeSeconds;
   Player? _tail;
   ListeningSession? _tailSession;
   final Stopwatch _tailClock = Stopwatch();
@@ -125,6 +145,7 @@ class PlayerController extends ChangeNotifier {
   bool _preparing = false;
   int? _attemptedKey;
   bool _eqEnabled = false;
+  ParametricEqProfile? _eqProfile;
   List<double> _eqGains = const [0, 0, 0, 0, 0];
 
   void _checkTransition() {
@@ -139,12 +160,13 @@ class PlayerController extends ChangeNotifier {
         repeat == PlaybackRepeat.track ||
         queueIndex < 0 ||
         queueIndex + 1 >= queue.length ||
-        duration.inMilliseconds < fadeSeconds * 2000 ||
+        duration.inMilliseconds < _transitionSeconds * 2000 ||
         _attemptedKey == queueKeys[queueIndex]) {
       return;
     }
     final remaining = duration - position;
-    if (remaining.inMilliseconds < 400 || remaining.inSeconds >= fadeSeconds) {
+    if (remaining.inMilliseconds < 400 ||
+        remaining.inSeconds >= _transitionSeconds) {
       return;
     }
     final next = queue[queueIndex + 1];
@@ -206,26 +228,43 @@ class PlayerController extends ChangeNotifier {
           repeat != PlaybackRepeat.track &&
           fadeMode == mode;
       if (!valid()) return;
+      int? window = mode == 'auto'
+          ? automaticOverlapMs(duration, staged.state.duration)
+          : null;
       if (mode != 'fixed' &&
           current?.localPath != null &&
           next.localPath != null) {
-        final window = await smartOverlapMs(
-          current!.localPath!,
-          next.localPath!,
-          fadeSeconds,
-          mixOnly: mode == 'mix',
-        );
-        if (!valid() || window == 0 || (window == null && mode == 'mix')) {
-          return;
-        }
-        if (window != null) {
-          while (valid() && (duration - position).inMilliseconds > window) {
-            await Future<void>.delayed(const Duration(milliseconds: 50));
+        try {
+          final analyzed = await smartOverlapMs(
+            current!.localPath!,
+            next.localPath!,
+            mode == 'auto' ? (window! / 1000).ceil() : fadeSeconds,
+            mixOnly: mode == 'mix',
+          );
+          if (analyzed != null) {
+            window = window == null || analyzed < window ? analyzed : window;
+          } else if (mode == 'mix') {
+            return;
           }
+        } catch (_) {
+          // Optional analysis must not cancel a usable automatic/fixed fade.
+          if (mode == 'mix') return;
+        }
+      }
+      if (!valid() || window == 0) return;
+      if (window != null) {
+        while (valid() && (duration - position).inMilliseconds > window) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
         }
       }
       if (!valid()) return;
-      if (_eqEnabled) await _applyEqualizer(staged, true, _eqGains);
+      if (_eqEnabled) {
+        if (_eqProfile != null) {
+          await _applyParametric(staged, true, _eqProfile!);
+        } else {
+          await _applyEqualizer(staged, true, _eqGains);
+        }
+      }
       final milliseconds = (duration - position).inMilliseconds;
       if (!valid() || milliseconds < 250) return;
       if (mode == 'mix' && _eqEnabled) return;
@@ -306,6 +345,33 @@ class PlayerController extends ChangeNotifier {
     await _applyEqualizer(player, enabled, gains);
     _eqEnabled = enabled;
     _eqGains = List.of(gains);
+    _eqProfile = null;
+  }
+
+  Future<void> setParametricEqualizer(
+    bool enabled,
+    ParametricEqProfile profile,
+  ) async {
+    await _finishFade();
+    await _applyParametric(player, enabled, profile);
+    _eqEnabled = enabled;
+    _eqProfile = profile;
+  }
+
+  Future<void> _applyParametric(
+    Player target,
+    bool enabled,
+    ParametricEqProfile profile,
+  ) async {
+    if (target.platform is! NativePlayer) {
+      throw UnsupportedError('Equalizador indisponível');
+    }
+    final native = target.platform as NativePlayer;
+    await native.setProperty(
+      'replaygain-fallback',
+      enabled ? profile.effectivePreamp.toString() : '0',
+    );
+    await native.setProperty('af', enabled ? profile.nativeChain : '');
   }
 
   Future<void> _applyEqualizer(

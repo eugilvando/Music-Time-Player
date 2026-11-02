@@ -129,6 +129,48 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  "Suavize a passagem de uma música para a próxima.":
+      "Smooth the transition from one song to the next.",
+  "Duração da transição": "Transition duration",
+  "Estilo da transição": "Transition style",
+  "Suave": "Smooth",
+  "Cada música termina antes de a próxima começar.":
+      "Each song ends before the next one starts.",
+  "O app escolhe uma transição de até 6 segundos conforme a duração das faixas e ajusta o ponto quando a análise está disponível.": "The app chooses a transition of up to 6 seconds based on track lengths and adjusts the timing when analysis is available.",
+  "Sobrepõe as músicas sem alterar o volume. Exige análise compatível e equalizador desativado.": "Overlaps songs without changing their volume. Requires compatible analysis and the equalizer turned off.",
+  "Ajusta o ponto da transição quando possível. Nos demais casos, usa a duração escolhida.": "Adjusts the transition timing when possible. Otherwise, uses the selected duration.",
+  "Reduz o volume da música atual enquanto a próxima entra.":
+      "Fades out the current song while fading in the next.",
+  "Álbuns em ordem sequencial mantêm a passagem original entre faixas.":
+      "Albums played in sequential order keep their original transitions.",
+  "Como funciona": "How it works",
+  "A análise de início e final está disponível para arquivos WAV locais compatíveis. O automático usa a duração das músicas quando não pode analisá-las. Mix only é ignorado quando a sobreposição não pode ser validada.": "Start and end analysis is available for compatible local WAV files. Automatic mode uses song lengths when analysis is unavailable. Mix only is skipped when overlap cannot be validated.",
+  "Continuar após o fim da fila": "Continue after the queue ends",
+  "Acrescenta músicas da sua biblioteca conforme o modo escolhido.":
+      "Adds songs from your library using the selected mode.",
+  "Você também pode trocar o modo pelo botão Play contínuo na barra de reprodução.": "You can also switch modes using the Continuous play button in the playback bar.",
+  "Importar perfil AutoEQ": "Import AutoEQ profile",
+  "Importar AutoEQ": "Import AutoEQ",
+  "A pré-amplificação pode ser reduzida para evitar saturação. O arquivo original será preservado.": "Preamp gain may be reduced to prevent clipping. The original file will be preserved.",
+  "Salvar e selecionar": "Save and select",
+  "Perfil por dispositivo de saída": "Profile per output device",
+  "Troca o equalizador quando a saída padrão do sistema muda.":
+      "Switches the equalizer when the system default output changes.",
+  "Saída atual": "Current output",
+  "Não identificada": "Not identified",
+  "Perfil desta saída": "Profile for this output",
+  "Sem equalização": "No equalization",
+  "Escolha a saída no sistema e associe um perfil aqui. Saídas sem associação ficam sem equalização.": "Choose the output in your system and assign a profile here. Outputs without an assigned profile use no equalization.",
+  "Perfil AutoEQ com filtros paramétricos e proteção de ganho.":
+      "AutoEQ profile with parametric filters and gain protection.",
+  "O perfil é aplicado integralmente. Os presets de cinco bandas continuam disponíveis.":
+      "The complete profile is applied. Five-band presets remain available.",
+  "Não foi possível identificar a saída de áudio.":
+      "Could not identify the audio output.",
+  "O perfil desta saída está indisponível. Equalização desativada.":
+      "The profile for this output is unavailable. Equalization is off.",
+  "Não foi possível importar o perfil AutoEQ.":
+      "Could not import the AutoEQ profile.",
   'Mesmo gênero': 'Same genre',
   'Desativado': 'Disabled',
   'Transição entre faixas': 'Track transition',

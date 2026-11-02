@@ -1,3 +1,5 @@
+import '../settings/parametric_eq.dart';
+
 import 'dart:convert';
 
 import '../settings/sidebar_layout.dart';
@@ -203,6 +205,49 @@ class AppData {
     if (ranges.containsKey(name)) {
       final range = ranges[name]!;
       return value is double && value >= range.$1 && value <= range.$2;
+    }
+    if (name == 'crossfade_setting') {
+      return {'off', 'auto', 'manual'}.contains(value);
+    }
+    if (name == 'eq_per_output') return value is bool;
+    if (name == 'eq_autoeq_profiles') {
+      if (value is! String || value.length > 1048576) return false;
+      final profiles = jsonDecode(value);
+      if (profiles is! Map || profiles.length > 50) return false;
+      return profiles.entries.every(
+        (entry) =>
+            entry.key is String &&
+            entry.value is Map &&
+            ParametricEqProfile.fromJson(
+                  Map<String, dynamic>.from(entry.value as Map),
+                ).name ==
+                entry.key,
+      );
+    }
+    if (name == 'eq_output_profiles') {
+      if (value is! String || value.length > 262144) return false;
+      final mappings = jsonDecode(value);
+      if (mappings is! Map || mappings.length > 128) return false;
+      return mappings.entries.every((entry) {
+        if (entry.key is! String ||
+            (entry.key as String).length > 512 ||
+            entry.value is! Map) {
+          return false;
+        }
+        final binding = entry.value as Map;
+        final gains = binding['gains'];
+        return binding['name'] is String &&
+            (binding['name'] as String).length <= 256 &&
+            binding['preset'] is String &&
+            (binding['preset'] as String).length <= 128 &&
+            binding['enabled'] is bool &&
+            (gains == null ||
+                gains is List &&
+                    gains.length == 5 &&
+                    gains.every(
+                      (v) => v is num && v.isFinite && v >= -12 && v <= 12,
+                    ));
+      });
     }
     if (name == 'eq_presets') {
       return value is String && validEqualizerPresets(jsonDecode(value));

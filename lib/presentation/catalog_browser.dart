@@ -1,3 +1,4 @@
+import 'album_queue_drag.dart';
 import 'home_skeleton.dart';
 import 'alphabet_scrollbar.dart';
 import 'rounded_select.dart';
@@ -1415,7 +1416,14 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       actions(group.tracks, collection: collectionKey(group, type)),
     ],
   );
+  Widget dragAlbum(CatalogGroup group, String type, Widget child) =>
+      AlbumQueueDrag(
+        tracks: type == 'albums' ? group.tracks : null,
+        title: group.name,
+        child: child,
+      );
   Widget compactGroup(CatalogGroup group, String type) => CompactMediaCard(
+    dragTracks: type == 'albums' ? group.tracks : null,
     key: ValueKey('collection.${group.id}'),
     artwork: groupImage(group, type),
     title: group.name,
@@ -1439,14 +1447,18 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         rowBuilder: (i) {
           final g = values[i];
           return [
-            InkWell(
-              onTap: () => openGroup(g, type: type),
-              child: Row(
-                children: [
-                  SizedBox.square(dimension: 32, child: groupImage(g, type)),
-                  const SizedBox(width: 8),
-                  Expanded(child: Text(g.name)),
-                ],
+            dragAlbum(
+              g,
+              type,
+              InkWell(
+                onTap: () => openGroup(g, type: type),
+                child: Row(
+                  children: [
+                    SizedBox.square(dimension: 32, child: groupImage(g, type)),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(g.name)),
+                  ],
+                ),
               ),
             ),
             Text(g.tracks.first.albumArtistNames.join('; ')),
@@ -1491,21 +1503,29 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         itemCount: values.length,
         itemBuilder: (context, i) {
           final g = values[i];
-          return ItemActionRegion(
-            child: ListTile(
-              dense: dense,
-              leading: SizedBox.square(
-                dimension: view == 'detailed' ? 64 : 40,
-                child: groupImage(g, type),
+          return dragAlbum(
+            g,
+            type,
+            ItemActionRegion(
+              child: ListTile(
+                dense: dense,
+                leading: SizedBox.square(
+                  dimension: view == 'detailed' ? 64 : 40,
+                  child: groupImage(g, type),
+                ),
+                title: Text(
+                  g.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  view == 'detailed'
+                      ? '${g.tracks.length} ${ui(context, 'Músicas')} · ${index.groups('albums', g.tracks).length} ${ui(context, 'Álbuns')} · ${catalogTime(g.tracks.fold(Duration.zero, (sum, t) => sum + t.duration))}'
+                      : '${g.tracks.length} ${ui(context, 'Músicas')}',
+                ),
+                trailing: actions(g.tracks, collection: collectionKey(g, type)),
+                onTap: () => openGroup(g, type: type),
               ),
-              title: Text(g.name, maxLines: 2, overflow: TextOverflow.ellipsis),
-              subtitle: Text(
-                view == 'detailed'
-                    ? '${g.tracks.length} ${ui(context, 'Músicas')} · ${index.groups('albums', g.tracks).length} ${ui(context, 'Álbuns')} · ${catalogTime(g.tracks.fold(Duration.zero, (sum, t) => sum + t.duration))}'
-                    : '${g.tracks.length} ${ui(context, 'Músicas')}',
-              ),
-              trailing: actions(g.tracks, collection: collectionKey(g, type)),
-              onTap: () => openGroup(g, type: type),
             ),
           );
         },
@@ -1522,61 +1542,65 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       itemCount: values.length,
       itemBuilder: (context, i) {
         final g = values[i];
-        return ItemActionRegion(
-          child: InkWell(
-            onTap: () => openGroup(g, type: type),
-            borderRadius: BorderRadius.circular(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: groupImage(g, type)),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        child: IconButton(
-                          tooltip: ui(context, 'Reproduzir'),
-                          onPressed: () => widget.onPlay(g.tracks, 0),
-                          icon: const MtIcon(Icons.play_arrow),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: actions(
-                          g.tracks,
-                          collection: collectionKey(g, type),
-                        ),
-                      ),
-                      if (g.tracks.every((t) => offline.contains(t.id)))
-                        const Positioned(
-                          left: 4,
-                          bottom: 4,
-                          child: MtIcon(
-                            Icons.offline_pin,
-                            color: Color(0xff54cf9b),
+        return dragAlbum(
+          g,
+          type,
+          ItemActionRegion(
+            child: InkWell(
+              onTap: () => openGroup(g, type: type),
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Positioned.fill(child: groupImage(g, type)),
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          child: IconButton(
+                            tooltip: ui(context, 'Reproduzir'),
+                            onPressed: () => widget.onPlay(g.tracks, 0),
+                            icon: const MtIcon(Icons.play_arrow),
                           ),
                         ),
-                    ],
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: actions(
+                            g.tracks,
+                            collection: collectionKey(g, type),
+                          ),
+                        ),
+                        if (g.tracks.every((t) => offline.contains(t.id)))
+                          const Positioned(
+                            left: 4,
+                            bottom: 4,
+                            child: MtIcon(
+                              Icons.offline_pin,
+                              color: Color(0xff54cf9b),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  g.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  type == 'albums'
-                      ? g.tracks.first.albumArtistNames.join('; ')
-                      : '${g.tracks.length} ${ui(context, 'músicas')}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    g.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Text(
+                    type == 'albums'
+                        ? g.tracks.first.albumArtistNames.join('; ')
+                        : '${g.tracks.length} ${ui(context, 'músicas')}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -1703,89 +1727,98 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       final group = values[i];
       if (smallCards) return compactGroup(group, type);
       if (!grid) {
-        return ItemActionRegion(
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
-            leading: SizedBox.square(
-              dimension: view == 'detailed' ? 64 : 40,
-              child: groupImage(group, type),
-            ),
-            title: Text(
-              group.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Text(
-              view == 'detailed'
-                  ? '${group.tracks.length} ${ui(context, 'Músicas')} · ${group.tracks.first.albumArtistNames.join('; ')} · ${catalogTime(group.tracks.fold(Duration.zero, (sum, t) => sum + t.duration))}'
-                  : '${group.tracks.length} ${ui(context, 'Músicas')}',
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  tooltip: ui(context, 'Reproduzir'),
-                  onPressed: () => batch('play', ordered(group.tracks)),
-                  icon: const MtIcon(Icons.play_arrow),
-                ),
-                actions(group.tracks, collection: collectionKey(group, type)),
-              ],
-            ),
-            onTap: () => openGroup(group, type: type),
-          ),
-        );
-      }
-      return ItemActionRegion(
-        child: InkWell(
-          key: ValueKey('collection.${group.id}'),
-          onTap: () => openGroup(group, type: type),
-          borderRadius: BorderRadius.circular(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(child: groupImage(group, type)),
-                      Positioned(
-                        left: 4,
-                        top: 4,
-                        child: IconButton.filled(
-                          tooltip: ui(context, 'Reproduzir'),
-                          onPressed: () => batch('play', ordered(group.tracks)),
-                          icon: const MtIcon(Icons.play_arrow),
-                        ),
-                      ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: actions(
-                          group.tracks,
-                          collection: collectionKey(group, type),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        return dragAlbum(
+          group,
+          type,
+          ItemActionRegion(
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-              const SizedBox(height: 12),
-              Text(
+              leading: SizedBox.square(
+                dimension: view == 'detailed' ? 64 : 40,
+                child: groupImage(group, type),
+              ),
+              title: Text(
                 group.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium,
               ),
-              if (group.tracks.first.year != null)
-                Text(
-                  '${group.tracks.first.year}',
-                  style: Theme.of(context).textTheme.bodySmall,
+              subtitle: Text(
+                view == 'detailed'
+                    ? '${group.tracks.length} ${ui(context, 'Músicas')} · ${group.tracks.first.albumArtistNames.join('; ')} · ${catalogTime(group.tracks.fold(Duration.zero, (sum, t) => sum + t.duration))}'
+                    : '${group.tracks.length} ${ui(context, 'Músicas')}',
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: ui(context, 'Reproduzir'),
+                    onPressed: () => batch('play', ordered(group.tracks)),
+                    icon: const MtIcon(Icons.play_arrow),
+                  ),
+                  actions(group.tracks, collection: collectionKey(group, type)),
+                ],
+              ),
+              onTap: () => openGroup(group, type: type),
+            ),
+          ),
+        );
+      }
+      return dragAlbum(
+        group,
+        type,
+        ItemActionRegion(
+          child: InkWell(
+            key: ValueKey('collection.${group.id}'),
+            onTap: () => openGroup(group, type: type),
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(child: groupImage(group, type)),
+                        Positioned(
+                          left: 4,
+                          top: 4,
+                          child: IconButton.filled(
+                            tooltip: ui(context, 'Reproduzir'),
+                            onPressed: () =>
+                                batch('play', ordered(group.tracks)),
+                            icon: const MtIcon(Icons.play_arrow),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: actions(
+                            group.tracks,
+                            collection: collectionKey(group, type),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  group.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                if (group.tracks.first.year != null)
+                  Text(
+                    '${group.tracks.first.year}',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+              ],
+            ),
           ),
         ),
       );

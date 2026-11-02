@@ -1,15 +1,14 @@
 {
   "library": "libmpv-2.dll",
-  "sha256": "0a5a0b476866c91a639a4e511e8153968f8fa23564461b0aa09acdba816164a4",
-  "package": "media_kit_libs_windows_audio",
-  "packageVersion": "1.0.9",
-  "upstreamRelease": "https://github.com/media-kit/libmpv-win32-audio-build/releases/tag/2023-09-24",
-  "archive": "mpv-dev-x86_64-20230924-git-652a1dd.7z",
-  "upstreamArchiveMd5": "cd738e16e2a19626d7cfa48801524f8c",
-  "observedFlags": [
-    "--disable-gpl",
-    "--disable-nonfree",
-    "--enable-version3"
-  ],
+  "sha256": "0c05c3ae5f54563dcd69bed60c69d4baa0a5c19f95a044c5c4c0a253197be41f",
+  "recipe": "windows/audio_runtime.cmake",
+  "upstreamRelease": "https://github.com/zhongfly/mpv-winbuild/releases/tag/2026-11-02-a687796d9d",
+  "archive": "mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z",
+  "archiveSha256": "8b61f89716f31a6a1a3c85dc9a16bd7c57c77062b843af8cc8b78f6b5912d2e9",
+  "mirror": "https://github.com/eugilvando/Music-Time-Player/releases/download/v2.7.0/mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z",
+  "mpvVersion": "v0.41.0-1421-ga687796d9",
+  "buildRecipe": "https://github.com/zhongfly/mpv-winbuild/tree/25b58a7",
+  "buildRun": "https://github.com/zhongfly/mpv-winbuild/actions/runs/41441239761",
+  "variant": "LGPL; not the GPL or x86_64-v3 variants",
   "dartPackageLicenseCount": 134
 }

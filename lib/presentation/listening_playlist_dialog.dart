@@ -51,6 +51,21 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
     'melancholic': ('Melancholic', 'Melancólico'),
     'energetic': ('Energetic', 'Energético'),
     'happy': ('Happy', 'Alegre'),
+    'relax': ('Relaxing', 'Relaxante'),
+    'chillout': ('Chill', 'Descontraído'),
+    'focus': ('Focus', 'Foco'),
+    'study': ('Study', 'Estudo'),
+    'romantic': ('Romantic', 'Romântico'),
+    'nostalgic': ('Nostalgic', 'Nostálgico'),
+    'dreamy': ('Dreamy', 'Sonhador'),
+    'uplifting': ('Uplifting', 'Motivador'),
+    'party': ('Party', 'Festa'),
+    'dance': ('Dance', 'Dançante'),
+    'workout': ('Workout', 'Treino'),
+    'sleep': ('Sleep', 'Sono'),
+    'meditation': ('Meditation', 'Meditação'),
+    'dark': ('Dark', 'Sombrio'),
+    'aggressive': ('Aggressive', 'Intenso'),
   };
   bool get tagBased => criterion == 'genre' || criterion == 'mood';
   String get tag => criterion == 'genre' ? genre : mood;

@@ -1,6 +1,9 @@
 #include "flutter_window.h"
 
 #include <optional>
+#include <mmdeviceapi.h>
+#include <functiondiscoverykeys_devpkey.h>
+#include <wrl/client.h>
 #include <flutter/standard_method_codec.h>
 #include <winrt/Windows.UI.h>
 #include <winrt/Windows.Foundation.h>
@@ -45,6 +48,13 @@ bool FlutterWindow::OnCreate() {
       ::PostMessage(window, WM_APP + 77, 0, 0);
     });
   } catch (...) { ui_settings_ = nullptr; }
+  audio_output_channel_ = std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+      flutter_controller_->engine()->messenger(), "music_time/audio_output",
+      &flutter::StandardMethodCodec::GetInstance());
+  audio_output_channel_->SetMethodCallHandler([this](const auto& call, auto result) {
+    if (call.method_name() == "getDefaultOutput") result->Success(DefaultAudioOutput());
+    else result->NotImplemented();
+  });
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
@@ -64,6 +74,7 @@ void FlutterWindow::OnDestroy() {
     try { ui_settings_.ColorValuesChanged(accent_changed_); } catch (...) {}
     ui_settings_ = nullptr;
   }
+  audio_output_channel_.reset();
   appearance_channel_.reset();
   if (appearance_apartment_initialized_) {
     winrt::uninit_apartment();
@@ -117,4 +128,29 @@ flutter::EncodableValue FlutterWindow::SystemAccent() noexcept {
     }
   } catch (...) {}
   return flutter::EncodableValue();
+}
+
+flutter::EncodableValue FlutterWindow::DefaultAudioOutput() noexcept {
+  try {
+    Microsoft::WRL::ComPtr<IMMDeviceEnumerator> enumerator;
+    if (FAILED(CoCreateInstance(__uuidof(MMDeviceEnumerator), nullptr, CLSCTX_ALL,
+        IID_PPV_ARGS(enumerator.GetAddressOf())))) return flutter::EncodableValue();
+    Microsoft::WRL::ComPtr<IMMDevice> device;
+    if (FAILED(enumerator->GetDefaultAudioEndpoint(eRender, eMultimedia, device.GetAddressOf()))) return flutter::EncodableValue();
+    LPWSTR raw_id = nullptr;
+    if (FAILED(device->GetId(&raw_id))) return flutter::EncodableValue();
+    const std::wstring identifier(raw_id);
+    CoTaskMemFree(raw_id);
+    std::wstring name = L"Audio output";
+    Microsoft::WRL::ComPtr<IPropertyStore> properties;
+    if (SUCCEEDED(device->OpenPropertyStore(STGM_READ, properties.GetAddressOf()))) {
+      PROPVARIANT value{};
+      if (SUCCEEDED(properties->GetValue(PKEY_Device_FriendlyName, &value)) && value.vt == VT_LPWSTR && value.pwszVal) name = value.pwszVal;
+      PropVariantClear(&value);
+    }
+    return flutter::EncodableValue(flutter::EncodableMap{
+      {flutter::EncodableValue("id"), flutter::EncodableValue(winrt::to_string(identifier))},
+      {flutter::EncodableValue("name"), flutter::EncodableValue(winrt::to_string(name))},
+    });
+  } catch (...) { return flutter::EncodableValue(); }
 }

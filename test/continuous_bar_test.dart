@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart' hide Track;
@@ -12,9 +13,11 @@ void main() {
   testWidgets(
     'existing continuous control selects a persistent mode; queue accepts dragged tracks',
     (tester) async {
-      MediaKit.ensureInitialized(libmpv: Platform.environment['MUSIC_TIME_LIBMPV']);
+      MediaKit.ensureInitialized(
+        libmpv: Platform.environment['MUSIC_TIME_LIBMPV'],
+      );
       SharedPreferences.setMockInitialValues({
-        'visual.bar_items': ['continuous', 'queue'],
+        'visual.bar_items': ['favorite', 'continuous', 'queue'],
       });
       final settings = AppSettings(await SharedPreferences.getInstance());
       final controller = PlayerController();
@@ -48,6 +51,13 @@ void main() {
             ),
           ),
         ),
+      );
+      final autoplay = find.byTooltip('Play contínuo');
+      final favorite = find.byTooltip('Favoritar');
+      expect(tester.getSize(autoplay), const Size(32, 32));
+      expect(
+        tester.getCenter(autoplay).dy,
+        closeTo(tester.getCenter(favorite).dy, 0.5),
       );
       await tester.tap(find.byTooltip('Play contínuo'));
       await tester.pumpAndSettle();
