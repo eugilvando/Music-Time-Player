@@ -45,7 +45,15 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
     text:
         'Last.fm · ${widget.report.from.toLocal().toIso8601String().substring(0, 10)} — ${widget.report.until.toLocal().toIso8601String().substring(0, 10)}',
   );
-  String criterion = 'top';
+  String criterion = 'top', genre = 'rock', mood = 'calm';
+  final moods = const {
+    'calm': ('Calm', 'Calmo'),
+    'melancholic': ('Melancholic', 'Melancólico'),
+    'energetic': ('Energetic', 'Energético'),
+    'happy': ('Happy', 'Alegre'),
+  };
+  bool get tagBased => criterion == 'genre' || criterion == 'mood';
+  String get tag => criterion == 'genre' ? genre : mood;
   late final artists =
       {
           ...widget.catalog.expand(
@@ -63,9 +71,15 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
   PlaylistImportReport? selection;
   late final byId = {for (final track in widget.catalog) track.id: track};
   String t(String en, String pt) => insightText(context, en, pt);
-  List<Track> get eligible => offline
-      ? widget.catalog.where((t) => widget.offlineIds.contains(t.id)).toList()
-      : widget.catalog;
+  List<Track> get eligible => widget.catalog
+      .where(
+        (track) =>
+            !track.libraryHidden &&
+            (offline
+                ? widget.offlineIds.contains(track.id)
+                : track.available || widget.offlineIds.contains(track.id)),
+      )
+      .toList();
   @override
   void initState() {
     super.initState();
@@ -85,6 +99,7 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
       preparing = true;
       error = null;
       selection = null;
+      if (automaticName && tagBased) name.text = 'Last.fm · $tag';
       if (automaticName && criterion.startsWith('artist_')) {
         name.text =
             '$artist · ${criterion == 'artist_radio'
@@ -95,7 +110,15 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
       }
     });
     try {
-      final report = criterion.startsWith('artist_')
+      final report = tagBased
+          ? await widget.artistTemplates!.tagPlaylist(
+              tag,
+              eligible,
+              limit,
+              genre: criterion == 'genre',
+              offline: widget.offlineOnly,
+            )
+          : criterion.startsWith('artist_')
           ? await widget.artistTemplates!.prepare(
               criterion: criterion,
               artist: artist,
@@ -212,6 +235,18 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
                 items: [
                   if (widget.artistTemplates != null) ...[
                     DropdownMenuItem(
+                      value: 'genre',
+                      child: Text(
+                        t('Genre · Last.fm tags', 'Gênero · tags do Last.fm'),
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'mood',
+                      child: Text(
+                        t('Mood · Last.fm tags', 'Humor · tags do Last.fm'),
+                      ),
+                    ),
+                    DropdownMenuItem(
                       value: 'artist_radio',
                       child: Text(
                         t(
@@ -270,6 +305,50 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
                       },
               ),
               const SizedBox(height: 10),
+              if (tagBased)
+                DropdownButtonFormField<String>(
+                  key: ValueKey(criterion),
+                  isExpanded: true,
+                  initialValue: tag,
+                  decoration: InputDecoration(labelText: t('Tag', 'Tag')),
+                  items: [
+                    for (final value
+                        in criterion == 'genre'
+                            ? ({
+                                  genre,
+                                  'pop',
+                                  'jazz',
+                                  'classical',
+                                  'metal',
+                                  'folk',
+                                  'soul',
+                                  'blues',
+                                  'electronic',
+                                  ...widget.catalog.expand((t) => t.genreNames),
+                                }.where((v) => v.trim().isNotEmpty).toList()
+                                ..sort())
+                            : moods.keys)
+                      DropdownMenuItem(
+                        value: value,
+                        child: Text(
+                          criterion == 'genre'
+                              ? value
+                              : t(moods[value]!.$1, moods[value]!.$2),
+                        ),
+                      ),
+                  ],
+                  onChanged: busy
+                      ? null
+                      : (value) {
+                          if (value == null) return;
+                          if (criterion == 'genre') {
+                            genre = value;
+                          } else {
+                            mood = value;
+                          }
+                          prepare();
+                        },
+                ),
               if (criterion.startsWith('artist_')) ...[
                 Autocomplete<String>(
                   key: ValueKey('insights.artist.$criterion'),

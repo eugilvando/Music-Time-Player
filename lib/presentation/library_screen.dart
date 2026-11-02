@@ -273,6 +273,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   void configurePlayback() {
     if (shutdownRequested) return;
+    controller.fadeMode = widget.settings.visualChoice(
+      'crossfade_mode',
+      'fixed',
+    );
+    controller.fadeSeconds = widget.settings
+        .visualNumber('crossfade_seconds', 0)
+        .round()
+        .clamp(0, 12);
     cachedLibraryPage = null;
     final configuration = [
       widget.settings.visualBool('offline_only', fallback: false),
@@ -281,6 +289,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       widget.settings.visualNumber('prefetch_count', 5),
       widget.settings.visualBool('smart_play', fallback: false),
       widget.settings.visualNumber('continuous_count', 5),
+      widget.settings.visualChoice('continuous_mode', 'related'),
     ].join('|');
     if (configuration == playbackConfiguration) return;
     playbackConfiguration = configuration;
@@ -301,9 +310,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
         ? (current, recent) async {
             final available = await availableOffline();
             return smartTracks(
-              tracks,
+              tracks.where((t) => !t.libraryHidden).toList(),
               current,
               recent,
+              mode: widget.settings.visualChoice('continuous_mode', 'related'),
               offlineOnly: offline,
               offline: available,
               count: widget.settings
@@ -1297,11 +1307,18 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
           Expanded(
             child: controller.queue.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: UiText(
-                        'Selecione uma música para iniciar a fila.',
+                ? DragTarget<List<Track>>(
+                    onWillAcceptWithDetails: (_) => !controller.opening,
+                    onAcceptWithDetails: (d) async {
+                      await controller.insertTracks(d.data, 0);
+                      await save();
+                    },
+                    builder: (_, over, _) => ColoredBox(
+                      color: over.isEmpty
+                          ? Colors.transparent
+                          : Theme.of(context).colorScheme.primaryContainer,
+                      child: const Center(
+                        child: UiText('Arraste faixas para a fila.'),
                       ),
                     ),
                   )
@@ -1311,41 +1328,61 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       controller.reorderQueue(oldIndex, newIndex);
                       save();
                     },
-                    itemBuilder: (context, index) => ListTile(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                      ),
-                      leading: SizedBox.square(
-                        dimension: 32,
-                        child: TrackCover(track: controller.queue[index]),
-                      ),
+                    itemBuilder: (context, index) => DragTarget<List<Track>>(
                       key: ValueKey(controller.queueKeys[index]),
-                      title: Text(
-                        controller.queue[index].title,
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      subtitle: Text(
-                        controller.queue[index].artist,
-                        style: Theme.of(context).textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      selected: index == controller.queueIndex,
-                      onTap: controller.opening
-                          ? null
-                          : () => play(
-                              List.of(controller.queue),
-                              index,
-                              title: controller.queueTitle,
+                      onWillAcceptWithDetails: (_) => !controller.opening,
+                      onAcceptWithDetails: (details) async {
+                        await controller.insertTracks(details.data, index);
+                        await save();
+                      },
+                      builder: (_, over, _) => DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(
+                              width: 2,
+                              color: over.isEmpty
+                                  ? Colors.transparent
+                                  : Theme.of(context).colorScheme.primary,
                             ),
-                      trailing: Padding(
-                        padding: const EdgeInsets.only(right: 28),
-                        child: trackActions(
-                          controller.queue[index],
-                          queueIndex: index,
+                          ),
+                        ),
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                          ),
+                          leading: SizedBox.square(
+                            dimension: 32,
+                            child: TrackCover(track: controller.queue[index]),
+                          ),
+                          key: ValueKey(controller.queueKeys[index]),
+                          title: Text(
+                            controller.queue[index].title,
+                            style: Theme.of(context).textTheme.titleSmall,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          subtitle: Text(
+                            controller.queue[index].artist,
+                            style: Theme.of(context).textTheme.bodySmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          selected: index == controller.queueIndex,
+                          onTap: controller.opening
+                              ? null
+                              : () => play(
+                                  List.of(controller.queue),
+                                  index,
+                                  title: controller.queueTitle,
+                                ),
+                          trailing: Padding(
+                            padding: const EdgeInsets.only(right: 28),
+                            child: trackActions(
+                              controller.queue[index],
+                              queueIndex: index,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -1739,6 +1776,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   );
 
   Widget reviewPlayerBar() => PlayerBar(
+    onQueueEdited: save,
     availability: TrackAvailabilityButton(
       track: controller.current,
       downloads: downloads,

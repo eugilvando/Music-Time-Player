@@ -129,6 +129,19 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Mesmo gênero': 'Same genre',
+  'Desativado': 'Disabled',
+  'Transição entre faixas': 'Track transition',
+  'Mix only exige análise local disponível e equalizador desativado.':
+      'Mix only requires available local analysis and a disabled equalizer.',
+  'Preserva a reprodução sequencial do álbum.':
+      'Preserves sequential album playback.',
+  'Modo de transição': 'Transition mode',
+  'Arraste faixas para a fila.': 'Drag tracks into the queue.',
+  'Modo do play contínuo': 'Continuous play mode',
+  'Ao terminar a fila, acrescenta faixas da biblioteca conforme o modo escolhido.':
+      'When the queue ends, adds library tracks using the selected mode.',
+  'Smart fades analisa WAV PCM de 16 bits e usa a duração escolhida nos demais formatos. Mix only sobrepõe sem ajustar volume apenas quando a análise permite.': 'Smart fades analyzes 16-bit PCM WAV and uses the selected duration for other formats. Mix only overlaps without volume adjustment when analysis permits.',
   'Enviar novos favoritos ao Last.fm': 'Send new favorites to Last.fm',
   'Ao favoritar uma faixa no app, marcar também no Last.fm conectado. Desfavoritar no app não remove o favorito no Last.fm.': 'Favoriting a track in the app also loves it on the connected Last.fm account. Unfavoriting in the app does not remove the Last.fm love.',
   'Novos favoritos serão enviados ao Last.fm conectado.':

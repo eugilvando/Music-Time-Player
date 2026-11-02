@@ -79,6 +79,46 @@ class InsightArtistTemplates {
     );
   }
 
+  Future<PlaylistImportReport> tagPlaylist(
+    String tag,
+    List<Track> catalog,
+    int limit, {
+    required bool genre,
+    required bool offline,
+  }) async {
+    final local = genre
+        ? catalog
+              .where(
+                (t) => t.genreNames.any((g) => searchKey(g) == searchKey(tag)),
+              )
+              .toList()
+        : <Track>[];
+    List<LastFmTrack> ranking;
+    try {
+      ranking = await _loadTopTracks(tag, offline: offline, tag: true);
+    } catch (_) {
+      if (local.isEmpty) rethrow;
+      ranking = [];
+    }
+    final matched = await compute(matchLastFmProfile, (ranking, catalog));
+    final ids = <String>{};
+    final entries = <PlaylistImportEntry>[
+      for (final e in matched.entries)
+        if (e.candidates.length == 1 && ids.add(e.candidates.single)) e,
+      for (final t in local)
+        if (ids.add(t.id))
+          PlaylistImportEntry(
+            ids.length,
+            t.id,
+            [t.id],
+            [],
+            title: t.title,
+            artist: t.artist,
+          ),
+    ];
+    return PlaylistImportReport(entries.take(limit).toList());
+  }
+
   final _topJobs = <String, Future<List<LastFmTrack>>>{};
   Future<List<LastFmTrack>> topTracks(String artist, {bool offline = false}) {
     final key = '${artistNameKey(artist)}|$offline';
@@ -93,11 +133,12 @@ class InsightArtistTemplates {
   Future<List<LastFmTrack>> _loadTopTracks(
     String artist, {
     bool offline = false,
+    bool tag = false,
   }) async {
     await store.database.execute(
       'CREATE TABLE IF NOT EXISTS lastfm_profile_cache(user TEXT NOT NULL,kind TEXT NOT NULL,payload TEXT NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(user,kind))',
     );
-    const kind = 'artist.top.v1';
+    final kind = tag ? 'tag.top.v1' : 'artist.top.v1';
     final key = artistNameKey(artist);
     final rows = await store.database.query(
       'lastfm_profile_cache',
@@ -119,10 +160,10 @@ class InsightArtistTemplates {
     } else {
       try {
         body = await (await api())
-            .readProfile('artist.getTopTracks', {
-              'artist': artist,
+            .readProfile(tag ? 'tag.getTopTracks' : 'artist.getTopTracks', {
+              (tag ? 'tag' : 'artist'): artist,
               'limit': '200',
-              'autocorrect': '0',
+              if (!tag) 'autocorrect': '0',
             })
             .timeout(const Duration(seconds: 10));
         await store.database.insert('lastfm_profile_cache', {
@@ -141,7 +182,7 @@ class InsightArtistTemplates {
       }
     }
     if (body == null) throw StateError('No cached artist ranking');
-    final raw = body['toptracks']?['track'];
+    final raw = body[tag ? 'tracks' : 'toptracks']?['track'];
     return [
       for (final row
           in (raw is List
@@ -155,6 +196,8 @@ class InsightArtistTemplates {
             row['name'] as String,
             row['artist'] is Map && row['artist']['name'] is String
                 ? row['artist']['name'] as String
+                : tag
+                ? ''
                 : artist,
             '',
             null,

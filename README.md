@@ -8,13 +8,17 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.5.5+57.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.6.0+58.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64 preview:** [Download 2.5.5 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1). Separate experimental package, 101 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+
+## New in 2.6.0
+
+Drag tracks into the queue, select modes through the existing Continuous play button, and create genre/mood playlists in Insights. Playback settings add crossfade and bounded WAV-based smart/mix transitions. [Behavior and limits](docs/release-2.6.0.md).
 
 ## New in 2.5.5
 

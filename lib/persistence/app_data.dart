@@ -197,6 +197,7 @@ class AppData {
       'cache_gb': (1.0, 100.0),
       'prefetch_count': (0.0, 20.0),
       'continuous_count': (1.0, 100.0),
+      'crossfade_seconds': (0.0, 12.0),
       'catalog_cover_size': (96.0, 360.0),
     };
     if (ranges.containsKey(name)) {
@@ -205,6 +206,12 @@ class AppData {
     }
     if (name == 'eq_presets') {
       return value is String && validEqualizerPresets(jsonDecode(value));
+    }
+    if (name == 'crossfade_mode') {
+      return {'fixed', 'smart', 'mix'}.contains(value);
+    }
+    if (name == 'continuous_mode') {
+      return {'related', 'shuffle', 'double', 'artist', 'era'}.contains(value);
     }
     if (name == 'eq_preset') return value is String;
     if (name.startsWith('eq_') && name != 'eq_enabled') {

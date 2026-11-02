@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'fade_analysis.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart' hide Track;
 
@@ -10,16 +12,30 @@ import '../domain/ports.dart';
 
 class PlayerController extends ChangeNotifier {
   PlayerController({this.onListening, this.resolver, this.coverLoader}) {
+    _bindPlayer();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _settle();
+      _updateClock();
+      _notify();
+    });
+  }
+
+  void _bindPlayer() {
+    final boundPlayer = player;
     _subscriptions.add(
       player.stream.playing.listen((value) {
+        if (_disposed || !identical(player, boundPlayer)) return;
         _settle();
+        if (!value) _generation++;
         playing = value;
+        if (!value && _tail != null) unawaited(_finishFade());
         _updateClock();
         _notify();
       }),
     );
     _subscriptions.add(
       player.stream.buffering.listen((value) {
+        if (_disposed || !identical(player, boundPlayer)) return;
         _settle();
         buffering = value;
         _updateClock();
@@ -28,12 +44,15 @@ class PlayerController extends ChangeNotifier {
     );
     _subscriptions.add(
       player.stream.position.listen((value) {
+        if (_disposed || !identical(player, boundPlayer)) return;
         position = value;
+        _checkTransition();
         _notify();
       }),
     );
     _subscriptions.add(
       player.stream.duration.listen((value) {
+        if (_disposed || !identical(player, boundPlayer)) return;
         duration = value;
         session?.duration = value;
         _notify();
@@ -41,6 +60,7 @@ class PlayerController extends ChangeNotifier {
     );
     _subscriptions.add(
       player.stream.completed.listen((value) {
+        if (_disposed || !identical(player, boundPlayer)) return;
         if (value && !opening) {
           _settle();
           playing = false;
@@ -52,17 +72,13 @@ class PlayerController extends ChangeNotifier {
     );
     _subscriptions.add(
       player.stream.error.listen((_) {
+        if (_disposed || !identical(player, boundPlayer)) return;
         _settle();
         playing = false;
         error = 'Não foi possível reproduzir este arquivo.';
         _notify();
       }),
     );
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _settle();
-      _updateClock();
-      _notify();
-    });
   }
 
   final void Function(ListeningSession)? onListening;
@@ -70,9 +86,220 @@ class PlayerController extends ChangeNotifier {
   final Future<Uint8List?> Function(String)? coverLoader;
   Future<List<Track>> Function(Track, List<Track>)? continuous;
   bool extending = false;
-  final Player player = Player();
+  Player player = Player();
+  int fadeSeconds = 0;
+  String fadeMode = 'fixed';
+  Player? _tail;
+  ListeningSession? _tailSession;
+  final Stopwatch _tailClock = Stopwatch();
+  bool get transitioning => _tail != null;
+  double _fadeFraction = 1;
+  String? _activeFadeMode;
+
+  void _settleTail() {
+    final tail = _tailSession;
+    if (tail == null) return;
+    _tailClock.stop();
+    tail.addListening(_tailClock.elapsed);
+    _tailClock.reset();
+    onListening?.call(tail);
+    if (_tail?.state.playing == true && _tail?.state.buffering == false) {
+      _tailClock.start();
+    }
+  }
+
+  int _generation = 0;
+  bool _preparing = false;
+  int? _attemptedKey;
+  bool _eqEnabled = false;
+  List<double> _eqGains = const [0, 0, 0, 0, 0];
+
+  void _checkTransition() {
+    if (fadeSeconds <= 0 ||
+        !playing ||
+        opening ||
+        buffering ||
+        seeking ||
+        _disposed ||
+        _preparing ||
+        _tail != null ||
+        repeat == PlaybackRepeat.track ||
+        queueIndex < 0 ||
+        queueIndex + 1 >= queue.length ||
+        duration.inMilliseconds < fadeSeconds * 2000 ||
+        _attemptedKey == queueKeys[queueIndex]) {
+      return;
+    }
+    final remaining = duration - position;
+    if (remaining.inMilliseconds < 400 || remaining.inSeconds >= fadeSeconds) {
+      return;
+    }
+    final next = queue[queueIndex + 1];
+    if (fadeMode == 'mix' &&
+        (next.localPath == null || current?.localPath == null)) {
+      return;
+    }
+    final sequentialAlbum =
+        !shuffle &&
+        current!.album.trim().isNotEmpty &&
+        current!.album == next.album &&
+        (current!.albumArtist.isEmpty
+                ? current!.artist
+                : current!.albumArtist) ==
+            (next.albumArtist.isEmpty ? next.artist : next.albumArtist);
+    if (sequentialAlbum) return;
+    _attemptedKey = queueKeys[queueIndex];
+    unawaited(_overlap(next, queueKeys[queueIndex + 1], _generation));
+  }
+
+  Future<void> _overlap(Track next, int nextKey, int generation) async {
+    _preparing = true;
+    Player? incoming;
+    try {
+      final outgoingKey = queueKeys[queueIndex];
+      final staged = Player();
+      incoming = staged;
+      await staged.setVolume(0);
+      if (staged.platform is NativePlayer) {
+        await (staged.platform as NativePlayer).setProperty('sub-auto', 'no');
+      }
+      final source = resolver == null
+          ? Uri.file(next.localPath!)
+          : await resolver!.resolve(next);
+      final headers = resolver == null
+          ? <String, String>{}
+          : await mediaHeaders(resolver!, next, source);
+      await staged.open(
+        Media(source.toString(), httpHeaders: headers),
+        play: false,
+      );
+      if (staged.state.duration <= Duration.zero) {
+        await staged.stream.duration
+            .firstWhere((value) => value > Duration.zero)
+            .timeout(const Duration(seconds: 3));
+      }
+      final mode = fadeMode;
+      bool valid() =>
+          generation == _generation &&
+          !_disposed &&
+          playing &&
+          !opening &&
+          !seeking &&
+          fadeSeconds > 0 &&
+          queueIndex >= 0 &&
+          queueKeys[queueIndex] == outgoingKey &&
+          queueIndex + 1 < queueKeys.length &&
+          queueKeys[queueIndex + 1] == nextKey &&
+          repeat != PlaybackRepeat.track &&
+          fadeMode == mode;
+      if (!valid()) return;
+      if (mode != 'fixed' &&
+          current?.localPath != null &&
+          next.localPath != null) {
+        final window = await smartOverlapMs(
+          current!.localPath!,
+          next.localPath!,
+          fadeSeconds,
+          mixOnly: mode == 'mix',
+        );
+        if (!valid() || window == 0 || (window == null && mode == 'mix')) {
+          return;
+        }
+        if (window != null) {
+          while (valid() && (duration - position).inMilliseconds > window) {
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+          }
+        }
+      }
+      if (!valid()) return;
+      if (_eqEnabled) await _applyEqualizer(staged, true, _eqGains);
+      final milliseconds = (duration - position).inMilliseconds;
+      if (!valid() || milliseconds < 250) return;
+      if (mode == 'mix' && _eqEnabled) return;
+      if (mode == 'mix') await staged.setVolume(volume);
+      await staged.play();
+      if (!valid()) return;
+      final outgoing = player;
+      _settle();
+      for (final sub in _subscriptions) {
+        unawaited(sub.cancel());
+      }
+      _subscriptions.clear();
+      player = staged;
+      incoming = null;
+      _tail = outgoing;
+      _tailSession = session;
+      _tailClock
+        ..reset()
+        ..start();
+      _activeFadeMode = mode;
+      _fadeFraction = mode == 'mix' ? 1 : 0;
+      current = next;
+      queueIndex++;
+      position = staged.state.position;
+      duration = staged.state.duration;
+      completed = false;
+      playing = true;
+      buffering = staged.state.buffering;
+      session = ListeningSession(next, DateTime.now().toUtc())
+        ..duration = duration;
+      _bindPlayer();
+      _updateClock();
+      _notify();
+      final elapsed = Stopwatch()..start();
+      while (identical(_tail, outgoing) && !_disposed) {
+        final fraction = (elapsed.elapsedMilliseconds / milliseconds).clamp(
+          0.0,
+          1.0,
+        );
+        _fadeFraction = fraction;
+        _settleTail();
+        if (mode != 'mix') {
+          await Future.wait([
+            staged.setVolume(volume * fraction),
+            outgoing.setVolume(volume * (1 - fraction)),
+          ]);
+        }
+        if (fraction >= 1) break;
+        await Future<void>.delayed(const Duration(milliseconds: 45));
+      }
+    } catch (_) {
+      // A failed preload leaves the ordinary end-of-track advance available.
+    } finally {
+      if (incoming != null) await incoming.dispose();
+      if (_tail != null) await _finishFade();
+      _preparing = false;
+    }
+  }
+
+  Future<void> _finishFade() async {
+    _generation++;
+    _settleTail();
+    _tailClock.stop();
+    _tailSession = null;
+    _activeFadeMode = null;
+    _fadeFraction = 1;
+    final tail = _tail;
+    _tail = null;
+    if (tail != null) {
+      await tail.dispose();
+      if (!_disposed) await player.setVolume(volume);
+    }
+  }
+
   static const equalizerFrequencies = [60, 230, 910, 3600, 14000];
   Future<void> setEqualizer(bool enabled, List<double> gains) async {
+    await _finishFade();
+    await _applyEqualizer(player, enabled, gains);
+    _eqEnabled = enabled;
+    _eqGains = List.of(gains);
+  }
+
+  Future<void> _applyEqualizer(
+    Player player,
+    bool enabled,
+    List<double> gains,
+  ) async {
     if (player.platform is! NativePlayer) {
       throw UnsupportedError('Equalizador indisponível');
     }
@@ -220,6 +447,8 @@ class PlayerController extends ChangeNotifier {
   }) async {
     if (opening || _disposed) return;
     opening = true;
+    await _finishFade();
+    _attemptedKey = null;
     _settle();
     playing = false;
     completed = false;
@@ -408,8 +637,15 @@ class PlayerController extends ChangeNotifier {
 
   Future<void> setVolume(double value) async {
     try {
-      await player.setVolume(value.clamp(0, 100));
       volume = value.clamp(0, 100);
+      final mixed = _activeFadeMode == 'mix';
+      await player.setVolume(
+        volume * (_tail == null || mixed ? 1 : _fadeFraction),
+      );
+      final tail = _tail;
+      if (tail != null) {
+        await tail.setVolume(volume * (mixed ? 1 : 1 - _fadeFraction));
+      }
       _notify();
     } catch (_) {
       error = 'Não foi possível alterar o volume.';
@@ -451,6 +687,34 @@ class PlayerController extends ChangeNotifier {
     _notify();
   }
 
+  Future<void> insertTracks(List<Track> items, int at) async {
+    if (opening || items.isEmpty) return;
+    final wasEmpty = queue.isEmpty;
+    final index = at.clamp(0, queue.length);
+    final keys = items.map((_) => _nextQueueKey++).toList();
+    if (shuffle) {
+      final baseline = originalQueueOrder.map((i) => queueKeys[i]).toList();
+      baseline.insertAll(
+        index == queue.length
+            ? baseline.length
+            : baseline.indexOf(queueKeys[index]),
+        keys,
+      );
+      _originalQueueKeys
+        ..clear()
+        ..addAll(baseline);
+    }
+    queue.insertAll(index, items);
+    queueKeys.insertAll(index, keys);
+    if (wasEmpty) {
+      queueIndex = 0;
+      await open(queue.first, play: false);
+    } else {
+      if (index <= queueIndex) queueIndex += items.length;
+      _notify();
+    }
+  }
+
   void reorderQueue(int oldIndex, int newIndex) {
     if (opening || oldIndex == newIndex) return;
     final track = queue.removeAt(oldIndex);
@@ -486,6 +750,7 @@ class PlayerController extends ChangeNotifier {
   Future<void> clearQueue() async {
     if (opening) return;
     _settle();
+    await _finishFade();
     await player.stop();
     queue.clear();
     queueTitle = null;
@@ -547,6 +812,7 @@ class PlayerController extends ChangeNotifier {
 
   Future<void> toggle() async {
     if (current == null || opening) return;
+    await _finishFade();
     if (completed) {
       await open(current!);
       return;
@@ -564,6 +830,7 @@ class PlayerController extends ChangeNotifier {
   Future<void> seek(Duration target) async {
     if (opening || seeking || current == null) return;
     seeking = true;
+    await _finishFade();
     _settle();
     try {
       await player.seek(target);
@@ -580,6 +847,7 @@ class PlayerController extends ChangeNotifier {
   void dispose() {
     _settle();
     _disposed = true;
+    unawaited(_finishFade());
     _timer.cancel();
     _clock.stop();
     for (final subscription in _subscriptions) {

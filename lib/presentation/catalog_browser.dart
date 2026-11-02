@@ -1160,21 +1160,25 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       return [
         if (category == 'albums')
           Text(t.trackNumber?.toString() ?? (i + 1).toString()),
-        InkWell(
-          onTap: () => paged ? selectPaged(t) : select(t, queue ?? values),
-          child: Row(
-            children: [
-              if (showSelection || selectedIds.isNotEmpty)
-                Checkbox(
-                  value: selectedIds.contains(t.id),
-                  onChanged: (_) => paged
-                      ? selectPaged(t, checkbox: true)
-                      : select(t, queue ?? values, checkbox: true),
-                ),
-              SizedBox.square(dimension: 32, child: TrackCover(track: t)),
-              const SizedBox(width: 12),
-              Expanded(child: Text(t.title)),
-            ],
+        dragTrack(
+          t,
+          paged ? widget.tracks : queue ?? values,
+          InkWell(
+            onTap: () => paged ? selectPaged(t) : select(t, queue ?? values),
+            child: Row(
+              children: [
+                if (showSelection || selectedIds.isNotEmpty)
+                  Checkbox(
+                    value: selectedIds.contains(t.id),
+                    onChanged: (_) => paged
+                        ? selectPaged(t, checkbox: true)
+                        : select(t, queue ?? values, checkbox: true),
+                  ),
+                SizedBox.square(dimension: 32, child: TrackCover(track: t)),
+                const SizedBox(width: 12),
+                Expanded(child: Text(t.title)),
+              ],
+            ),
           ),
         ),
         ...columns.map(
@@ -1229,32 +1233,36 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             itemCount: values.length,
             itemBuilder: (context, i) {
               final t = values[i];
-              return ItemActionRegion(
-                child: ListTile(
-                  dense: dense,
-                  selected: selectedIds.contains(t.id),
-                  leading: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      check(t),
-                      SizedBox.square(
-                        dimension: dense ? 32 : 44,
-                        child: TrackCover(track: t),
-                      ),
-                    ],
+              return dragTrack(
+                t,
+                paged ? widget.tracks : values,
+                ItemActionRegion(
+                  child: ListTile(
+                    dense: dense,
+                    selected: selectedIds.contains(t.id),
+                    leading: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        check(t),
+                        SizedBox.square(
+                          dimension: dense ? 32 : 44,
+                          child: TrackCover(track: t),
+                        ),
+                      ],
+                    ),
+                    title: Text(
+                      t.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      '${t.artistNames.join('; ')}${t.album.isEmpty ? '' : ' · ${t.album}'}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: widget.trackActions(t),
+                    onTap: () => paged ? selectPaged(t) : select(t, values),
                   ),
-                  title: Text(
-                    t.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Text(
-                    '${t.artistNames.join('; ')}${t.album.isEmpty ? '' : ' · ${t.album}'}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: widget.trackActions(t),
-                  onTap: () => paged ? selectPaged(t) : select(t, values),
                 ),
               );
             },
@@ -1807,6 +1815,23 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           );
   }
 
+  Widget dragTrack(Track t, List<Track> order, Widget child) {
+    final data = selectedIds.contains(t.id)
+        ? order.where((item) => selectedIds.contains(item.id)).toList()
+        : [t];
+    return Draggable<List<Track>>(
+      data: data,
+      feedback: Material(
+        elevation: 4,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(data.length == 1 ? t.title : '${data.length} ♪'),
+        ),
+      ),
+      child: child,
+    );
+  }
+
   Widget compactTrack(
     List<Track> values,
     int i, {
@@ -1814,80 +1839,85 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     List<Track>? queue,
   }) {
     final t = values[i];
-    return ItemActionRegion(
-      child: Card(
-        margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {
-            if (showSelection || selectedIds.isNotEmpty) {
-              if (paged) {
-                selectPaged(t);
+    return dragTrack(
+      t,
+      paged ? widget.tracks : queue ?? values,
+      ItemActionRegion(
+        child: Card(
+          margin: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              if (showSelection || selectedIds.isNotEmpty) {
+                if (paged) {
+                  selectPaged(t);
+                } else {
+                  select(t, queue ?? values);
+                }
               } else {
-                select(t, queue ?? values);
+                final playback = queue ?? values;
+                widget.onPlay(
+                  playback,
+                  playback.indexWhere((track) => track.id == t.id),
+                );
               }
-            } else {
-              final playback = queue ?? values;
-              widget.onPlay(
-                playback,
-                playback.indexWhere((track) => track.id == t.id),
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              children: [
-                if (showSelection || selectedIds.isNotEmpty)
-                  Checkbox(
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                    value: selectedIds.contains(t.id),
-                    onChanged: (_) => setState(() {
-                      if (!selectedIds.remove(t.id)) {
-                        selectedIds.add(t.id);
-                      }
-                    }),
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  if (showSelection || selectedIds.isNotEmpty)
+                    Checkbox(
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                      value: selectedIds.contains(t.id),
+                      onChanged: (_) => setState(() {
+                        if (!selectedIds.remove(t.id)) {
+                          selectedIds.add(t.id);
+                        }
+                      }),
+                    ),
+                  if (category == 'albums')
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Text(
+                        t.trackNumber?.toString() ?? (i + 1).toString(),
+                      ),
+                    ),
+                  SizedBox.square(
+                    dimension: MediaCardSizeScope.horizontalArtwork(context),
+                    child: TrackCover(track: t),
                   ),
-                if (category == 'albums')
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Text(
-                      t.trackNumber?.toString() ?? (i + 1).toString(),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          t.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        Text(
+                          t.artist,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
-                SizedBox.square(
-                  dimension: MediaCardSizeScope.horizontalArtwork(context),
-                  child: TrackCover(track: t),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        t.artist,
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                widget.trackActions(t),
-              ],
+                  widget.trackActions(t),
+                ],
+              ),
             ),
           ),
         ),
@@ -1954,60 +1984,64 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         itemCount: values.length,
         itemBuilder: (context, i) {
           final track = values[i];
-          return ItemActionRegion(
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              leading: category == 'albums'
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          track.trackNumber?.toString() ?? (i + 1).toString(),
-                        ),
-                        const SizedBox(width: 12),
-                        if (showSelection || selectedIds.isNotEmpty)
-                          Checkbox(
-                            value: selectedIds.contains(track.id),
-                            onChanged: (_) =>
-                                select(track, values, checkbox: true),
-                          )
-                        else
-                          SizedBox.square(
-                            dimension: 44,
-                            child: TrackCover(track: track),
+          return dragTrack(
+            track,
+            queue ?? values,
+            ItemActionRegion(
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                leading: category == 'albums'
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            track.trackNumber?.toString() ?? (i + 1).toString(),
                           ),
-                      ],
-                    )
-                  : showSelection || selectedIds.isNotEmpty
-                  ? Checkbox(
-                      value: selectedIds.contains(track.id),
-                      onChanged: (_) => select(track, values, checkbox: true),
-                    )
-                  : SizedBox.square(
-                      dimension: 44,
-                      child: TrackCover(track: track),
-                    ),
-              title: Text(
-                track.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 12),
+                          if (showSelection || selectedIds.isNotEmpty)
+                            Checkbox(
+                              value: selectedIds.contains(track.id),
+                              onChanged: (_) =>
+                                  select(track, values, checkbox: true),
+                            )
+                          else
+                            SizedBox.square(
+                              dimension: 44,
+                              child: TrackCover(track: track),
+                            ),
+                        ],
+                      )
+                    : showSelection || selectedIds.isNotEmpty
+                    ? Checkbox(
+                        value: selectedIds.contains(track.id),
+                        onChanged: (_) => select(track, values, checkbox: true),
+                      )
+                    : SizedBox.square(
+                        dimension: 44,
+                        child: TrackCover(track: track),
+                      ),
+                title: Text(
+                  track.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text(
+                  view == 'detailed'
+                      ? columns
+                            .map(
+                              (c) =>
+                                  '${ui(context, catalogColumns[c] ?? c)}: ${cell(track, c)}',
+                            )
+                            .join(' · ')
+                      : track.artistNames.join('; '),
+                ),
+                selected: selectedIds.contains(track.id),
+                trailing: widget.trackActions(track),
+                onTap: () => select(track, queue ?? values),
               ),
-              subtitle: Text(
-                view == 'detailed'
-                    ? columns
-                          .map(
-                            (c) =>
-                                '${ui(context, catalogColumns[c] ?? c)}: ${cell(track, c)}',
-                          )
-                          .join(' · ')
-                    : track.artistNames.join('; '),
-              ),
-              selected: selectedIds.contains(track.id),
-              trailing: widget.trackActions(track),
-              onTap: () => select(track, queue ?? values),
             ),
           );
         },

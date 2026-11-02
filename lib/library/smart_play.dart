@@ -82,15 +82,95 @@ List<Track> itemMix(
   return [availableSeeds.first, ...candidates.take(count - 1)];
 }
 
+const continuousModes = {
+  'related': 'Mesmo gênero',
+  'shuffle': 'Shuffle Specialist',
+  'double': 'Double Shot',
+  'artist': 'Artist Fan',
+  'era': 'Era Enthusiast',
+};
+
 List<Track> smartTracks(
   List<Track> library,
   Track current,
   List<Track> recent, {
   int count = 5,
+  String mode = 'related',
   bool offlineOnly = false,
   Set<String> offline = const {},
   Random? random,
 }) {
+  if (mode != 'related' && continuousModes.containsKey(mode)) {
+    final seen = recent.reversed.take(20).map((t) => t.id).toSet();
+    final pool =
+        library
+            .where(
+              (t) =>
+                  t.id != current.id &&
+                  (offlineOnly
+                      ? offline.contains(t.id)
+                      : t.available || offline.contains(t.id)),
+            )
+            .toList()
+          ..shuffle(random);
+    bool sharesArtist(Track a, Track b) {
+      final names = a.artistNames
+          .map(searchKey)
+          .where((s) => s.isNotEmpty)
+          .toSet();
+      return b.artistNames.map(searchKey).any(names.contains);
+    }
+
+    final ranked = [
+      ...pool.where((t) => !seen.contains(t.id)),
+      ...pool.where((t) => seen.contains(t.id)),
+    ];
+    if (mode == 'double') {
+      final result = <Track>[];
+      final used = <String>{};
+      void add(Track t) {
+        if (result.length < count && used.add(t.id)) result.add(t);
+      }
+
+      final previous = recent.length > 1 ? recent[recent.length - 2] : null;
+      if (previous == null || !sharesArtist(current, previous)) {
+        final mate = ranked.where((t) => sharesArtist(t, current)).firstOrNull;
+        if (mate != null) add(mate);
+      }
+      final lastArtist = result.isNotEmpty ? result.last : current;
+      for (final t in [
+        ...ranked.where((t) => !sharesArtist(t, lastArtist)),
+        ...ranked.where((t) => sharesArtist(t, lastArtist)),
+      ]) {
+        if (result.length >= count) break;
+        if (used.contains(t.id)) continue;
+        final mate = ranked
+            .where(
+              (b) => !used.contains(b.id) && b.id != t.id && sharesArtist(b, t),
+            )
+            .firstOrNull;
+        if (mate != null || result.length < count) {
+          add(t);
+          if (mate != null) add(mate);
+        }
+      }
+      return result;
+    }
+    final artists = [current, ...recent.reversed.take(3)];
+    return ranked
+        .where(
+          (t) => switch (mode) {
+            'artist' => artists.any((a) => sharesArtist(a, t)),
+            'era' =>
+              current.year != null &&
+                  t.year != null &&
+                  current.year! ~/ 10 == t.year! ~/ 10,
+            _ => true,
+          },
+        )
+        .take(count)
+        .toList();
+  }
   final genres = current.genreNames.map(searchKey).toSet();
   final related = library
       .where(

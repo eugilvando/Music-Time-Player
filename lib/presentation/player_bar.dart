@@ -1,3 +1,5 @@
+import '../library/smart_play.dart';
+import '../domain/track.dart';
 import 'design_icon.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -77,6 +79,7 @@ class PlayerBar extends StatelessWidget {
     required this.onFavorite,
     required this.onDetails,
     required this.onQueue,
+    this.onQueueEdited,
     required this.onExpand,
     required this.onSave,
     this.onLyrics,
@@ -90,6 +93,7 @@ class PlayerBar extends StatelessWidget {
   final PlayerController controller;
   final AppSettings settings;
   final bool favorite;
+  final VoidCallback? onQueueEdited;
   final VoidCallback onFavorite, onDetails, onQueue, onExpand;
   final Future<void> Function() onSave;
   final VoidCallback? onLyrics;
@@ -247,19 +251,41 @@ class PlayerBar extends StatelessWidget {
       width: 18,
       child: VerticalDivider(indent: 8, endIndent: 8),
     ),
-    'continuous' => IconButton(
+    'continuous' => PopupMenuButton<String>(
       tooltip: ui(context, 'Play contínuo'),
-      isSelected: settings.visualBool('smart_play', fallback: false),
-      icon: const MtIcon(
-        IconData(0xf6b5, fontFamily: 'Material Symbols Rounded'),
+      initialValue: settings.visualBool('smart_play', fallback: false)
+          ? settings.visualChoice('continuous_mode', 'related')
+          : 'off',
+      icon: MtIcon(
+        const IconData(0xf6b5, fontFamily: 'Material Symbols Rounded'),
+        color: settings.visualBool('smart_play', fallback: false)
+            ? Theme.of(context).colorScheme.primary
+            : null,
       ),
-      onPressed: () => settings.updateVisual(
-        'smart_play',
-        !settings.visualBool('smart_play', fallback: false),
-      ),
+      itemBuilder: (_) => [
+        PopupMenuItem(value: 'off', child: Text(ui(context, 'Desativado'))),
+        for (final mode in continuousModes.entries)
+          PopupMenuItem(value: mode.key, child: Text(ui(context, mode.value))),
+      ],
+      onSelected: (mode) async {
+        if (mode != 'off') await settings.updateVisual('continuous_mode', mode);
+        await settings.updateVisual('smart_play', mode != 'off');
+      },
     ),
     'lyrics' => panelToggle(context, 'lyrics'),
-    'queue' => panelToggle(context, 'queue'),
+    'queue' => DragTarget<List<Track>>(
+      onWillAcceptWithDetails: (_) => !controller.opening,
+      onAcceptWithDetails: (details) async {
+        await controller.insertTracks(details.data, controller.queue.length);
+        onQueueEdited?.call();
+      },
+      builder: (_, over, _) => ColoredBox(
+        color: over.isEmpty
+            ? Colors.transparent
+            : Theme.of(context).colorScheme.primaryContainer,
+        child: panelToggle(context, 'queue'),
+      ),
+    ),
     'expand' => IconButton(
       tooltip: ui(context, 'Tocando agora'),
       onPressed: onExpand,

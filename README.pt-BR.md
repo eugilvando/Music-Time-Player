@@ -4,11 +4,15 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.5.5+57.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.6.0+58.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
+
+## Novidades da 2.6.0
+
+Arraste faixas para a fila, escolha modos no botão existente de Play contínuo e crie playlists por gênero/humor nos Insights. Configurações de reprodução incluem crossfade e transições inteligentes com análise WAV. [Comportamento e limites](docs/release-2.6.0.md).
 
 ## Novidades da 2.5.5
 

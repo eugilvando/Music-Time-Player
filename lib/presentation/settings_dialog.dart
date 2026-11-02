@@ -1,3 +1,4 @@
+import '../library/smart_play.dart';
 import 'design_icon.dart';
 import 'about_page.dart';
 import 'sidebar_settings.dart';
@@ -568,12 +569,82 @@ class _SettingsPageState extends State<SettingsPage> {
     subsection('Organizar barra de reprodução', [
       PlayerBarOrganizer(settings: widget.settings),
     ], collapsible: true),
+    subsection('Crossfade', [
+      DropdownButtonFormField<int>(
+        key: ValueKey(widget.settings.visualNumber('crossfade_seconds', 0)),
+        initialValue: widget.settings
+            .visualNumber('crossfade_seconds', 0)
+            .round()
+            .clamp(0, 12),
+        decoration: InputDecoration(
+          labelText: ui(context, 'Transição entre faixas'),
+        ),
+        items: [
+          for (var n = 0; n <= 12; n++)
+            DropdownMenuItem(
+              value: n,
+              child: Text(n == 0 ? ui(context, 'Desativado') : '${n}s'),
+            ),
+        ],
+        onChanged: (n) {
+          if (n != null) {
+            widget.settings.updateVisual('crossfade_seconds', n.toDouble());
+          }
+        },
+      ),
+      DropdownButtonFormField<String>(
+        key: ValueKey(widget.settings.visualChoice('crossfade_mode', 'fixed')),
+        initialValue: widget.settings.visualChoice('crossfade_mode', 'fixed'),
+        decoration: InputDecoration(
+          labelText: ui(context, 'Modo de transição'),
+        ),
+        items: const [
+          DropdownMenuItem(value: 'fixed', child: Text('Crossfade')),
+          DropdownMenuItem(value: 'smart', child: Text('Smart fades')),
+          DropdownMenuItem(value: 'mix', child: Text('Mix only')),
+        ],
+        onChanged: (v) {
+          if (v != null) widget.settings.updateVisual('crossfade_mode', v);
+        },
+      ),
+      const UiText(
+        'Smart fades analisa WAV PCM de 16 bits e usa a duração escolhida nos demais formatos. Mix only sobrepõe sem ajustar volume apenas quando a análise permite.',
+      ),
+      const UiText(
+        'Mix only exige análise local disponível e equalizador desativado.',
+      ),
+      const UiText('Preserva a reprodução sequencial do álbum.'),
+    ]),
     subsection('Play contínuo', [
       visualSwitch(
         'smart_play',
         'Play contínuo',
         fallback: false,
-        subtitle: 'Ao terminar a fila, acrescenta faixas do mesmo gênero da sua biblioteca, sem reproduzir músicas externas.',
+        subtitle: 'Ao terminar a fila, acrescenta faixas da biblioteca conforme o modo escolhido.',
+      ),
+      DropdownButtonFormField<String>(
+        key: ValueKey(
+          widget.settings.visualChoice('continuous_mode', 'related'),
+        ),
+        initialValue: widget.settings.visualChoice(
+          'continuous_mode',
+          'related',
+        ),
+        decoration: InputDecoration(
+          labelText: ui(context, 'Modo do play contínuo'),
+        ),
+        items: [
+          for (final mode in continuousModes.entries)
+            DropdownMenuItem(
+              value: mode.key,
+              child: Text(ui(context, mode.value)),
+            ),
+        ],
+        onChanged: (mode) {
+          if (mode != null) {
+            widget.settings.updateVisual('continuous_mode', mode);
+          }
+        },
       ),
       DropdownButtonFormField<int>(
         key: ValueKey(
@@ -833,7 +904,7 @@ class _SettingsPageState extends State<SettingsPage> {
             visualSwitch('lyrics_auto_scroll', 'Rolagem automática das letras'),
             ...typography(lyrics: true),
           ]),
-          controls()[3],
+          controls()[4],
           controls().first,
           subsection('Informações e painéis', [
             visualSwitch('show_queue', 'Mostrar fila lateral'),
@@ -854,6 +925,7 @@ class _SettingsPageState extends State<SettingsPage> {
         return pageList([
           controls()[1],
           controls()[2],
+          controls()[3],
           ArtistSelectionSettings(settings: widget.settings),
           if (widget.controller != null) controls().last,
         ]);

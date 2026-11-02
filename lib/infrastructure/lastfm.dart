@@ -44,6 +44,7 @@ class LastFmClient implements ScrobbleSink {
     const methods = {
       'artist.getSimilar',
       'artist.getTopTracks',
+      'tag.getTopTracks',
       'album.getInfo',
       'user.getTopTracks',
       'user.getRecentTracks',
