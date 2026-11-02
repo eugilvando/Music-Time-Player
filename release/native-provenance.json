@@ -5,7 +5,7 @@
   "upstreamRelease": "https://github.com/zhongfly/mpv-winbuild/releases/tag/2026-11-02-a687796d9d",
   "archive": "mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z",
   "archiveSha256": "8b61f89716f31a6a1a3c85dc9a16bd7c57c77062b843af8cc8b78f6b5912d2e9",
-  "mirror": "https://github.com/eugilvando/Music-Time-Player/releases/download/v2.7.0/mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z",
+  "mirror": "https://github.com/eugilvando/Music-Time-Player/releases/download/v2.7.1/mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z",
   "mpvVersion": "v0.41.0-1421-ga687796d9",
   "buildRecipe": "https://github.com/zhongfly/mpv-winbuild/tree/25b58a7",
   "buildRun": "https://github.com/zhongfly/mpv-winbuild/actions/runs/41441239761",

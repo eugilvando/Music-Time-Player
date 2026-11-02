@@ -4,7 +4,7 @@
 
 # Music Time
 
-**Your music, your library, your time.** A personal Windows music player for local files, cloud libraries and media servers. Built with Flutter, Dart, MediaKit/libmpv and SQLite, without a Music Time backend.
+**Your music, your library, your time.** A personal Windows and Ubuntu music player for local files, cloud libraries and media servers. Built with Flutter, Dart, MediaKit/libmpv and SQLite, without a Music Time backend.
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
@@ -16,68 +16,17 @@ Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [Download 2.7.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
-## New in 2.7.1
+## Current highlights
 
-Fixes missing album artwork in Windows media controls after crossfade. [Details](docs/release-2.7.1.md).
+Windows **2.7.1** fixes album artwork after crossfade; Ubuntu **2.7.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
 
-## New in 2.7.0
+[Windows release notes](docs/release-2.7.1.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
-Album drag and drop, automatic crossfade, clearer playback settings, 19 mood templates, AutoEQ text-profile import and automatic EQ profiles per output device. The existing Continuous play icon now aligns with its neighboring controls. [Usage and limits](docs/release-2.7.0.md).
-
-## New in 2.6.1
-
-Drag tracks into the queue, select modes through the existing Continuous play button, and create genre/mood playlists in Insights. Playback settings add crossfade and bounded WAV-based smart/mix transitions. [Behavior and limits](docs/release-2.6.1.md).
-
-## New in 2.5.5
-
-New track favorites can be exported to the connected Last.fm account, with persistent retry and an opt-out. Ubuntu tray and desktop icon fixes are included in the published 2.5.5 Preview 1 package; real desktop acceptance remains pending. [Details](docs/release-2.5.5.md).
-
-## New in 2.5.4
-
-Completed source scans remove missing files from the visible library and update renamed item locations. Track details show a selectable source path. Hide/show tracks or collection tracks with persistent library visibility filters. The sidebar organizer now supports drag handles, switches and movement menus. Catalog editing appears at the end of track actions. [Details and validation](docs/release-2.5.4.md).
-
-## New in 2.5.3
-
-Create a mix or radio from tracks, artists or albums. The player bar artist link prefers the album artist, falling back to track credits. Artist mixes/radios use the full visible library with offline eligibility. Case/spacing variants no longer reject valid similar artists. Improved similarity cache, status messages, explicit Last.fm refresh and automatic local genre/credit fallback make failures recoverable. Playing starts a named queue; playlists are saved only explicitly. [Details and validation](docs/release-2.5.3.md).
-
-## New in 2.5.2
-
-Disabling shuffle restores the original queue order while preserving the current occurrence and playback position. The artwork backdrop is now global across all sections. Settings adds an About page with project, version, licenses and support links; the Sidebar organizer is below Navigation and Home. [Details and validation](docs/release-2.5.2.md).
-
-## New in 2.5.1
-
-Home reuses its previous composition when returning to the page during the same app session. When library data changes, compatible content stays visible while its replacement is prepared in the background, then updates together. Cached content respects source visibility and offline/filter changes; initial large-library loads still use a skeleton. [Scope and validation](docs/release-2.5.1.md).
-
-## New in 2.5.0
-
-Shuffle now rearranges the visible queue, keeping the current occurrence first. The player bar wraps controls in narrow windows, volume spacing is 8 px, and active Last.fm uses brand red. Home starts with a reduced-motion-aware skeleton. A–Z navigation supports title-sorted Library, Albums, Artists and Playlists, including SQL-paged tracks. Listening Insights keeps cached data visible while refreshing in the background, once per selection per session, with manual refresh available. Account and refresh status share the period toolbar. [Release notes and validation](docs/release-2.5.0.md).
-
-## New in 2.4.1
-
-Save queue as playlist and Clear queue now live in the action menu beside the Queue title. The sidebar and player bar organizers in Settings can be expanded or collapsed and start closed. Existing order and visibility preferences are preserved. [Release notes](docs/release-2.4.1.md).
-
-## New in 2.4.0
-
-Listening Insights adds artist radio, an artist's most played tracks in the selected period, and global Last.fm artist popularity matched to your library. Review expected track names and replacement suggestions before confirming. Save the current queue as a playlist, preserving order and repeats. Insights uses the library's artist images. Reorder/hide sidebar items, enlarge Vinyl artwork, and use larger lyrics with tighter line spacing. [Details and limits](docs/release-2.4.0.md).
-
-## New in 2.3.0
-
-Review album metadata in one operation and choose a cover for albums without artwork. Only checked fields are applied; individual track titles, credits and disc/track numbers are preserved. Manual covers survive synchronization and can be included in artwork backups. Thumbnail decoding and bounded artwork/portrait caches reduce image memory use. [Details, measurements and compatibility](docs/release-2.3.0.md).
-
-## New in 2.2.1
-
-Multi-disc albums now show ordered disc sections and play in disc/track order. MP3 TPOS and FLAC DISCNUMBER are read, including number/total values. Tracks in one folder or explicit CD1/CD2 subfolders are supported; existing track IDs, playlists and album favorites are preserved. [Details and upgrade compatibility](docs/release-2.2.1.md).
-
-## What changed since 2.0
-
-- **Listening Insights**, below History: exact/custom periods, personal Last.fm rankings, listening activity, previous-period comparison, weekly/monthly/yearly summaries and CSV export.
-- Create a reviewed manual playlist from listening data or start a playback queue without saving; offline report cache and explicit partial-history coverage.
-- Independent primary/secondary typography, refined Home controls and artwork indicators, Top Tracks on artist pages, and one action menu per playlist track.
-- Resizable Queue/Lyrics side panels, window dimensions preserved on tray restore, and Classic, Vinyl, Minimalist, Cover Only and Lyrics Only player models.
+Only the current Windows and Ubuntu installers are retained in Releases. Historical source tags and release notes remain available in Git.
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.7.0.exe` from the [2.7.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0).
+1. Download `MusicTime-Setup-2.7.1.exe` from the [2.7.1 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.1).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -131,14 +80,17 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 ### Playback, queue, mixes and lyrics
 
 - Play/pause, previous/next, seek, volume and click-to-mute, shuffle cycles and repeat off/queue/track.
+- Drag tracks or whole albums from library views, artist discography and Home into the queue; album tracks follow disc/track order. Save the queue as a playlist.
 - Persistent queue/index/position/volume/shuffle/repeat, duplicate queue occurrences, drag reordering, play next, append, remove and clear.
 - Queue heading shows the playing playlist or mix when available.
 - Five Now Playing designs: Classic, Vinyl, Minimalist, Cover Only and Lyrics Only, adjustable artwork and optional blurred backgrounds.
 - Player-bar organizer with ordering/visibility of individual controls and three movable optional separators; metadata fields, time/progress and offline/cache/permanent status.
-- Optional continuous play adds related tracks **from your library** at the end of the queue, respecting visibility and offline rules.
+- Continuous play adds tracks **from your library**, respecting visibility and offline rules. Choose same genre, Shuffle specialist, Double shot, Artist fan or Era enthusiast using the existing player-bar button or Playback settings; configure how many tracks to add.
 - Track/album-related mixes, artist-only mixes and artist radio using available similar artists. Artist mix and radio have independent sizes, **40 tracks by default, configurable from 1 to 500**, preview and regeneration.
 - Mixes create and start a **playback queue**. Saving a manual playlist is a separate explicit action.
-- Five-band equalizer with presets, persistent bands and gain compensation.
+- Crossfade: Off, Automatic or Manual; Smooth, Smart fades and Mix only transitions. Automatic selects up to six seconds using track lengths and compatible waveform analysis. Sequential album playback bypasses overlap.
+- Five-band equalizer with presets, persistent bands and gain compensation. Import named AutoEQ `ParametricEQ.txt` profiles with peak/low-shelf/high-shelf filters and protective preamp adjustment.
+- Optional EQ profile per default system output: assign separate profiles to speakers/headphones; Music Time applies the saved profile when the OS output changes. Unassigned outputs use no EQ. Choose the output in the operating system.
 - Local LRC/TXT sidecars, supported embedded MP3 lyrics, OneDrive lyric retrieval and optional free LRCLIB fallback. Synchronized scrolling, seek, per-track offset and presentation controls; word timing only when real timestamps exist.
 
 ### Playlists and listening history
@@ -163,11 +115,14 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 ### Last.fm, settings and Windows integration
 
 - Optional Last.fm browser authorization, independent now-playing/scrobble controls and a persistent outbox.
+- New track favorites can also be sent to the connected Last.fm account, with persistent retries and an opt-out.
 - Public favorites/recent/top-track imports with catalog matching and review; artist similarity and library-constrained radio. API credentials and authorization are required where applicable.
 - Listening Insights: personal rankings, exact/custom periods, activity and previous-period comparison, weekly/monthly/yearly summaries, CSV and a reviewed playlist/queue generator. Reports use a separate per-profile cache, with offline access and explicit partial coverage; they do not alter local history. See [the Insights guide](docs/listening-insights.md).
-- Nine redesigned settings categories: General and appearance; Interface and player; Playback and audio; Library and metadata; Music sources; Cache and offline; Downloads; Integrations; Backup and advanced.
+- Genre playlists and 19 mood templates use Last.fm community tags matched to tracks already in your library. These are editable manual playlists, not an external streaming catalog or audio mood analysis.
+- Settings with search and an About page: General and appearance; Interface and player; Playback and audio; Library and metadata; Music sources; Cache and offline; Downloads; Integrations; Backup and advanced.
 - Dark/light/system themes, manual accent or Windows accent, typography, motion, artwork/background and detailed player customization.
 - Selective, compressed `.mtbackup` backups and import of only the data you choose, including playlist-only imports. Optional artwork, provider application IDs and password-encrypted credentials/sessions. Legacy JSON import, storage information, artwork optimization and guarded reset remain available. See [backup guide](docs/backup.md).
+- Reorder/hide sidebar and player-bar items, resize Queue/Lyrics panels, and use A–Z navigation in title-sorted catalog views.
 - Windows tray, close/minimize behavior and native media controls with title/artist/album/artwork, play/pause, next/previous and seek.
 
 ## Screenshots
@@ -190,7 +145,7 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Current limits
 
-- The stable release targets Windows x64. A separate experimental Ubuntu 24.04 x64 preview is linked above; Android and macOS are not supplied or validated.
+- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 123 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. Android and macOS are not supplied or validated.
 - No streaming subscription, catalog acquisition, bundled songs, DRM bypass or Music Time backend.
 - Source synchronization is currently manual/full within the selected scope. Checkpoints are not a general automatic/incremental sync system. Google Drive includes a paginated visual folder picker.
 - OneDrive personal playback/reopening has user evidence. Google Drive, WebDAV, Jellyfin, Emby, SMB, multiple-account edge cases and live Last.fm delivery still need broader real-account/device validation. Controlled tests do not imply service certification.
@@ -200,14 +155,15 @@ These images render actual application widgets using a **fictional, isolated dem
 - Listening Insights reads up to 250 pages per operation, with continuation and partial coverage labels. Live-account acceptance remains pending. Generated playlists are manual snapshots; PDF reports and automatic playlist updates are not included.
 - No smart-playlist AND/OR rule engine, playlist tags, named queue manager or independent resume position per album/playlist.
 - No automatic offline-playlist membership refresh, rule-driven downloads, byte-range download resumption or general configurable download directory/concurrency.
-- No sleep timer, ReplayGain, gapless guarantee, AutoEQ/headphone profiles or advanced output selection. Crossfade scope is described in the 2.6.1 release notes. No Windows startup option, fully configurable global hotkeys or full notification system.
+- AutoEQ imports text files; it does not search or download profiles from autoeq.app. Crossfade waveform analysis supports local PCM16 WAV; other formats use duration-based fallback. Mix only requires compatible analysis and EQ disabled.
+- No sleep timer, user-facing ReplayGain mode, gapless guarantee, in-app advanced output selection, Windows startup option, fully configurable global hotkeys or full notification system.
 - Backups are limited to 128 MiB after decompression; optional artwork is capped at 64 MiB before export. Music files, managed audio and separate custom-image files are not included. Credentials require encryption; provider sessions may still need reconnection. Older versions cannot read the new archive format.
 
 ## Validation and development
 
-Version 2.4.0 validation is recorded in [release notes](docs/release-2.4.0.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
+Windows 2.7.1 passed five targeted regressions, static analysis, release build and native media/tray integration. The preceding 2.7.0 full suite passed 425 tests; it was not rerun in full for 2.7.1. Results are recorded in [release notes](docs/release-2.7.1.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.4.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.7.1.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 

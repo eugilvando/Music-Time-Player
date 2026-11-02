@@ -3,7 +3,7 @@
 set(MUSIC_TIME_MPV_SHA256 "8b61f89716f31a6a1a3c85dc9a16bd7c57c77062b843af8cc8b78f6b5912d2e9")
 set(MUSIC_TIME_MPV_DLL_SHA256 "0c05c3ae5f54563dcd69bed60c69d4baa0a5c19f95a044c5c4c0a253197be41f")
 set(MUSIC_TIME_MPV_URL "https://github.com/zhongfly/mpv-winbuild/releases/download/2026-11-02-a687796d9d/mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z")
-set(MUSIC_TIME_MPV_MIRROR "https://github.com/eugilvando/Music-Time-Player/releases/download/v2.7.0/mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z")
+set(MUSIC_TIME_MPV_MIRROR "https://github.com/eugilvando/Music-Time-Player/releases/download/v2.7.1/mpv-dev-lgpl-x86_64-20261102-git-a687796d9d.7z")
 set(MUSIC_TIME_MPV_DIR "${CMAKE_BINARY_DIR}/music_time_mpv")
 set(MUSIC_TIME_MPV_ARCHIVE "${MUSIC_TIME_MPV_DIR}/mpv-lgpl.7z")
 if(DEFINED FLUTTER_TARGET_PLATFORM AND NOT FLUTTER_TARGET_PLATFORM STREQUAL "windows-x64")
