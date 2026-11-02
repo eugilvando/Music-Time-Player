@@ -1,41 +1,32 @@
-# Music Time — Ubuntu 24.04 x64 Preview 2.6.0
+# Music Time 2.6.0 — Ubuntu 24.04 x64
 
-Experimental Ubuntu package based on **2.6.0+58**, retaining the existing `music-time-preview` package and `app.musictime.preview` profile identity. Windows 2.6.0 is independent.
+This is the final Ubuntu release based on 2.6.0+58. The existing Debian package name `music-time-preview`, launch command and `app.musictime.preview` application identifier are retained so apt upgrades the installed preview and finds its existing profile. The application displays Music Time.
 
 ## Install or upgrade
 
-Close the previous instance and back up your Linux profile. Download the Debian package and SHA256SUMS.txt into the same folder:
+Close Music Time, back up your Linux profile, and download the .deb and SHA256SUMS.txt from the Ubuntu release.
 
 ```sh
 sha256sum -c SHA256SUMS.txt
 sudo apt update
-sudo apt install ./music-time-preview_2.6.0-0ubuntu1*preview1_amd64.deb
+sudo apt install ./music-time-preview_2.6.0-0ubuntu1_amd64.deb
 music-time-preview
 ```
 
-Internal Debian version: `2.6.0-0ubuntu1~preview1`. GitHub changes `~` to `.` in download filenames; the wildcard accepts both. Do not run the app with sudo. Existing library/profile is preserved during package upgrades; Windows credentials are not automatically transferable.
+## Features and scope
 
-## Changes
+Drag library tracks into the queue. Choose autoplay behavior through the existing Continuous play button or Playback settings. Create genre and mood playlists through Insights and Last.fm tags. Playback settings include Crossfade, Smart fades and Mix only.
 
-- New track favorites are exported to the authorized Last.fm account, with persistent retries. Configure under Settings → Integrations → Last.fm. Unfavoriting locally does not unlove remotely. Requires API credentials and an authorized session; old favorites are not bulk-exported.
-- Close/minimize-to-tray is now enabled on Linux. Restore and playback/exit actions are available in the tray menu. Ubuntu needs the AppIndicator extension active. Without an active StatusNotifier host, the app keeps the window reachable rather than hiding it.
-- The window's themed icon and installed desktop filename match its existing application ID. Unpin/re-pin an older dock shortcut if necessary after upgrade.
-- Windows SMTC/accent/startup features remain Windows-only. Mount SMB shares in Ubuntu and add local folders.
+Smart fades currently analyzes local 16-bit PCM WAV envelopes and uses the configured duration for other formats. Mix only requires supported local analysis and a disabled equalizer. Sequential album playback bypasses overlap. Last.fm/community tagging and real cloud delivery require account acceptance.
 
-## Graphics in VMware
+Ubuntu needs an active AppIndicator extension for the tray. The package recommends it and the app checks for a host before hiding. Verify close, minimize, restore, playback and Exit in your desktop session. Re-pin an older launcher if its icon is stale.
 
-Impeller stays disabled. Default compatibility mode uses Mesa CPU OpenGL and X11. Close the app before trying `MUSIC_TIME_RENDERER=software music-time-preview` or the opt-in hardware comparison `MUSIC_TIME_RENDERER=hardware music-time-preview`. Retest in your own VM; CPU rendering can use more CPU.
+## Graphics and validation
 
-## Validation and real-machine acceptance
+Default compatibility rendering uses X11 and Mesa software OpenGL with Impeller disabled. After closing the app, use `MUSIC_TIME_RENDERER=software music-time-preview` for CPU rendering or `MUSIC_TIME_RENDERER=hardware music-time-preview` for a hardware comparison.
 
-The Ubuntu workflow builds and checks the candidate package. Confirm the release tag and checksum before installation. CI does not prove speaker output, real cloud/Last.fm account access, GNOME tray behavior or VMware compatibility in your own environment.
+The release manifest records the CI run, tests, package checksum and graphical inspection. Real speaker output, cloud accounts, GNOME tray interaction and your VM/partition require separate acceptance. Native overlap tests have Windows coverage. The final release designation was requested by the project owner.
 
-On your VM or separate partition: verify dock/Alt+Tab icon, close/minimize/restore through the tray, playback continuity and Exit. Disable tray settings and verify normal behavior. Launch with AppIndicator disabled and confirm the window remains accessible; re-enable it and restart. Test a new Last.fm favorite online and offline, then reconnect and allow retries. Verify local/cloud playback and paused session restoration.
+## Português
 
-## Português brasileiro
-
-Prévia **2.6.0+58** com favoritos enviados ao Last.fm e correções do ícone/bandeja Ubuntu. Feche o app, faça backup do perfil Linux e atualize pelo apt com o comando acima. A extensão AppIndicator precisa estar ativa para usar a bandeja. O teste na sua VM/outra partição, áudio e contas reais continua separado da validação automatizada. O Windows não é reinstalado por esta publicação.
-
-## Build from source
-
-Use the public main branch on Ubuntu 24.04 with Flutter 3.47.7/Dart 3.13 and the dependencies in `.github/workflows/ubuntu-preview.yml`. Run `flutter pub get`, `flutter analyze`, `flutter build linux --release`, then `bash scripts/package-ubuntu.sh`.
+Versão final 2.6.0 para Ubuntu 24.04 x64. Atualize com o comando apt acima. O identificador interno conserva a palavra preview para atualizar a instalação existente e preservar o perfil. Confira bandeja, áudio e contas reais na sua VM/outra partição. As limitações de Smart fades e Mix only estão descritas acima.

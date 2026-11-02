@@ -45,11 +45,11 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "Music Time — Ubuntu Preview");
+    gtk_header_bar_set_title(header_bar, "Music Time");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "Music Time — Ubuntu Preview");
+    gtk_window_set_title(window, "Music Time");
   }
 
   // The desktop filename and themed icon use the existing application ID.
@@ -59,7 +59,7 @@ static void my_application_activate(GApplication* application) {
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   // Impeller can produce corrupt geometry with virtual GPU drivers. Keep the
-  // preview on Skia; its launcher chooses Mesa software GL or a CPU fallback.
+  // application on Skia; its launcher chooses Mesa software GL or a CPU fallback.
   fl_dart_project_set_enable_impeller(project, FALSE);
   g_message("Music Time graphics: renderer=%s; impeller=disabled; software_gl=%s",
             g_getenv("FLUTTER_LINUX_RENDERER") != nullptr

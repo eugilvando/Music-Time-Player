@@ -1,4 +1,4 @@
-name: Ubuntu preview package
+name: Ubuntu release package
 on:
   push:
     branches: [main]
@@ -66,13 +66,13 @@ jobs:
       - name: Upload VM package
         uses: actions/upload-artifact@v4
         with:
-          name: music-time-ubuntu-24.04-amd64-2.6.0-preview1
+          name: music-time-ubuntu-24.04-amd64-2.6.0-final
           path: dist/ubuntu/
           retention-days: 14
       - name: Upload Linux validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-2.6.0-preview1-validation
+          name: ubuntu-2.6.0-final-validation
           path: build/ubuntu-smoke/
           if-no-files-found: ignore

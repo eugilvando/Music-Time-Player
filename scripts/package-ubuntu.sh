@@ -5,7 +5,7 @@ test "$(uname -m)" = x86_64
 bundle=build/linux/x64/release/bundle
 test -x "$bundle/music_time"
 test -f "$bundle/lib/libapp.so"
-version="$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)-0ubuntu1~preview1"
+version="$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)-0ubuntu1"
 stage="$(mktemp -d)"
 trap 'rm -rf -- "$stage"' EXIT
 install -d "$stage/DEBIAN" "$stage/opt/music-time-preview" "$stage/usr/bin" \
@@ -23,8 +23,8 @@ if test -d LICENSES; then cp -a LICENSES "$stage/usr/share/doc/music-time-previe
 cat > "$stage/usr/share/applications/app.musictime.preview.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
-Name=Music Time (Ubuntu Preview)
-Comment=Personal music player — experimental Ubuntu build
+Name=Music Time
+Comment=Personal music player — Ubuntu desktop player
 Exec=music-time-preview
 Icon=app.musictime.preview
 Terminal=false
@@ -40,9 +40,9 @@ Section: sound
 Priority: optional
 Depends: libc6 (>= 2.39), libstdc++6, libgtk-3-0t64, libsecret-1-0, libmpv2, libsqlite3-0, libx11-6, libxi6, libblkid1, liblzma5, libglu1-mesa, libasound2t64, gnome-keyring, xdg-utils, libglib2.0-bin
 Recommends: gnome-shell-extension-appindicator
-Description: Music Time experimental Ubuntu 24.04 desktop player
+Description: Music Time Ubuntu 24.04 desktop player
  Local and cloud music catalog, audio playback and playlists.
- Separate preview package; desktop integrations require VM testing.
+ Desktop integrations depend on the host session and AppIndicator.
 CONTROL
 find "$stage" -type d -exec chmod 755 {} +
 dpkg-deb --root-owner-group --build "$stage" "dist/ubuntu/music-time-preview_${version}_amd64.deb"
