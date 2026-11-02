@@ -8,13 +8,17 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.6.1+58.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.7.0+60.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64 preview:** [Download 2.5.5 Preview 1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.5-ubuntu-preview.1). Separate experimental package, 101 targeted tests and graphical launch checked; real audio/cloud/VM acceptance remains pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 2.7.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+
+## New in 2.7.0
+
+Album drag and drop, automatic crossfade, clearer playback settings, 19 mood templates, AutoEQ text-profile import and automatic EQ profiles per output device. The existing Continuous play icon now aligns with its neighboring controls. [Usage and limits](docs/release-2.7.0.md).
 
 ## New in 2.6.1
 
@@ -69,7 +73,7 @@ Multi-disc albums now show ordered disc sections and play in disc/track order. M
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.5.4.exe` from the [2.4.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.5.4).
+1. Download `MusicTime-Setup-2.7.0.exe` from the [2.7.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.

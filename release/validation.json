@@ -1,32 +1,34 @@
 {
-  "version": "2.6.1+59",
+  "testScope": "425 unique full-suite tests passed. 21 targeted and 5 final AutoEQ checks overlap the full suite and are not additional unique tests.",
+  "version": "2.7.0+60",
   "platform": "Windows x64",
-  "sourceCommit": "09e8b4319cf3e13d8bce38b5dbfd4c739f55a79c",
+  "limits": "AutoEQ imports ParametricEQ.txt profiles. Smart analysis supports local PCM16 WAV; automatic duration fallback covers other formats. Mix requires analysis and EQ disabled. Real Linux desktop/audio/tray acceptance remains pending.",
+  "sourceCommit": "5eb54cf3ea08d9d9c4af1d1225b7d9765105e5ce",
   "checks": {
     "analysis": "passed",
-    "regressionCases": 5,
+    "visualReview": "Settings wide/narrow, output profile and native autoplay alignment inspected",
+    "finalAutoEqRegressionTests": 5,
+    "fullSuiteTests": 425,
+    "releaseBuild": "passed",
+    "nativeIntegration": "SMTC, tray, placement and clean exit passed",
     "nativeOverlapModes": [
-      "fixed",
+      "manual",
+      "automatic",
       "smart",
       "mix"
     ],
-    "audioOutput": "24-bit paused restoration, WASAPI device failure and recovery passed",
-    "nativeIntegration": "SMTC, seek, tray, placement, clean exit passed",
-    "releaseBuild": "passed",
-    "installation": "binary hashes matched; database, preferences and vault unchanged by installer",
+    "targetedTests": 21,
+    "installation": "installed 2.7.0+60; binary hashes matched; database, preferences and vault unchanged",
     "personalProfile": {
-      "date": "2026-11-02T17:11:38.5526485Z",
-      "newCrashEvents": 0,
       "responding": true,
-      "visualReview": "Personal library and queue rendered; playback visible; listening quality not asserted",
-      "observedSeconds": 81
+      "observedSeconds": 54,
+      "scope": "Startup observed in personal profile; listening quality not asserted",
+      "newCrashEvents": 0
     }
   },
-  "testScope": "Five unique regression cases passed across two runs after a test fixture compilation correction. No full-suite claim. Existing 2.6.0 functionality was tested separately.",
   "installer": {
-    "file": "MusicTime-Setup-2.6.1.exe",
-    "bytes": 20573971,
-    "sha256": "9d7fa669c99900c95f5720d7b50ba1df2a72a43bd4d6e2eaee418ebe9a3ef2eb"
-  },
-  "limits": "Smart fades analysis: local PCM16 WAV. Other formats: fixed fade. Mix only requires local analysis and EQ disabled. Real Linux playback and tray acceptance remain for VM validation."
+    "bytes": 46275852,
+    "file": "MusicTime-Setup-2.7.0.exe",
+    "sha256": "462588c67b8b72e0927b6f4cfd7a60f7eac0d681df71218f95ca07be0fb6997b"
+  }
 }

@@ -53,6 +53,13 @@ try {
     )
     $compiler = $compilerPaths | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     if (-not $compiler) { throw 'Instale Inno Setup 6 para empacotar.' }
+    $nativeProvenance = Get-Content 'release/native-provenance.json' -Raw | ConvertFrom-Json
+    if ((Get-FileHash (Join-Path $bundle 'libmpv-2.dll')).Hash.ToLowerInvariant() -ne $nativeProvenance.sha256) {
+        throw 'Biblioteca de áudio diferente da versão validada.'
+    }
+    Copy-Item -LiteralPath 'LICENSES' -Destination $bundle -Recurse -Force
+    Copy-Item -LiteralPath 'THIRD_PARTY_NOTICES.md','LICENSE' -Destination $bundle -Force
+    Copy-Item -LiteralPath 'release/native-provenance.json' -Destination (Join-Path $bundle 'LICENSES/native-provenance.json') -Force
     & $compiler installer/music_time.iss
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao criar instalador.' }
 } finally {

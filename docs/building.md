@@ -26,6 +26,8 @@ $env:MUSIC_TIME_LIBMPV = Join-Path $PWD 'build/windows/x64/runner/Release/libmpv
 flutter test --no-pub --concurrency=1
 ```
 
+The Windows CMake recipe verifies a pinned LGPL libmpv archive and DLL by SHA256. It first checks the unchanged archive attached to Music Time 2.7.0, then the upstream daily release. This preserves reproducibility after upstream archive retention expires.
+
 Current validation results are listed in the release manifest. `MUSIC_TIME_LIBMPV` selects the built playback library for native tests; build it first. Test fixtures use temporary or in-memory data. Material-icon test fonts are resolved from this checkout's active Flutter SDK rather than a developer-specific absolute path.
 
 Optional native checks use temporary validation profiles:
@@ -43,7 +45,7 @@ Do not use an active personal profile for reset/restore tests. Do not interpret 
 .\scripts\build-installer.ps1 -FlutterSdk 'C:\path\to\flutter'
 ```
 
-The script checks formatting and analysis, builds Windows, runs tests/native checks, copies the C++ runtime, prepares notices and calls Inno Setup. Output: `dist/MusicTime-Setup-2.5.4.exe`.
+The script checks formatting and analysis, builds Windows, runs tests/native checks, copies the C++ runtime, prepares notices and calls Inno Setup. Output: `dist/MusicTime-Setup-2.7.0.exe`.
 
 Application binaries live in `build/windows/x64/runner/Release/`. Distribute the complete bundle or the installer, not only `music_time.exe`. Keep third-party licenses/notices with the binaries. See [third-party notices](../THIRD_PARTY_NOTICES.md) and `LICENSES/`.
 
