@@ -1,6 +1,7 @@
 import '../platform/output_equalizer.dart';
 import 'playback_transition_settings.dart';
 import 'design_icon.dart';
+import 'icon_settings.dart';
 import 'about_page.dart';
 import 'sidebar_settings.dart';
 import 'artist_selection_settings.dart';
@@ -97,6 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
   static const pages = <SettingsCategory, List<String>>{
     SettingsCategory.general: [
       'Tema e cores',
+      'Ícones',
       'Idioma',
       'Janela e bandeja',
       'Movimento e acessibilidade',
@@ -766,6 +768,7 @@ class _SettingsPageState extends State<SettingsPage> {
       case SettingsCategory.general:
         return pageList([
           appearance().first,
+          subsection('Ícones', [IconSettings(settings: widget.settings)]),
           ...language(),
           ...windows(),
           subsection('Movimento e acessibilidade', [
@@ -925,6 +928,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final q = search.toLowerCase().trim();
     const terms = <String, String>{
       'Tema e cores': 'theme colors accent destaque windows',
+      'Ícones': 'icons solar phosphor material filled outlined contorno preenchido pacote',
       'Tipografia': 'font text texto fontes tamanho size',
       'Movimento e acessibilidade':
           'animation accessibility reduce motion animações',

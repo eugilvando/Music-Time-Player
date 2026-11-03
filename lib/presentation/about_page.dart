@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'settings_card.dart';
 import 'ui_language.dart';
 
-const musicTimeVersion = '2.8.0+62';
+const musicTimeVersion = '2.9.0+63';
 const musicTimeRepository = 'https://github.com/eugilvando/Music-Time-Player';
 
 class MusicTimeAbout extends StatelessWidget {
@@ -102,6 +102,10 @@ class MusicTimeAbout extends StatelessWidget {
             const SizedBox(height: 12),
             const UiText(
               'Construído com Flutter, Dart, MediaKit/libmpv e SQLite.',
+            ),
+            const SizedBox(height: 12),
+            const SelectableText(
+              'Solar Icons © 480 Design · CC BY 4.0\nhttps://solar-icons.dev/ · https://creativecommons.org/licenses/by/4.0/\nPhosphor Icons © Phosphor Icons · MIT\nhttps://phosphoricons.com/',
             ),
             const SizedBox(height: 12),
             const UiText(

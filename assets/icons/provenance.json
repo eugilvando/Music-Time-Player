@@ -1,0 +1,67 @@
+{
+  "solar": {
+    "source": "https://github.com/iconify/icon-sets/blob/master/json/solar.json",
+    "sha256": "dccf8d964b11fbf0e95a3fc5b9c5a9577f5a61ebdc00fdf388c4f28972435bda",
+    "info": {
+      "name": "Solar",
+      "total": 8706,
+      "author": {
+        "name": "480 Design",
+        "url": "https://www.figma.com/community/file/1166831539721848736"
+      },
+      "license": {
+        "title": "CC BY 4.0",
+        "spdx": "CC-BY-4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "samples": [
+        "magnifier-zoom-out-broken",
+        "armchair-2-bold-duotone",
+        "traffic-economy-line-duotone",
+        "user-rounded-bold-duotone",
+        "soundwave-linear",
+        "hamburger-menu-broken"
+      ],
+      "height": 24,
+      "category": "UI 24px",
+      "tags": [
+        "Precise Shapes",
+        "Has Padding",
+        "Uses Stroke"
+      ],
+      "palette": false
+    }
+  },
+  "ph": {
+    "source": "https://github.com/iconify/icon-sets/blob/master/json/ph.json",
+    "sha256": "c530113dab503dae58492e46cad79c7bb3e4d6fbe85b1c181e7c6208cbfa28f8",
+    "info": {
+      "name": "Phosphor",
+      "total": 9072,
+      "version": "2.1.1",
+      "author": {
+        "name": "Phosphor Icons",
+        "url": "https://github.com/phosphor-icons/core"
+      },
+      "license": {
+        "title": "MIT",
+        "spdx": "MIT",
+        "url": "https://github.com/phosphor-icons/core/blob/main/LICENSE"
+      },
+      "samples": [
+        "folder-open-duotone",
+        "check-square-offset-thin",
+        "pencil-line-fill",
+        "check-thin",
+        "browser-duotone",
+        "thermometer-simple-fill"
+      ],
+      "height": 24,
+      "category": "UI Other / Mixed Grid",
+      "tags": [
+        "Has Padding"
+      ],
+      "palette": false
+    }
+  }
+}

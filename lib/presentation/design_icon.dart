@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-/// Renders the Figma symbol family without changing action identifiers.
+import 'icon_catalog.dart';
+
+/// An inherited choice also reaches menus, dialogs and const icon widgets.
+class MtIconTheme extends InheritedWidget {
+  const MtIconTheme({
+    super.key,
+    required super.child,
+    this.pack = 'current',
+    this.style = 'filled',
+  });
+  final String pack, style;
+  static MtIconTheme? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<MtIconTheme>();
+  @override
+  bool updateShouldNotify(MtIconTheme oldWidget) =>
+      pack != oldWidget.pack || style != oldWidget.style;
+}
+
+/// Renders the selected family without changing action identifiers.
 class MtIcon extends Icon {
   const MtIcon(
     super.icon, {
@@ -373,19 +392,67 @@ class MtIcon extends Icon {
   };
 
   @override
-  Widget build(BuildContext context) => Icon(
-    symbols[icon] ?? icon,
-    size: size,
-    color: color,
-    semanticLabel: semanticLabel,
-    textDirection: textDirection,
-    shadows: shadows,
-    applyTextScaling: applyTextScaling,
-    fill: fill ?? 1,
-    weight: weight ?? 400,
-    grade: grade ?? 0,
-    opticalSize: opticalSize ?? 24,
-    blendMode: blendMode,
-    fontWeight: fontWeight,
-  );
+  Widget build(BuildContext context) {
+    final theme = MtIconTheme.of(context);
+    final outlined =
+        theme?.style == 'outlined' ||
+        fill == 0 ||
+        icon == Icons.favorite_border;
+    final asset = assetFor(icon, theme?.pack ?? 'current', outlined: outlined);
+    if (asset != null) {
+      final inherited = IconTheme.of(context);
+      final baseSize = size ?? inherited.size ?? 24;
+      final effectiveSize =
+          (applyTextScaling ?? inherited.applyTextScaling ?? false)
+          ? MediaQuery.textScalerOf(context).scale(baseSize)
+          : baseSize;
+      var effectiveColor = color ?? inherited.color ?? const Color(0xff000000);
+      final opacity = inherited.opacity ?? 1;
+      if (opacity != 1) {
+        effectiveColor = effectiveColor.withValues(
+          alpha: effectiveColor.a * opacity,
+        );
+      }
+      return SvgPicture.asset(
+        asset,
+        width: effectiveSize,
+        height: effectiveSize,
+        colorFilter: ColorFilter.mode(effectiveColor, BlendMode.srcIn),
+        semanticsLabel: semanticLabel,
+        excludeFromSemantics: semanticLabel == null,
+        matchTextDirection: icon?.matchTextDirection ?? false,
+      );
+    }
+    return Icon(
+      symbols[icon] ?? icon,
+      size: size,
+      color: color,
+      semanticLabel: semanticLabel,
+      textDirection: textDirection,
+      shadows: shadows,
+      applyTextScaling: applyTextScaling,
+      fill: fill ?? (outlined ? 0 : 1),
+      weight: weight ?? 400,
+      grade: grade ?? 0,
+      opticalSize: opticalSize ?? 24,
+      blendMode: blendMode,
+      fontWeight: fontWeight,
+    );
+  }
+
+  static String? assetFor(
+    IconData? icon,
+    String pack, {
+    bool outlined = false,
+  }) {
+    final names = iconCatalog[icon];
+    if (names == null) return null;
+    return switch (pack) {
+      'solar' =>
+        'assets/icons/solar/${names.$1}-${outlined ? 'linear' : 'bold'}.svg',
+      'phosphor' =>
+        'assets/icons/phosphor/${names.$2}${outlined ? '' : '-fill'}.svg',
+      _ => null,
+    };
+  }
 }

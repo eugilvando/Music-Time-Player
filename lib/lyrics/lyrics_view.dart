@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../presentation/design_icon.dart';
+
 import 'package:flutter/rendering.dart';
 
 import '../application/player_controller.dart';
@@ -110,7 +113,7 @@ class _LyricsViewState extends State<LyricsView> {
           return Center(
             child: TextButton.icon(
               onPressed: reload,
-              icon: const Icon(Icons.refresh),
+              icon: const MtIcon(Icons.refresh),
               label: const Text('Could not load lyrics. Retry'),
             ),
           );
@@ -120,7 +123,7 @@ class _LyricsViewState extends State<LyricsView> {
           return Center(
             child: TextButton.icon(
               onPressed: reload,
-              icon: const Icon(Icons.refresh),
+              icon: const MtIcon(Icons.refresh),
               label: const Text(
                 'No lyrics found. Add a matching LRC/TXT beside the audio file, or embed lyrics in its tags. Retry',
               ),
@@ -152,7 +155,7 @@ class _LyricsViewState extends State<LyricsView> {
                       widget.controller.current!.id,
                       offset.inMilliseconds - 250,
                     ),
-                    icon: const Icon(Icons.remove),
+                    icon: const MtIcon(Icons.remove),
                   ),
                   Text('${ui(context, 'Ajuste')}: ${offset.inMilliseconds} ms'),
                   IconButton(
@@ -161,7 +164,7 @@ class _LyricsViewState extends State<LyricsView> {
                       widget.controller.current!.id,
                       offset.inMilliseconds + 250,
                     ),
-                    icon: const Icon(Icons.add),
+                    icon: const MtIcon(Icons.add),
                   ),
                   TextButton(
                     onPressed: () => widget.settings.setLyricsOffset(

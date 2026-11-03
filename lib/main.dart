@@ -1,4 +1,6 @@
 import 'presentation/design_preview.dart';
+import 'presentation/design_icon.dart';
+import 'presentation/icon_licenses.dart';
 
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
@@ -24,6 +26,7 @@ import 'package:path/path.dart' as path;
 
 Future<void> main(List<String> arguments) async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerIconLicenses();
   // Live images are separate from this LRU budget; size-aware decoding keeps
   // thumbnails small while the expanded player can request a larger variant.
   PaintingBinding.instance.imageCache
@@ -245,7 +248,11 @@ class MusicTimeApp extends StatelessWidget {
               settings.visualBool('reduce_motion', fallback: false) ||
               !settings.visualBool('animations'),
         ),
-        child: child!,
+        child: MtIconTheme(
+          pack: settings.iconPack,
+          style: settings.iconStyle,
+          child: child!,
+        ),
       ),
       theme: musicTimeTheme(
         Brightness.light,

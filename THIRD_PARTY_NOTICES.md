@@ -29,3 +29,9 @@ The library is a separate replaceable DLL; the application does not add a restri
 Windows builds include Microsoft Visual C++ runtime files redistributed under Microsoft's applicable terms, not MIT. Windows itself and system fonts are not bundled as source assets. The interface now bundles Inter and Bricolage Grotesque under their SIL Open Font Licenses, and Material Symbols Rounded under its Apache license. License texts are included in assets/fonts and LICENSES. No Segoe font files are included.
 
 The generated artwork and fictional catalog used in screenshots were created for this project and are not an included commercial music library. Provider and server names identify their respective third-party products; this project is not an official Google, Microsoft, Last.fm, Jellyfin or Emby client endorsed by those providers.
+
+## Optional interface icon packs
+
+- Solar Icons © 480 Design, licensed under CC BY 4.0: https://solar-icons.dev/ and https://creativecommons.org/licenses/by/4.0/. Included styles: Bold and Linear. A subset is bundled as SVG assets, with SVG containers and runtime colors adapted for Music Time. Full license: assets/icons/licenses/Solar-CC-BY-4.0.txt.
+- Phosphor Icons © Phosphor Icons, MIT: https://phosphoricons.com/ and https://github.com/phosphor-icons/core. Included styles: Fill and Regular. Full license: assets/icons/licenses/Phosphor-MIT.txt.
+- SVG data is sourced from the Iconify icon-sets collection, preserving the original icon licenses. Source URLs, input hashes and attribution are recorded in assets/icons/provenance.json. These assets do not require a network connection at runtime.

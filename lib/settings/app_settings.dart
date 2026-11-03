@@ -44,6 +44,15 @@ class AppSettings extends ChangeNotifier {
     return fontFamilies.containsKey(value) ? value : fallback;
   }
 
+  String get iconPack {
+    final value = visualChoice('icon_pack', 'current');
+    return {'current', 'solar', 'phosphor'}.contains(value) ? value : 'current';
+  }
+
+  String get iconStyle => visualChoice('icon_style', 'filled') == 'outlined'
+      ? 'outlined'
+      : 'filled';
+
   late ThemeMode mode;
   late int accent;
   int? systemAccent;
@@ -243,7 +252,13 @@ class AppSettings extends ChangeNotifier {
     'additional_info',
   });
   Future<void> resetGeneral() async {
-    await resetVisualKeys({'system_accent', 'animations', 'reduce_motion'});
+    await resetVisualKeys({
+      'system_accent',
+      'animations',
+      'reduce_motion',
+      'icon_pack',
+      'icon_style',
+    });
     await update(theme: ThemeMode.dark, color: accents.keys.first);
     await setLanguage('en');
     await setWindowBehavior('windows.close_to_tray', true);
