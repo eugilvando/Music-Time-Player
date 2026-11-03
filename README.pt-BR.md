@@ -18,7 +18,7 @@ O **Windows 2.8.0** traz mixes somente do artista com ranking Last.fm, até 20 d
 
 [Notas Windows](docs/release-2.8.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
 
-Releases mantém apenas os instaladores atuais de Windows e Ubuntu. Tags do código e notas de versões anteriores permanecem no Git.
+Use os links de Windows e Ubuntu acima para obter os pacotes atuais. Tags do código e notas históricas permanecem no Git; instaladores antigos podem ser removidos nas limpezas.
 
 ## Instalação
 

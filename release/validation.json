@@ -1,27 +1,25 @@
 {
-  "checks": {
-    "nativeIntegration": "SMTC thumbnail present, play/pause, tray, placement and clean exit passed",
-    "nativeOverlapModes": [
-      "fixed",
-      "smart",
-      "mix",
-      "auto"
-    ],
-    "targetedTests": 5,
-    "installation": "binary hashes matched; database, preferences and vault unchanged",
-    "regressionReproduced": "incoming crossfade artwork was null before the fix",
-    "releaseBuild": "passed",
-    "artwork": "incoming track and listening session retain artwork; previous/next retains artwork",
-    "analysis": "passed"
-  },
-  "platform": "Windows x64",
-  "sourceCommit": "3525cfb464876270e2ef267dc6e6130e2427b6ab",
   "installer": {
-    "sha256": "5353ee063691c8898e353a61ae0477e90e1e1e8b7ec3f483759ddcbee5abb279",
-    "bytes": 46271410,
-    "file": "MusicTime-Setup-2.7.1.exe"
+    "sha256": "92b3a95ff8690e12f5d61fc6e2107939f2e8ff98ac5831bf9c9cc6016ca403fb",
+    "file": "MusicTime-Setup-2.8.0.exe",
+    "bytes": 46282655
   },
-  "version": "2.7.1+61",
-  "limits": "Acceptance with the user album remains pending. Ubuntu package remains 2.7.0.",
-  "testScope": "Five targeted regression tests; no full-suite rerun. Native SMTC smoke checks thumbnail presence; artwork identity is checked in the playback-controller regressions."
+  "limits": "Windows-only packaging. Ubuntu final remains 2.7.0 with no new Linux build/publication. Last.fm ranking requires a valid API key; local fallback remains available.",
+  "sourceCommit": "18f06d223686051f777cacf754b116b6c20ceb76",
+  "platform": "Windows x64",
+  "version": "2.8.0+62",
+  "checks": {
+    "nativeIntegration": "SMTC artwork/play/pause, tray, placement and clean exit passed",
+    "installation": "2.8.0+62 installed; binary hashes matched; database/preferences/vault unchanged",
+    "radio": "existing similarity regression cases passed",
+    "analysis": "passed; complete project",
+    "uniqueTargetedTests": 39,
+    "sourceCopies": "private/public/package application sources matched",
+    "finalRerunTests": 7,
+    "queueDrag": "row text reorders; taps and action buttons retained",
+    "artistRanking": "Last.fm global ranking, library-only artist scope, local fill, cache/offline/refresh/failure paths",
+    "featured": "20 cards, play/shuffle actions, drag to queue, stale artist response protection",
+    "releaseBuild": "passed"
+  },
+  "testScope": "39 unique cases across final runs: 38 passed initially; the one failing drag test used an insufficient gesture. After correcting the gesture endpoint, all seven cases in its file passed. No full-suite rerun. Last.fm uses controlled HTTP fixtures and SQLite cache, not live account certification."
 }

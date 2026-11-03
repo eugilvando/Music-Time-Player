@@ -22,7 +22,7 @@ Windows **2.8.0** adds Last.fm-ranked artist-only mixes, 20 draggable Top Tracks
 
 [Windows release notes](docs/release-2.8.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
-Only the current Windows and Ubuntu installers are retained in Releases. Historical source tags and release notes remain available in Git.
+Use the Windows and Ubuntu download links above for the current packages. Historical source tags and release notes remain available in Git; older installers may be removed during cleanup.
 
 ## Install and start listening
 
