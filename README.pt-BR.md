@@ -10,11 +10,11 @@
 
 Design: **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [versão final 2.7.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
+**Ubuntu 24.04 x64:** [versão final 2.8.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
 
-O **Windows 2.8.0** traz mixes somente do artista com ranking Last.fm, até 20 destaques arrastáveis com ícones de reproduzir/shuffle e reordenação pela linha inteira da fila. O **Ubuntu 2.7.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
+O **Windows 2.8.0** traz mixes somente do artista com ranking Last.fm, até 20 destaques arrastáveis com ícones de reproduzir/shuffle e reordenação pela linha inteira da fila. O **Ubuntu 2.8.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
 
 [Notas Windows](docs/release-2.8.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
 
@@ -96,7 +96,7 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 
 ## Limitações atuais
 
-- Pacotes para Windows x64 e Ubuntu 24.04 x64. Ubuntu passou em 123 testes direcionados, instalação apt e abertura gráfica em dois modos; áudio, troca de saída e bandeja reais ainda precisam de aceite na VM/partição. Android e macOS não são entregues/validados.
+- Pacotes para Windows x64 e Ubuntu 24.04 x64. Ubuntu passou em 144 testes direcionados, instalação apt e abertura gráfica em dois modos; áudio, troca de saída e bandeja reais ainda precisam de aceite na VM/partição. Android e macOS não são entregues/validados.
 - Google Drive, WebDAV, Jellyfin, Emby, SMB e envios Last.fm têm implementação/testes controlados, mas ainda precisam de aceites reais mais amplos. Testes não equivalem a certificação por serviço.
 - Sincronização manual/completa; não há política geral automática/incremental. Google oferece um seletor visual de pastas. Não há transcodificação Jellyfin/Emby.
 - Agrupamentos de artistas/álbuns ainda não são integralmente paginados em SQL. Coleções grandes exigem medição na máquina real.
@@ -114,4 +114,4 @@ Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/bu
 
 Windows 2.8.0: 39 casos direcionados únicos aprovados entre rodadas finais e análise completa sem problemas. Consulte o manifesto para build, integração e instalação. A suíte completa de 425 testes pertence à 2.7.0 e não foi repetida integralmente na 2.8.0. [Manifesto](release/validation.json).
 
-[Ubuntu 2.7.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
+[Ubuntu 2.8.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).

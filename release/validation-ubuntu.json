@@ -1,0 +1,24 @@
+{
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/41645514485",
+  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
+  "debianVersion": "2.8.0-0ubuntu1",
+  "checks": {
+    "targetedTests": 144,
+    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
+    "debInstallation": "passed using apt in Ubuntu CI",
+    "graphicalLaunch": "passed in compatibility and software modes",
+    "binaries": "x64 ELF",
+    "linuxReleaseBuild": "passed",
+    "analysis": "passed",
+    "visualReview": "passed; six screenshots inspected"
+  },
+  "installer": {
+    "bytes": 12354398,
+    "sha256": "ab57b46f2bbb881a6c6a8978436ac2151f4617bd38d9b0865042677274afdb4e",
+    "file": "music-time-preview_2.8.0-0ubuntu1_amd64.deb"
+  },
+  "experimental": false,
+  "platform": "Ubuntu Desktop 24.04 amd64",
+  "commit": "1e54bec42b713b231b17732ef303111dc10b1e08",
+  "version": "2.8.0+62"
+}

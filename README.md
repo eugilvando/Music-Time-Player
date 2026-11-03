@@ -14,11 +14,11 @@
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [Download 2.7.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 2.8.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
 
-Windows **2.8.0** adds Last.fm-ranked artist-only mixes, 20 draggable Top Tracks with Play/Shuffle icons, and queue reordering by the whole row; Ubuntu **2.7.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
+Windows **2.8.0** adds Last.fm-ranked artist-only mixes, 20 draggable Top Tracks with Play/Shuffle icons, and queue reordering by the whole row; Ubuntu **2.8.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
 
 [Windows release notes](docs/release-2.8.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
@@ -145,7 +145,7 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Current limits
 
-- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 123 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. Android and macOS are not supplied or validated.
+- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 144 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. Android and macOS are not supplied or validated.
 - No streaming subscription, catalog acquisition, bundled songs, DRM bypass or Music Time backend.
 - Source synchronization is currently manual/full within the selected scope. Checkpoints are not a general automatic/incremental sync system. Google Drive includes a paginated visual folder picker.
 - OneDrive personal playback/reopening has user evidence. Google Drive, WebDAV, Jellyfin, Emby, SMB, multiple-account edge cases and live Last.fm delivery still need broader real-account/device validation. Controlled tests do not imply service certification.
