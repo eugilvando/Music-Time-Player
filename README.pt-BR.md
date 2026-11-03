@@ -1,5 +1,8 @@
 # Music Time
 
+
+Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Preenchido ou Contorno**, em Configurações → Geral e aparência → Ícones. A prévia é imediata, a escolha fica salva e os ícones funcionam offline.
+
 **Sua música, sua biblioteca, seu tempo.** Player pessoal para Windows e Ubuntu, com arquivos locais, nuvens e servidores de mídia. Flutter/Dart, MediaKit/libmpv e SQLite, sem backend próprio.
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
@@ -14,15 +17,15 @@ Design: **Gilvando Souza**.
 
 ## Destaques atuais
 
-O **Windows 2.8.0** traz mixes somente do artista com ranking Last.fm, até 20 destaques arrastáveis com ícones de reproduzir/shuffle e reordenação pela linha inteira da fila. O **Ubuntu 2.8.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
+O **Windows 2.9.0** traz os pacotes de ícones Atual, Solar e Phosphor, estilos Preenchido/Contorno, prévia imediata e preferências salvas. O **Ubuntu 2.8.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
 
-[Notas Windows](docs/release-2.8.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
+[Notas Windows](docs/release-2.9.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
 
 Use os links de Windows e Ubuntu acima para obter os pacotes atuais. Tags do código e notas históricas permanecem no Git; instaladores antigos podem ser removidos nas limpezas.
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.8.0.exe` na [release Windows 2.8.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0).
+1. Baixe `MusicTime-Setup-2.8.0.exe` na [release Windows 2.9.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -108,10 +111,10 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 - Sem timer, modo ReplayGain configurável, garantia gapless, seletor avançado de saída no app, início com Windows ou sistema completo de atalhos/notificações configuráveis.
 - Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
-Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.8.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.9.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
 
 ## Validação
 
-Windows 2.8.0: 39 casos direcionados únicos aprovados entre rodadas finais e análise completa sem problemas. Consulte o manifesto para build, integração e instalação. A suíte completa de 425 testes pertence à 2.7.0 e não foi repetida integralmente na 2.8.0. [Manifesto](release/validation.json).
+Windows 2.9.0: 27 testes direcionados, análise completa e integração nativa aprovados. Seis combinações de pacote/estilo inspecionadas. A suíte completa não foi repetida nesta versão. [Manifesto](release/validation.json).
 
 [Ubuntu 2.8.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).

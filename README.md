@@ -1,5 +1,8 @@
 <p align="center">
   <img src="assets/branding/icon.svg" width="88" alt="Music Time icon">
+
+Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled or Outlined** styles, under Settings → General and appearance → Icons. Preview changes immediately; preferences persist and the icons work offline.
+
 </p>
 
 # Music Time
@@ -18,15 +21,15 @@ Design by **Gilvando Souza**.
 
 ## Current highlights
 
-Windows **2.8.0** adds Last.fm-ranked artist-only mixes, 20 draggable Top Tracks with Play/Shuffle icons, and queue reordering by the whole row; Ubuntu **2.8.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
+Windows **2.9.0** adds Current, Solar and Phosphor icon packs, Filled/Outlined styles, instant previews and saved preferences; Ubuntu **2.8.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
 
-[Windows release notes](docs/release-2.8.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
+[Windows release notes](docs/release-2.9.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
 Use the Windows and Ubuntu download links above for the current packages. Historical source tags and release notes remain available in Git; older installers may be removed during cleanup.
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.8.0.exe` from the [2.8.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0).
+1. Download `MusicTime-Setup-2.8.0.exe` from the [2.8.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -161,9 +164,9 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Validation and development
 
-Windows 2.8.0 passed 39 unique targeted cases across final runs and full static analysis. See the release manifest for native/package checks. The preceding 2.7.0 full suite passed 425 tests; it was not rerun in full for 2.8.0. Results are recorded in [release notes](docs/release-2.8.0.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
+Windows 2.9.0 passed 27 targeted regression tests, full static analysis and native integration checks. Six icon pack/style combinations were visually inspected. The full suite was not rerun for this release. See [release notes](docs/release-2.9.0.md) and [the validation manifest](release/validation.json).
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.8.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.9.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 
