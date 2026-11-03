@@ -7,17 +7,17 @@ Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Pr
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.8.0+62.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.9.0+63.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
 Design: **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [versão final 2.8.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
+**Ubuntu 24.04 x64:** [versão final 2.9.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
 
-O **Windows 2.9.0** traz os pacotes de ícones Atual, Solar e Phosphor, estilos Preenchido/Contorno, prévia imediata e preferências salvas. O **Ubuntu 2.8.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
+O **Windows 2.9.0** traz os pacotes de ícones Atual, Solar e Phosphor, estilos Preenchido/Contorno, prévia imediata e preferências salvas. O **Ubuntu 2.9.0** inclui as mesmas opções em um pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
 
 [Notas Windows](docs/release-2.9.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
 
@@ -25,7 +25,7 @@ Use os links de Windows e Ubuntu acima para obter os pacotes atuais. Tags do có
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.8.0.exe` na [release Windows 2.9.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
+1. Baixe `MusicTime-Setup-2.9.0.exe` na [release Windows 2.9.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -99,7 +99,7 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 
 ## Limitações atuais
 
-- Pacotes para Windows x64 e Ubuntu 24.04 x64. Ubuntu passou em 144 testes direcionados, instalação apt e abertura gráfica em dois modos; áudio, troca de saída e bandeja reais ainda precisam de aceite na VM/partição. Android e macOS não são entregues/validados.
+- Pacotes para Windows x64 e Ubuntu 24.04 x64. Ubuntu passou em 152 testes direcionados, instalação apt e abertura gráfica em dois modos; áudio, troca de saída e bandeja reais ainda precisam de aceite na VM/partição. Android e macOS não são entregues/validados.
 - Google Drive, WebDAV, Jellyfin, Emby, SMB e envios Last.fm têm implementação/testes controlados, mas ainda precisam de aceites reais mais amplos. Testes não equivalem a certificação por serviço.
 - Sincronização manual/completa; não há política geral automática/incremental. Google oferece um seletor visual de pastas. Não há transcodificação Jellyfin/Emby.
 - Agrupamentos de artistas/álbuns ainda não são integralmente paginados em SQL. Coleções grandes exigem medição na máquina real.
@@ -117,4 +117,4 @@ Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/bu
 
 Windows 2.9.0: 27 testes direcionados, análise completa e integração nativa aprovados. Seis combinações de pacote/estilo inspecionadas. A suíte completa não foi repetida nesta versão. [Manifesto](release/validation.json).
 
-[Ubuntu 2.8.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
+[Ubuntu 2.9.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).

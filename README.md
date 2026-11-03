@@ -1,27 +1,28 @@
 <p align="center">
   <img src="assets/branding/icon.svg" width="88" alt="Music Time icon">
 
-Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled or Outlined** styles, under Settings → General and appearance → Icons. Preview changes immediately; preferences persist and the icons work offline.
-
 </p>
 
 # Music Time
+
+Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled or Outlined** styles, under Settings → General and appearance → Icons. Preview changes immediately; preferences persist and the icons work offline.
+
 
 **Your music, your library, your time.** A personal Windows and Ubuntu music player for local files, cloud libraries and media servers. Built with Flutter, Dart, MediaKit/libmpv and SQLite, without a Music Time backend.
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.8.0+62.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.9.0+63.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [Download 2.8.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 2.9.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
 
-Windows **2.9.0** adds Current, Solar and Phosphor icon packs, Filled/Outlined styles, instant previews and saved preferences; Ubuntu **2.8.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
+Windows **2.9.0** adds Current, Solar and Phosphor icon packs, Filled/Outlined styles, instant previews and saved preferences; Ubuntu **2.9.0** includes the same icon options in a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
 
 [Windows release notes](docs/release-2.9.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
@@ -29,7 +30,7 @@ Use the Windows and Ubuntu download links above for the current packages. Histor
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.8.0.exe` from the [2.8.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
+1. Download `MusicTime-Setup-2.9.0.exe` from the [2.9.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -148,7 +149,7 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Current limits
 
-- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 144 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. Android and macOS are not supplied or validated.
+- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 152 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. Android and macOS are not supplied or validated.
 - No streaming subscription, catalog acquisition, bundled songs, DRM bypass or Music Time backend.
 - Source synchronization is currently manual/full within the selected scope. Checkpoints are not a general automatic/incremental sync system. Google Drive includes a paginated visual folder picker.
 - OneDrive personal playback/reopening has user evidence. Google Drive, WebDAV, Jellyfin, Emby, SMB, multiple-account edge cases and live Last.fm delivery still need broader real-account/device validation. Controlled tests do not imply service certification.
