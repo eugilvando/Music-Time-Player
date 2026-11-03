@@ -1,6 +1,6 @@
-# Music Time 2.7.0 — Ubuntu 24.04 x64
+# Music Time 2.8.0 — Ubuntu 24.04 x64
 
-This is the final Ubuntu release based on 2.7.0+60. The existing Debian package name `music-time-preview`, launch command and `app.musictime.preview` application identifier are retained so apt upgrades the installed preview and finds its existing profile. The application displays Music Time.
+This is the final Ubuntu release based on 2.8.0+62. The existing Debian package name `music-time-preview`, launch command and `app.musictime.preview` application identifier are retained so apt upgrades the installed preview and finds its existing profile. The application displays Music Time.
 
 ## Install or upgrade
 
@@ -9,9 +9,13 @@ Close Music Time, back up your Linux profile, and download the .deb and SHA256SU
 ```sh
 sha256sum -c SHA256SUMS.txt
 sudo apt update
-sudo apt install ./music-time-preview_2.7.0-0ubuntu1_amd64.deb
+sudo apt install ./music-time-preview_2.8.0-0ubuntu1_amd64.deb
 music-time-preview
 ```
+
+## New in 2.8.0
+
+Artist mixes use global Last.fm top tracks matched to your library, with local play-count fallback. Track and album mix entry points stay within the chosen artist; radio similarity is preserved. Artist pages show up to 20 draggable Top Tracks with icon-only Play and Shuffle controls. Reorder the queue by dragging the row content.
 
 ## Features and scope
 
@@ -29,4 +33,4 @@ The release manifest records the CI run, tests, package checksum and graphical i
 
 ## Português
 
-Versão final 2.7.0 para Ubuntu 24.04 x64. Atualize com o comando apt acima. O identificador interno conserva a palavra preview para atualizar a instalação existente e preservar o perfil. Confira bandeja, áudio e contas reais na sua VM/outra partição. As limitações de Smart fades e Mix only estão descritas acima.
+Versão final 2.8.0 para Ubuntu 24.04 x64. Atualize com o comando apt acima. O identificador interno conserva a palavra preview para atualizar a instalação existente e preservar o perfil. Confira bandeja, áudio e contas reais na sua VM/outra partição. As limitações de Smart fades e Mix only estão descritas acima.
