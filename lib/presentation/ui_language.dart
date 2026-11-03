@@ -259,6 +259,10 @@ const englishLabels = <String, String>{
   'Somente letras': 'Lyrics Only',
   'Espaçamento entre seções': 'Section spacing',
   'Faixas em destaque': 'Top Tracks',
+  'Consultando ranking do Last.fm…': 'Loading Last.fm ranking…',
+  'Ranking do Last.fm, complementado pelas reproduções locais.':
+      'Last.fm ranking, completed with local play counts.',
+  'Escolha o artista do mix': 'Choose the mix artist',
   'Ordenadas pelas reproduções na sua biblioteca.':
       'Ordered by plays in your library.',
   'Prévia dos textos, menus e campos.': 'Preview of text, menus and fields.',

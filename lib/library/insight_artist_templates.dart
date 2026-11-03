@@ -1,3 +1,5 @@
+import 'artist_ranking.dart';
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -29,6 +31,29 @@ class InsightArtistTemplates {
   final LibraryStore store;
   final Future<LastFmClient> Function() api;
   late final similarity = ArtistSimilarity(store, api);
+
+  Future<ArtistRankedTracks> rankedArtist(
+    String artist,
+    List<Track> eligible,
+    int limit, {
+    bool offline = false,
+    bool refresh = false,
+  }) async {
+    final stats = await store.listeningStats();
+    List<LastFmTrack> ranking = [];
+    try {
+      ranking = await topTracks(artist, offline: offline, refresh: refresh);
+    } catch (_) {
+      // Missing key, no cached result or network failure uses actual local plays.
+    }
+    return rankArtistTracks(
+      artist: artist,
+      eligible: eligible,
+      stats: stats,
+      ranking: ranking,
+      limit: limit,
+    );
+  }
 
   Future<PlaylistImportReport> prepare({
     required String criterion,
@@ -120,13 +145,18 @@ class InsightArtistTemplates {
   }
 
   final _topJobs = <String, Future<List<LastFmTrack>>>{};
-  Future<List<LastFmTrack>> topTracks(String artist, {bool offline = false}) {
-    final key = '${artistNameKey(artist)}|$offline';
+  Future<List<LastFmTrack>> topTracks(
+    String artist, {
+    bool offline = false,
+    bool refresh = false,
+  }) {
+    final key = '${artistNameKey(artist)}|$offline|$refresh';
     return _topJobs.putIfAbsent(
       key,
-      () => _loadTopTracks(artist, offline: offline).whenComplete(() {
-        _topJobs.remove(key);
-      }),
+      () => _loadTopTracks(artist, offline: offline, refresh: refresh)
+          .whenComplete(() {
+            _topJobs.remove(key);
+          }),
     );
   }
 
@@ -134,6 +164,7 @@ class InsightArtistTemplates {
     String artist, {
     bool offline = false,
     bool tag = false,
+    bool refresh = false,
   }) async {
     await store.database.execute(
       'CREATE TABLE IF NOT EXISTS lastfm_profile_cache(user TEXT NOT NULL,kind TEXT NOT NULL,payload TEXT NOT NULL,updated_at TEXT NOT NULL,PRIMARY KEY(user,kind))',
@@ -153,7 +184,7 @@ class InsightArtistTemplates {
             ) <
             const Duration(days: 7);
     Map<String, dynamic>? body;
-    if (offline || fresh) {
+    if (offline || (fresh && !refresh)) {
       if (old != null) {
         body = jsonDecode(old['payload'] as String) as Map<String, dynamic>;
       }

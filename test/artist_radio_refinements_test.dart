@@ -1,3 +1,6 @@
+import 'package:music_time/library/artist_ranking.dart';
+import 'package:music_time/library/insight_artist_templates.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -157,6 +160,13 @@ void main() {
                   seedLabel: main.title,
                   eligible: [main, related, other],
                   settings: settings,
+                  ranking: (artist, items, count, refresh) async =>
+                      rankArtistTracks(
+                        artist: artist,
+                        eligible: items,
+                        stats: {},
+                        limit: count,
+                      ),
                   similarity: ArtistSimilarity(
                     store,
                     () async => throw StateError('item mix must work locally'),
@@ -177,8 +187,8 @@ void main() {
       );
       await tester.tap(find.text('Open item'));
       await waitForCatalog(tester, () => queue != null);
-      expect(queue!.map((t) => t.id), ['main', 'related']);
-      expect(title, 'Local item mix · Main song');
+      expect(queue!.map((t) => t.id), ['main']);
+      expect(title, 'Local artist mix · Main');
       expect(saves, 0);
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(store.close);
@@ -356,6 +366,13 @@ void main() {
                   action: 'preview',
                   eligible: [main, related, other],
                   settings: settings,
+                  ranking: (artist, items, count, refresh) async =>
+                      rankArtistTracks(
+                        artist: artist,
+                        eligible: items,
+                        stats: {},
+                        limit: count,
+                      ),
                   similarity: ArtistSimilarity(
                     store,
                     () async => throw StateError('must stay offline'),
@@ -405,7 +422,7 @@ void main() {
       final client = MockClient((_) async {
         requests++;
         return http.Response(
-          '{"similarartists":{"artist":[{"name":"Other"}]}}',
+          '{"toptracks":{"track":[{"name":"Main song","artist":{"name":"Main"}}]}}',
           200,
         );
       });
@@ -426,6 +443,12 @@ void main() {
                   seedLabel: main.title,
                   eligible: [main, other],
                   settings: settings,
+                  ranking: (artist, items, count, refresh) =>
+                      InsightArtistTemplates(
+                        store,
+                        () async =>
+                            LastFmClient(client, apiKey: 'test', apiSecret: ''),
+                      ).rankedArtist(artist, items, count, refresh: refresh),
                   similarity: ArtistSimilarity(
                     store,
                     () async =>
@@ -448,8 +471,8 @@ void main() {
       await tester.tap(find.text('Create'));
       await waitForCatalog(tester, () => queue != null);
       expect(requests, 1);
-      expect(queue!.map((t) => t.id), ['main', 'other']);
-      expect(title, 'Item mix · Main song');
+      expect(queue!.map((t) => t.id), ['main']);
+      expect(title, 'Artist mix · Main');
       await tester.pumpWidget(const SizedBox());
       await tester.runAsync(store.close);
       settings.dispose();

@@ -1,3 +1,6 @@
+import 'queue_drag_row.dart';
+import '../library/artist_ranking.dart';
+import '../library/insight_artist_templates.dart';
 import '../platform/output_equalizer.dart';
 import 'listening_insights_page.dart';
 import '../library/listening_insights.dart';
@@ -1329,6 +1332,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   )
                 : ReorderableListView.builder(
+                    buildDefaultDragHandles: false,
                     itemCount: controller.queue.length,
                     onReorderItem: (oldIndex, newIndex) {
                       controller.reorderQueue(oldIndex, newIndex);
@@ -1341,52 +1345,55 @@ class _LibraryScreenState extends State<LibraryScreen> {
                         await controller.insertTracks(details.data, index);
                         await save();
                       },
-                      builder: (_, over, _) => DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(
-                              width: 2,
-                              color: over.isEmpty
-                                  ? Colors.transparent
-                                  : Theme.of(context).colorScheme.primary,
+                      builder: (_, over, _) => QueueDragRow(
+                        index: index,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                width: 2,
+                                color: over.isEmpty
+                                    ? Colors.transparent
+                                    : Theme.of(context).colorScheme.primary,
+                              ),
                             ),
                           ),
-                        ),
-                        child: ListTile(
-                          dense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                          ),
-                          leading: SizedBox.square(
-                            dimension: 32,
-                            child: TrackCover(track: controller.queue[index]),
-                          ),
-                          key: ValueKey(controller.queueKeys[index]),
-                          title: Text(
-                            controller.queue[index].title,
-                            style: Theme.of(context).textTheme.titleSmall,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          subtitle: Text(
-                            controller.queue[index].artist,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          selected: index == controller.queueIndex,
-                          onTap: controller.opening
-                              ? null
-                              : () => play(
-                                  List.of(controller.queue),
-                                  index,
-                                  title: controller.queueTitle,
-                                ),
-                          trailing: Padding(
-                            padding: const EdgeInsets.only(right: 28),
-                            child: trackActions(
-                              controller.queue[index],
-                              queueIndex: index,
+                          child: ListTile(
+                            dense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                            leading: SizedBox.square(
+                              dimension: 32,
+                              child: TrackCover(track: controller.queue[index]),
+                            ),
+                            key: ValueKey(controller.queueKeys[index]),
+                            title: Text(
+                              controller.queue[index].title,
+                              style: Theme.of(context).textTheme.titleSmall,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(
+                              controller.queue[index].artist,
+                              style: Theme.of(context).textTheme.bodySmall,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            selected: index == controller.queueIndex,
+                            onTap: controller.opening
+                                ? null
+                                : () => play(
+                                    List.of(controller.queue),
+                                    index,
+                                    title: controller.queueTitle,
+                                  ),
+                            trailing: Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: trackActions(
+                                controller.queue[index],
+                                queueIndex: index,
+                              ),
                             ),
                           ),
                         ),
@@ -1539,6 +1546,22 @@ class _LibraryScreenState extends State<LibraryScreen> {
   }
 
   bool startingItemMix = false;
+  late final artistRankings = InsightArtistTemplates(
+    widget.store,
+    providers.lastfm,
+  );
+  Future<ArtistRankedTracks> rankedArtist(
+    String artist,
+    List<Track> eligible,
+    int count,
+    bool refresh,
+  ) => artistRankings.rankedArtist(
+    artist,
+    eligible,
+    count,
+    offline: widget.settings.visualBool('offline_only', fallback: false),
+    refresh: refresh,
+  );
   late final artistSimilarity = ArtistSimilarity(
     widget.store,
     providers.lastfm,
@@ -1565,7 +1588,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
       eligible: eligible,
       settings: widget.settings,
       similarity: artistSimilarity,
-      onPlay: playNamed,
+      ranking: rankedArtist,
+      onPlay: (values, index, title) async {
+        if (!radio && controller.shuffle) controller.toggleShuffle();
+        await playNamed(values, index, title);
+      },
       onSave: saveSelection,
     );
   }
@@ -1584,9 +1611,31 @@ class _LibraryScreenState extends State<LibraryScreen> {
           fallback: false,
         ),
       );
-      final artist = seeds.length == 1
-          ? seeds.first.artistNames.first
-          : navigationArtistName(seeds.first);
+      var artist = radio
+          ? (seeds.length == 1
+                ? seeds.first.artistNames.firstOrNull ?? ''
+                : navigationArtistName(seeds.first))
+          : mixSeedArtist(seeds);
+      if (!radio && artist.isEmpty) {
+        final names = seeds.expand((t) => t.artistNames).toSet().toList()
+          ..sort();
+        if (!mounted || names.isEmpty) return;
+        final chosen = await showDialog<String>(
+          context: context,
+          builder: (context) => SimpleDialog(
+            title: const UiText('Escolha o artista do mix'),
+            children: [
+              for (final name in names)
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, name),
+                  child: Text(name),
+                ),
+            ],
+          ),
+        );
+        if (!mounted || chosen == null) return;
+        artist = chosen;
+      }
       final album = seeds.first.album;
       final label = seeds.length == 1
           ? seeds.first.title
@@ -1604,7 +1653,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
         eligible: eligible,
         settings: widget.settings,
         similarity: artistSimilarity,
-        onPlay: playNamed,
+        ranking: rankedArtist,
+        onPlay: (values, index, title) async {
+          if (!radio && controller.shuffle) controller.toggleShuffle();
+          await playNamed(values, index, title);
+        },
         onSave: saveSelection,
       );
     } finally {
@@ -1631,6 +1684,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           await startItemMix(values);
         case 'radio':
           await startItemMix(values, radio: true);
+        case 'ranked_play':
+          if (controller.shuffle) controller.toggleShuffle();
+          await play(values, 0);
         case 'play':
           await play(values, 0);
         case 'shuffle':

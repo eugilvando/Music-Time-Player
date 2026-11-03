@@ -1,3 +1,4 @@
+import '../library/artist_ranking.dart';
 import 'design_icon.dart';
 
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,7 @@ Future<void> showArtistSelection(
   required List<Track> eligible,
   required AppSettings settings,
   required ArtistSimilarity similarity,
+  required ArtistRankingLoader ranking,
   required Future<void> Function(List<Track>, int, String) onPlay,
   required Future<void> Function(List<Track>) onSave,
 }) => showDialog<void>(
@@ -32,6 +34,7 @@ Future<void> showArtistSelection(
     eligible: eligible,
     settings: settings,
     similarity: similarity,
+    ranking: ranking,
     onPlay: onPlay,
     onSave: onSave,
   ),
@@ -47,6 +50,7 @@ class _ArtistSelectionDialog extends StatefulWidget {
     required this.eligible,
     required this.settings,
     required this.similarity,
+    required this.ranking,
     required this.onPlay,
     required this.onSave,
   });
@@ -58,6 +62,7 @@ class _ArtistSelectionDialog extends StatefulWidget {
   final List<Track> eligible;
   final AppSettings settings;
   final ArtistSimilarity similarity;
+  final ArtistRankingLoader ranking;
   final Future<void> Function(List<Track>, int, String) onPlay;
   final Future<void> Function(List<Track>) onSave;
   @override
@@ -74,7 +79,9 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
   bool fallbackMix = false;
   SimilarityResult? similarityResult;
   int similarCount = 0, matchedCount = 0, generation = 0;
-  String get selectionType => widget.seeds.isNotEmpty
+  String get selectionType => !radio
+      ? (localRadio ? 'Local artist mix' : 'Artist mix')
+      : widget.seeds.isNotEmpty
       ? !radio || fallbackMix
             ? localRadio
                   ? 'Local item mix'
@@ -111,7 +118,7 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
       final hasArtist = widget.eligible.any(
         (t) => trackByArtist(t, widget.artist),
       );
-      final response = hasArtist
+      final response = radio && hasArtist
           ? await widget.similarity.lookup(
               widget.artist,
               refresh: refresh,
@@ -131,12 +138,29 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
         similar: response?.names ?? <String>[],
         local: false,
       );
-      final result = widget.seeds.isEmpty
-          ? await compute(prepareArtistPreview, work)
-          : await compute(prepareItemPreview, (
-              work: work,
-              seeds: widget.seeds,
-            ));
+      final ArtistPreview result;
+      if (!radio) {
+        final ranked = await widget.ranking(
+          widget.artist,
+          widget.eligible,
+          count,
+          refresh,
+        );
+        result = (
+          tracks: ranked.tracks,
+          similar: 0,
+          matched: ranked.remoteMatches,
+          local: ranked.remoteMatches == 0,
+          fallbackMix: false,
+        );
+      } else {
+        result = widget.seeds.isEmpty
+            ? await compute(prepareArtistPreview, work)
+            : await compute(prepareItemPreview, (
+                work: work,
+                seeds: widget.seeds,
+              ));
+      }
       if (!mounted || request != generation) return;
       if (mounted) {
         setState(() {
@@ -152,7 +176,7 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
         firstGeneration = false;
         if (widget.action == 'play') {
           final title =
-              '${ui(context, selectionType)} · ${widget.seedLabel ?? widget.artist}';
+              '${ui(context, selectionType)} · ${radio ? (widget.seedLabel ?? widget.artist) : widget.artist}';
           Navigator.pop(context);
           await widget.onPlay(List<Track>.of(result.tracks), 0, title);
         } else if (widget.action == 'save') {
@@ -178,7 +202,7 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
     actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
     scrollable: true,
     title: Text(
-      '${ui(context, selectionType)} · ${widget.seedLabel ?? widget.artist}',
+      '${ui(context, selectionType)} · ${radio ? (widget.seedLabel ?? widget.artist) : widget.artist}',
     ),
     content: SizedBox(
       width: 640,
@@ -206,7 +230,13 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
                       const UiText(
                         'Uses all visible library sources; page search and filters do not limit this selection. Offline mode is respected.',
                       ),
-                      if (!loading) ...[
+                      if (!loading && !radio)
+                        UiText(
+                          localRadio
+                              ? 'Ordenadas pelas reproduções na sua biblioteca.'
+                              : 'Ranking do Last.fm, complementado pelas reproduções locais.',
+                        ),
+                      if (!loading && radio) ...[
                         Text(
                           '$similarCount ${ui(context, localRadio ? 'related artists' : 'similar artists')} · $matchedCount ${ui(context, 'in your library')}',
                         ),
@@ -299,7 +329,7 @@ class _ArtistSelectionDialogState extends State<_ArtistSelectionDialog> {
               : () async {
                   final snapshot = List<Track>.of(selection);
                   final title =
-                      '${ui(context, selectionType)} · ${widget.seedLabel ?? widget.artist}';
+                      '${ui(context, selectionType)} · ${radio ? (widget.seedLabel ?? widget.artist) : widget.artist}';
                   Navigator.pop(context);
                   await widget.onPlay(snapshot, 0, title);
                 },

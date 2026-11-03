@@ -8,7 +8,7 @@
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.7.1+61.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.8.0+62.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
@@ -18,15 +18,15 @@ Design by **Gilvando Souza**.
 
 ## Current highlights
 
-Windows **2.7.1** fixes album artwork after crossfade; Ubuntu **2.7.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
+Windows **2.8.0** adds Last.fm-ranked artist-only mixes, 20 draggable Top Tracks with Play/Shuffle icons, and queue reordering by the whole row; Ubuntu **2.7.0** is available as a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
 
-[Windows release notes](docs/release-2.7.1.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
+[Windows release notes](docs/release-2.8.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
 Only the current Windows and Ubuntu installers are retained in Releases. Historical source tags and release notes remain available in Git.
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.7.1.exe` from the [2.7.1 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.1).
+1. Download `MusicTime-Setup-2.8.0.exe` from the [2.8.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -71,7 +71,7 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 - Sorting, detailed columns, compact lists, grids and compact horizontal cards. Library starts with Songs sorted by title.
 - Ctrl/Shift selection and batch play, queue, favorites, playlist and offline actions.
 - Independent favorites for tracks, albums, artists and playlists; accent-colored overlays and a visible currently-playing indicator.
-- Artist pages with chronological discography, direct album playback, track view and album navigation. Album pages show known year/genre, track/disc numbers and more albums by the artist.
+- Artist pages with up to 20 Last.fm-ranked Top Tracks (local fallback), draggable cards and icon-only Play/Shuffle actions, chronological discography, direct album playback, track view and album navigation. Album pages show known year/genre, track/disc numbers and more albums by the artist.
 - Similar artists limited to those present in your library; optional artist biographies/portraits and custom artwork.
 - Multiple artist credits, including `;`, comma, colon, `&`, `feat.` and `ft.`; `/` remains part of names such as AC/DC.
 - Manual catalog metadata edits, artist/album merging, conservative grouping, hidden sources and restoration of source tags. These actions do not rewrite or rename your original music files.
@@ -86,7 +86,7 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 - Five Now Playing designs: Classic, Vinyl, Minimalist, Cover Only and Lyrics Only, adjustable artwork and optional blurred backgrounds.
 - Player-bar organizer with ordering/visibility of individual controls and three movable optional separators; metadata fields, time/progress and offline/cache/permanent status.
 - Continuous play adds tracks **from your library**, respecting visibility and offline rules. Choose same genre, Shuffle specialist, Double shot, Artist fan or Era enthusiast using the existing player-bar button or Playback settings; configure how many tracks to add.
-- Track/album-related mixes, artist-only mixes and artist radio using available similar artists. Artist mix and radio have independent sizes, **40 tracks by default, configurable from 1 to 500**, preview and regeneration.
+- Artist mixes, including track/album entry points, use global Last.fm popularity for that artist only, with local play-count fallback. Radio keeps its similarity behavior. Artist mix and radio have independent sizes, **40 tracks by default, configurable from 1 to 500**, preview and regeneration.
 - Mixes create and start a **playback queue**. Saving a manual playlist is a separate explicit action.
 - Crossfade: Off, Automatic or Manual; Smooth, Smart fades and Mix only transitions. Automatic selects up to six seconds using track lengths and compatible waveform analysis. Sequential album playback bypasses overlap.
 - Five-band equalizer with presets, persistent bands and gain compensation. Import named AutoEQ `ParametricEQ.txt` profiles with peak/low-shelf/high-shelf filters and protective preamp adjustment.
@@ -161,9 +161,9 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Validation and development
 
-Windows 2.7.1 passed five targeted regressions, static analysis, release build and native media/tray integration. The preceding 2.7.0 full suite passed 425 tests; it was not rerun in full for 2.7.1. Results are recorded in [release notes](docs/release-2.7.1.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
+Windows 2.8.0 passed 39 unique targeted cases across final runs and full static analysis. See the release manifest for native/package checks. The preceding 2.7.0 full suite passed 425 tests; it was not rerun in full for 2.8.0. Results are recorded in [release notes](docs/release-2.8.0.md) and [the release manifest](release/validation.json). Controlled tests and fictional screenshots are separate from real-account acceptance.
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.7.1.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.8.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 

@@ -4,7 +4,7 @@
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.7.1+61.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 2.8.0+62.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Home do Music Time com biblioteca fictícia](docs/images/home.png)
 
@@ -14,15 +14,15 @@ Design: **Gilvando Souza**.
 
 ## Destaques atuais
 
-O **Windows 2.7.1** corrige a capa do álbum após o crossfade. O **Ubuntu 2.7.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
+O **Windows 2.8.0** traz mixes somente do artista com ranking Last.fm, até 20 destaques arrastáveis com ícones de reproduzir/shuffle e reordenação pela linha inteira da fila. O **Ubuntu 2.7.0** está disponível como pacote final separado. Arraste faixas ou álbuns para a fila, escolha modos de Play contínuo, crie playlists por gênero/humor da sua coleção e use crossfade automático, importação AutoEQ e perfis de EQ por dispositivo de saída.
 
-[Notas Windows](docs/release-2.7.1.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
+[Notas Windows](docs/release-2.8.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
 
 Releases mantém apenas os instaladores atuais de Windows e Ubuntu. Tags do código e notas de versões anteriores permanecem no Git.
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.7.1.exe` na [release Windows 2.7.1](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.1).
+1. Baixe `MusicTime-Setup-2.8.0.exe` na [release Windows 2.8.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.8.0).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -61,12 +61,13 @@ O [guia de configuração](docs/provider-setup.md) traz as etapas e links oficia
 - **Navegação e visualizações:** sidebar recolhível, fila lateral elevada, grades/listas/carrosséis, cards compactos horizontais, colunas detalhadas e cinco tamanhos de cards. Tema claro/escuro/sistema, acento manual ou do Windows, fontes, movimento e fundos personalizáveis.
 - **Biblioteca e pesquisa:** músicas, álbuns, artistas, artistas de álbum, gêneros, anos, décadas e pastas; busca geral ou contextual, tolerante a caixa/acentos, limpeza com Esc/X, filtros combináveis, ordenação e seleção Ctrl/Shift com ações em lote.
 - **Favoritos:** índices independentes de faixas, álbuns, artistas e playlists, filtros rápidos e indicadores na cor de destaque. A mídia em reprodução fica identificada na biblioteca. Clique direito abre as ações do item.
+- **Destaques do artista:** até 20 faixas com prioridade Last.fm e fallback local, arraste individual para a fila e botões apenas com ícones para reproduzir ou embaralhar a lista exibida.
 - **Artistas e álbuns:** discografia por ano, play direto do álbum, navegação entre artista/álbum, ano e gêneros conhecidos, numeração por disco/faixa, mais álbuns do artista e similares presentes na coleção. Retratos/biografias opcionais e imagens personalizadas.
 - **Metadados e capas:** leitura local e complementação remota pertinente, edição manual e mesclagem somente no catálogo, restauração das tags originais, múltiplos artistas e agrupamento conservador. `/` é preservado em nomes como AC/DC. Capas iguais compartilham armazenamento por SHA256.
 - **Fila por arraste:** faixas e álbuns da biblioteca, discografia e Home podem ser arrastados para a fila; álbuns seguem a ordem de disco/faixa. Salve a fila como playlist, preservando ordem e repetições. Ao desligar o shuffle, a ordem original é restaurada.
 - **Player:** controles completos, mudo pelo volume, shuffle, repeat, fila editável com repetições, estado/posição persistidos e restauração pausada. Cinco modelos de Now Playing, capa ampliada e fundos desfocados.
 - **Barra de reprodução:** organizador de ordem e visibilidade de itens, três separadores opcionais, campos de informações, tempos/progresso e status local/cache/permanente.
-- **Mixes e rádio:** seleção relacionada a faixa/álbum, mix somente com créditos do artista e rádio com similares da coleção. Mix e rádio de artista têm tamanhos independentes, padrão 40 e intervalo 1–500, prévia e regeneração. Iniciam uma fila; salvar playlist é uma ação separada. Play contínuo usa a própria biblioteca e oferece mesmo gênero, Shuffle specialist, Double shot, Artist fan e Era enthusiast. Ajuste o modo pelo botão existente da barra ou pelas configurações, incluindo a quantidade de faixas a adicionar.
+- **Mixes e rádio:** mix somente do artista, inclusive ao partir de faixa/álbum, ordenado pelo ranking global Last.fm com fallback por reproduções locais. Rádio mantém a seleção por similaridade. Mix e rádio de artista têm tamanhos independentes, padrão 40 e intervalo 1–500, prévia e regeneração. Iniciam uma fila; salvar playlist é uma ação separada. Play contínuo usa a própria biblioteca e oferece mesmo gênero, Shuffle specialist, Double shot, Artist fan e Era enthusiast. Ajuste o modo pelo botão existente da barra ou pelas configurações, incluindo a quantidade de faixas a adicionar.
 - **Crossfade:** desativado, automático ou manual, com transição suave, Smart fades e Mix only. O automático escolhe até seis segundos conforme a duração das faixas e análise compatível. Álbuns em ordem sequencial preservam suas transições.
 - **AutoEQ e perfis de saída:** importe `ParametricEQ.txt`, revise e salve perfis com filtros de pico, graves/agudos e pré-amplificação protetora. Associe um perfil a cada saída padrão do sistema; ao trocar de fone/caixas no Windows ou Ubuntu, o app aplica o perfil salvo. Saídas sem associação ficam sem EQ.
 - **Áudio e letras:** equalizador de cinco bandas com presets/compensação de ganho; letras LRC/TXT ao lado, MP3 embutidas suportadas, recuperação OneDrive e fallback opcional LRCLIB. Rolagem, seek, offset e apresentação configuráveis; palavras sincronizadas apenas com timestamps reais.
@@ -107,10 +108,10 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 - Sem timer, modo ReplayGain configurável, garantia gapless, seletor avançado de saída no app, início com Windows ou sistema completo de atalhos/notificações configuráveis.
 - Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
-Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.7.1.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.8.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
 
 ## Validação
 
-Windows 2.7.1: cinco regressões direcionadas, análise, build e integração nativa aprovados. A suíte completa de 425 testes pertence à 2.7.0 e não foi repetida integralmente na 2.7.1. [Manifesto](release/validation.json).
+Windows 2.8.0: 39 casos direcionados únicos aprovados entre rodadas finais e análise completa sem problemas. Consulte o manifesto para build, integração e instalação. A suíte completa de 425 testes pertence à 2.7.0 e não foi repetida integralmente na 2.8.0. [Manifesto](release/validation.json).
 
 [Ubuntu 2.7.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.7.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).

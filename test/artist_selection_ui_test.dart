@@ -140,6 +140,8 @@ void main() {
               radio: false,
               eligible: const [song],
               settings: settings,
+              ranking: (_, items, count, refresh) async =>
+                  (tracks: items.take(count).toList(), remoteMatches: 0),
               similarity: ArtistSimilarity(
                 store,
                 () async => throw StateError('unused'),
@@ -185,6 +187,8 @@ void main() {
                   radio: false,
                   eligible: const [song],
                   settings: settings,
+                  ranking: (_, items, count, refresh) async =>
+                      (tracks: items.take(count).toList(), remoteMatches: 0),
                   similarity: ArtistSimilarity(
                     store,
                     () async => throw StateError('unused'),
@@ -248,6 +252,8 @@ void main() {
                 radio: true,
                 eligible: const [song],
                 settings: settings,
+                ranking: (_, items, count, refresh) async =>
+                    (tracks: items.take(count).toList(), remoteMatches: 0),
                 similarity: ArtistSimilarity(
                   store,
                   () async => throw StateError('offline'),

@@ -1,3 +1,6 @@
+import 'artist_featured_tracks.dart';
+import '../library/artist_ranking.dart';
+import '../library/insight_artist_templates.dart';
 import 'album_queue_drag.dart';
 import 'home_skeleton.dart';
 import 'alphabet_scrollbar.dart';
@@ -2424,60 +2427,57 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           )
           .toList();
       content.add(collectionSliver(albums, 'albums', releaseOrder: true));
-      final top = List<Track>.of(values)
-        ..sort((a, b) {
-          final count = index.plays(b).compareTo(index.plays(a));
-          return count == 0 ? a.title.compareTo(b.title) : count;
-        });
-      final featured = top.take(12).toList();
-      if (featured.isNotEmpty) {
-        content.add(
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 48, bottom: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  UiText(
-                    'Faixas em destaque',
-                    style: Theme.of(context).textTheme.headlineSmall
-                        ?.copyWith(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const UiText(
-                    'Ordenadas pelas reproduções na sua biblioteca.',
-                  ),
-                ],
-              ),
+      final eligible = eligibleArtistTracks(
+        values,
+        offline,
+        offlineOnly: widget.settings.visualBool(
+          'offline_only',
+          fallback: false,
+        ),
+      );
+      content.add(
+        SliverToBoxAdapter(
+          child: ArtistFeaturedTracks(
+            artist: original.name,
+            tracks: eligible,
+            stats: stats,
+            offline: widget.settings.visualBool(
+              'offline_only',
+              fallback: false,
             ),
+            load: (artist, tracks, limit, refresh) async {
+              final remote = widget.downloads.remote;
+              if (remote is ProviderConnections) {
+                return InsightArtistTemplates(
+                  widget.store,
+                  remote.lastfm,
+                ).rankedArtist(
+                  artist,
+                  tracks,
+                  limit,
+                  offline: widget.settings.visualBool(
+                    'offline_only',
+                    fallback: false,
+                  ),
+                  refresh: refresh,
+                );
+              }
+              return rankArtistTracks(
+                artist: artist,
+                eligible: tracks,
+                stats: stats,
+                limit: limit,
+              );
+            },
+            actions: widget.trackActions,
+            onPlay: (tracks, i) => widget.onAction('ranked_play', [
+              ...tracks.skip(i),
+              ...tracks.take(i),
+            ]),
+            onShuffle: (tracks) => widget.onAction('shuffle', tracks),
           ),
-        );
-        content.add(
-          SliverLayoutBuilder(
-            builder: (context, constraints) => SliverGrid.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: ((constraints.crossAxisExtent + 12) / 208)
-                    .floor()
-                    .clamp(1, 6),
-                mainAxisExtent: 53 * MediaQuery.textScalerOf(context).scale(1),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-              ),
-              itemCount: featured.length,
-              itemBuilder: (context, i) => MediaCardSizeScope(
-                value: 'Small',
-                onChanged: (_) {},
-                child: CompactMediaCard(
-                  artwork: TrackCover(track: featured[i]),
-                  title: featured[i].title,
-                  subtitle: featured[i].artist,
-                  actions: widget.trackActions(featured[i]),
-                  onTap: () => widget.onPlay(featured, i),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
+        ),
+      );
     } else if ({'genres', 'years', 'decades'}.contains(category)) {
       headers.add(
         Wrap(
