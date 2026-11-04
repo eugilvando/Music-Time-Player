@@ -87,7 +87,7 @@ Editar informações, mesclar entidades ou remover uma ocorrência de playlist *
 
 ## Capturas
 
-A galeria de interface foi capturada na 2.0 e a tela Listening Insights na 2.2, usando componentes reais e uma biblioteca fictícia isolada, com capas e textos criados para demonstração. Não são contas conectadas nem músicas incluídas no download.
+A galeria mostra o Music Time 2.9.0, usando componentes reais e uma biblioteca fictícia isolada, com capas e textos criados para demonstração. Não são contas conectadas nem músicas incluídas no download.
 
 | Biblioteca | Tocando agora e fila |
 | --- | --- |

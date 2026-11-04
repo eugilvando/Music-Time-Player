@@ -131,9 +131,9 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 
 ## Screenshots
 
-These images render actual application widgets using a **fictional, isolated demonstration library**. The interface gallery was captured in 2.0; the Listening Insights screenshot is from 2.2. Album artwork and lyric text were created for the demo. They do not show personal accounts, a bundled music catalog or proof of a live cloud-service connection.
+These images render actual application widgets using a **fictional, isolated demonstration library**. The gallery shows Music Time 2.9.0. Album artwork and lyric text were created for the demo. They do not show personal accounts, a bundled music catalog or proof of a live cloud-service connection.
 
-| Library | Now Playing and queue |
+| Library | Now Playing |
 | --- | --- |
 | ![Library](docs/images/library.png) | ![Now Playing](docs/images/now-playing.png) |
 
@@ -145,7 +145,7 @@ These images render actual application widgets using a **fictional, isolated dem
 | --- | --- |
 | ![Playlists](docs/images/playlists.png) | ![Settings](docs/images/settings.png) |
 
-![Listening Insights with fictional listening data](docs/images/listening-insights.png)
+![Listening Insights before connecting an account](docs/images/listening-insights.png)
 
 ## Current limits
 
