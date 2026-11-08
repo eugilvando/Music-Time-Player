@@ -20,6 +20,7 @@ class PlayerController extends ChangeNotifier {
       _settle();
       _updateClock();
       _notify();
+      unawaited(prepareFlow());
     });
   }
 
@@ -102,6 +103,135 @@ class PlayerController extends ChangeNotifier {
   final Future<Uint8List?> Function(String)? coverLoader;
   Future<List<Track>> Function(Track, List<Track>)? continuous;
   bool extending = false;
+  Future<Map<int, Track>> Function(List<Track>, List<int>)? _smartFlow;
+  final automaticEntries = <int, String>{};
+  final _flowHandled = <int>{};
+  bool _flowBusy = false;
+  String _flowAttempt = '';
+
+  Set<int> get automaticIndices => {
+    for (var i = 0; i < queueKeys.length; i++)
+      if (automaticEntries.containsKey(queueKeys[i])) i,
+  };
+  String? automaticOrigin(int index) =>
+      automaticEntries[queueKeys[index]] == 'flow_played'
+      ? 'flow'
+      : automaticEntries[queueKeys[index]];
+  Map<String, dynamic> get automationSnapshot => {
+    'queue': queue.map((t) => t.id).toList(),
+    'origins': [for (final key in queueKeys) automaticEntries[key]],
+    'handled': [
+      for (var i = 0; i < queueKeys.length; i++)
+        if (_flowHandled.contains(queueKeys[i])) i,
+    ],
+  };
+  void restoreAutomationSnapshot(Map<String, dynamic> value) {
+    final ids = value['queue'],
+        origins = value['origins'],
+        handled = value['handled'];
+    if (ids is! List ||
+        origins is! List ||
+        origins.length != queue.length ||
+        !listEquals(ids, queue.map((t) => t.id).toList())) {
+      return;
+    }
+    automaticEntries.clear();
+    for (var i = 0; i < origins.length; i++) {
+      if (origins[i] == 'flow' ||
+          origins[i] == 'flow_played' ||
+          origins[i] == 'queue') {
+        automaticEntries[queueKeys[i]] = origins[i] as String;
+      }
+    }
+    _flowHandled.clear();
+    if (handled is List) {
+      for (final i in handled) {
+        if (i is int && i >= 0 && i < queue.length) {
+          _flowHandled.add(queueKeys[i]);
+        }
+      }
+    }
+    if (_smartFlow == null) _removeFutureFlow();
+  }
+
+  void _removeFutureFlow() {
+    for (var i = queue.length - 1; i > queueIndex; i--) {
+      if (automaticEntries[queueKeys[i]] != 'flow') continue;
+      automaticEntries.remove(queueKeys[i]);
+      _originalQueueKeys.remove(queueKeys[i]);
+      queueKeys.removeAt(i);
+      queue.removeAt(i);
+    }
+  }
+
+  void configureSmartFlow(
+    Future<Map<int, Track>> Function(List<Track>, List<int>)? recommend,
+  ) {
+    _smartFlow = recommend;
+    _generation++;
+    _removeFutureFlow();
+    _flowHandled.removeWhere((key) => queueKeys.indexOf(key) >= queueIndex);
+    _flowAttempt = '';
+    _notify();
+  }
+
+  /// Prepare a bounded look-ahead without blocking audio or rescanning on ticks.
+  Future<void> prepareFlow() async {
+    final recommend = _smartFlow;
+    if (_disposed ||
+        opening ||
+        _flowBusy ||
+        recommend == null ||
+        repeat != PlaybackRepeat.off ||
+        queueIndex < 0) {
+      return;
+    }
+    final keys = List<int>.of(queueKeys);
+    final active = queueIndex;
+    final signature = '$active:${keys.join(',')}';
+    if (_flowAttempt == signature) return;
+    _flowAttempt = signature;
+    final anchors = <int>[];
+    for (var i = active; i + 1 < keys.length && anchors.length < 12; i++) {
+      if (!automaticEntries.containsKey(keys[i]) &&
+          !_flowHandled.contains(keys[i])) {
+        anchors.add(i);
+      }
+    }
+    if (anchors.isEmpty) return;
+    _flowBusy = true;
+    try {
+      final suggestions = await recommend(List.of(queue), anchors);
+      if (_disposed ||
+          !identical(recommend, _smartFlow) ||
+          opening ||
+          repeat != PlaybackRepeat.off ||
+          active != queueIndex ||
+          !listEquals(keys, queueKeys)) {
+        _flowAttempt = '';
+        return;
+      }
+      final used = queue.map((t) => t.id).toSet();
+      for (final i in anchors.reversed) {
+        _flowHandled.add(keys[i]);
+        final track = suggestions[i];
+        if (track == null || !used.add(track.id)) continue;
+        final key = _nextQueueKey++;
+        queue.insert(i + 1, track);
+        queueKeys.insert(i + 1, key);
+        automaticEntries[key] = 'flow';
+        final original = _originalQueueKeys.indexOf(keys[i]);
+        if (original >= 0) _originalQueueKeys.insert(original + 1, key);
+      }
+      _generation++;
+      _notify();
+    } catch (_) {
+      // Optional suggestions never interrupt or replace user choices.
+    } finally {
+      _flowBusy = false;
+    }
+  }
+
   Player player = Player();
   int fadeSeconds = 0;
   String fadeMode = 'fixed';
@@ -478,6 +608,13 @@ class PlayerController extends ChangeNotifier {
   String? error;
 
   void _notify() {
+    // History stays history even when shuffle moves it after the current song.
+    if (queueIndex >= 0 &&
+        queueIndex < queueKeys.length &&
+        current?.id == queue[queueIndex].id &&
+        automaticEntries[queueKeys[queueIndex]] == 'flow') {
+      automaticEntries[queueKeys[queueIndex]] = 'flow_played';
+    }
     if (!_disposed) notifyListeners();
   }
 
@@ -596,6 +733,9 @@ class PlayerController extends ChangeNotifier {
       ..addAll(copy);
     queueIndex = index;
     if (!sameOrder) {
+      automaticEntries.clear();
+      _flowHandled.clear();
+      _flowAttempt = '';
       queueKeys
         ..clear()
         ..addAll(List.generate(queue.length, (_) => _nextQueueKey++));
@@ -612,6 +752,9 @@ class PlayerController extends ChangeNotifier {
     String? title,
   }) async {
     if (tracks.isEmpty) return;
+    automaticEntries.clear();
+    _flowHandled.clear();
+    _flowAttempt = '';
     queueTitle = title;
     queue
       ..clear()
@@ -665,7 +808,11 @@ class PlayerController extends ChangeNotifier {
         if (suggested.isNotEmpty) {
           index = queue.length;
           queue.addAll(suggested);
-          queueKeys.addAll(suggested.map((_) => _nextQueueKey++));
+          for (final _ in suggested) {
+            final key = _nextQueueKey++;
+            queueKeys.add(key);
+            automaticEntries[key] = 'queue';
+          }
         }
       } catch (_) {
         /* Optional recommendations do not alter the existing queue on failure. */
@@ -698,6 +845,10 @@ class PlayerController extends ChangeNotifier {
   void toggleShuffle() {
     if (opening) return;
     shuffle = !shuffle;
+    _generation++;
+    _removeFutureFlow();
+    _flowHandled.removeWhere((key) => queueKeys.indexOf(key) >= queueIndex);
+    _flowAttempt = '';
     if (shuffle) {
       shuffleQueue();
     } else if (queue.isNotEmpty) {
@@ -720,6 +871,10 @@ class PlayerController extends ChangeNotifier {
   void cycleRepeat() {
     repeat = PlaybackRepeat
         .values[(repeat.index + 1) % PlaybackRepeat.values.length];
+    _generation++;
+    if (repeat != PlaybackRepeat.off) _removeFutureFlow();
+    _flowHandled.removeWhere((key) => queueKeys.indexOf(key) >= queueIndex);
+    _flowAttempt = '';
     _notify();
   }
 
@@ -770,6 +925,7 @@ class PlayerController extends ChangeNotifier {
         key,
       );
     }
+    if (asNext) _flowHandled.add(queueKeys[queueIndex]);
     queueKeys.insert(asNext ? queueIndex + 1 : queue.length, key);
     queue.insert(asNext ? queueIndex + 1 : queue.length, track);
     _notify();
@@ -792,6 +948,7 @@ class PlayerController extends ChangeNotifier {
         ..clear()
         ..addAll(baseline);
     }
+    if (index > 0) _flowHandled.add(queueKeys[index - 1]);
     queue.insertAll(index, items);
     queueKeys.insertAll(index, keys);
     if (wasEmpty) {
@@ -807,6 +964,8 @@ class PlayerController extends ChangeNotifier {
     if (opening || oldIndex == newIndex) return;
     final track = queue.removeAt(oldIndex);
     final key = queueKeys.removeAt(oldIndex);
+    // Moving a suggestion makes it an explicit user choice.
+    automaticEntries.remove(key);
     queueKeys.insert(newIndex, key);
     if (queueIndex == oldIndex) {
       queueIndex = newIndex;
@@ -843,6 +1002,9 @@ class PlayerController extends ChangeNotifier {
     queue.clear();
     queueTitle = null;
     queueKeys.clear();
+    automaticEntries.clear();
+    _flowHandled.clear();
+    _flowAttempt = '';
     _originalQueueKeys.clear();
     queueIndex = -1;
     current = null;

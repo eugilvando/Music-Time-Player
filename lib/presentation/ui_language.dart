@@ -129,6 +129,25 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  "Fila inteligente": "Intelligent queue",
+  "Modo da fila inteligente": "Intelligent queue mode",
+  "Smart Flow": "Smart Flow",
+  "Modo do Smart Flow": "Smart Flow mode",
+  "Dose dupla": "Double shot",
+  "Fã do artista": "Artist fan",
+  "Da era": "Era enthusiast",
+  "Era": "Era",
+  "Continua ao terminar a fila, considerando seus artistas, gêneros e épocas. Suas escolhas têm mais peso.": "Continues when the queue ends, considering its artists, genres and eras. Your choices carry more weight.",
+  "Intercala sugestões entre as músicas da fila. Não altera a playlist salva.": "Inserts suggestions between queued songs. Your saved playlist stays unchanged.",
+  "Forma duplas do mesmo artista, preservando as duplas que já existem.":
+      "Pairs songs by the same artist, keeping existing pairs.",
+  "Prioriza os artistas da fila e artistas semelhantes. Sem similaridade disponível, usa os gêneros locais.": "Prioritizes queued and similar artists. Uses local genres when similarity is unavailable.",
+  "Intercala músicas da mesma década, priorizando artistas semelhantes.":
+      "Inserts songs from the same decade, prioritizing similar artists.",
+  "Insere uma música aleatória entre as faixas escolhidas por você.":
+      "Inserts a random song between your chosen tracks.",
+  "Use os dois recursos juntos ou separadamente. As sugestões usam sua biblioteca e pausam durante a repetição.": "Use both features together or separately. Suggestions use your library and pause during repeat.",
+
   "Suavize a passagem de uma música para a próxima.":
       "Smooth the transition from one song to the next.",
   "Duração da transição": "Transition duration",

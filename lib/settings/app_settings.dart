@@ -44,6 +44,24 @@ class AppSettings extends ChangeNotifier {
     return fontFamilies.containsKey(value) ? value : fallback;
   }
 
+  bool get intelligentQueueEnabled => visualBool('smart_play', fallback: false);
+  String get intelligentQueueMode {
+    final mode = visualChoice('continuous_mode', 'related');
+    // Keep the intent of the former end-of-queue double-shot setting.
+    if (mode == 'double') return 'artist';
+    return {'related', 'artist', 'era', 'shuffle'}.contains(mode)
+        ? mode
+        : 'related';
+  }
+
+  bool get smartFlowEnabled => visualBool('smart_flow', fallback: false);
+  String get smartFlowMode {
+    final mode = visualChoice('smart_flow_mode', 'shuffle');
+    return {'shuffle', 'double', 'artist', 'era'}.contains(mode)
+        ? mode
+        : 'shuffle';
+  }
+
   String get iconPack {
     final value = visualChoice('icon_pack', 'current');
     return {'current', 'solar', 'phosphor'}.contains(value) ? value : 'current';

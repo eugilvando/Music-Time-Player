@@ -1,6 +1,6 @@
-# Music Time 2.9.0 — Ubuntu 24.04 x64
+# Music Time 2.10.0 — Ubuntu 24.04 x64
 
-This is the final Ubuntu release based on 2.9.0+63. The existing Debian package name `music-time-preview`, launch command and `app.musictime.preview` application identifier are retained so apt upgrades the installed preview and finds its existing profile. The application displays Music Time.
+This is the final Ubuntu release based on 2.10.0+64. The existing Debian package name `music-time-preview`, launch command and `app.musictime.preview` application identifier are retained so apt upgrades the installed preview and finds its existing profile. The application displays Music Time.
 
 ## Install or upgrade
 
@@ -9,13 +9,13 @@ Close Music Time, back up your Linux profile, and download the .deb and SHA256SU
 ```sh
 sha256sum -c SHA256SUMS.txt
 sudo apt update
-sudo apt install ./music-time-preview_2.9.0-0ubuntu1_amd64.deb
+sudo apt install ./music-time-preview_2.10.0-0ubuntu1_amd64.deb
 music-time-preview
 ```
 
-## New in 2.9.0
+## New in 2.10.0
 
-Choose Current, Solar or Phosphor icons with Filled/Outlined styles and a live preview in General and appearance → Icons. The setting applies immediately and works offline.
+Independent Intelligent queue and Smart Flow, shared by Settings and the existing playback-bar control. Intelligent queue uses the whole queue context; Smart Flow interleaves library songs using random, same-artist, artist similarity or decade criteria. Saved playlists remain unchanged. See [all modes and behavior](release-2.10.0.md).
 
 ## Artist features
 
@@ -37,4 +37,4 @@ The release manifest records the CI run, tests, package checksum and graphical i
 
 ## Português
 
-Versão final 2.9.0 para Ubuntu 24.04 x64. Atualize com o comando apt acima. O identificador interno conserva a palavra preview para atualizar a instalação existente e preservar o perfil. Confira bandeja, áudio e contas reais na sua VM/outra partição. As limitações de Smart fades e Mix only estão descritas acima.
+Versão final 2.10.0 para Ubuntu 24.04 x64. Atualize com o comando apt acima. O identificador interno conserva a palavra preview para atualizar a instalação existente e preservar o perfil. Confira bandeja, áudio e contas reais na sua VM/outra partição. As limitações de Smart fades e Mix only estão descritas acima.

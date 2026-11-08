@@ -22,7 +22,8 @@ import 'dart:ui' as ui_effects;
 import 'metadata_editor.dart';
 import '../offline/media_cache.dart';
 import '../lyrics/library_lyrics.dart';
-import '../library/smart_play.dart';
+import '../library/intelligent_queue.dart';
+import '../library/catalog.dart' show artistNameKey;
 import '../library/artist_similarity.dart';
 import '../library/artist_selection.dart';
 import 'artist_selection_dialog.dart';
@@ -154,6 +155,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Timer? cacheTimer;
   String cacheSignature = '';
   String playbackConfiguration = '';
+  String flowConfiguration = '';
   bool shutdownRequested = false;
   bool importingBackup = false;
   late final playbackSaves = PlaybackSaveCoordinator(_writePlayback);
@@ -298,7 +300,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
       widget.settings.visualNumber('prefetch_count', 5),
       widget.settings.visualBool('smart_play', fallback: false),
       widget.settings.visualNumber('continuous_count', 5),
-      widget.settings.visualChoice('continuous_mode', 'related'),
+      widget.settings.intelligentQueueMode,
+      widget.settings.smartFlowEnabled,
+      widget.settings.smartFlowMode,
     ].join('|');
     if (configuration == playbackConfiguration) return;
     playbackConfiguration = configuration;
@@ -314,26 +318,105 @@ class _LibraryScreenState extends State<LibraryScreen> {
               .round(),
       prefetchCount: widget.settings.visualNumber('prefetch_count', 5).round(),
     );
-    controller.continuous =
-        widget.settings.visualBool('smart_play', fallback: false)
+    controller.continuous = widget.settings.intelligentQueueEnabled
         ? (current, recent) async {
+            final automatic = controller.automaticIndices;
+            final mode = widget.settings.intelligentQueueMode;
             final available = await availableOffline();
-            return smartTracks(
-              tracks.where((t) => !t.libraryHidden).toList(),
-              current,
-              recent,
-              mode: widget.settings.visualChoice('continuous_mode', 'related'),
-              offlineOnly: offline,
-              offline: available,
-              count: widget.settings
-                  .visualNumber('continuous_count', 5)
-                  .round()
-                  .clamp(1, 100),
+            final similar = mode == 'era'
+                ? await queueSimilarArtists(
+                    recent,
+                    offline,
+                    automatic: automatic,
+                  )
+                : <String, Set<String>>{};
+            return compute(
+              prepareIntelligentQueue,
+              IntelligentQueueWork(
+                List.of(tracks),
+                recent,
+                automatic: automatic,
+                similar: similar.values.expand((v) => v).toSet(),
+                mode: mode,
+                offlineOnly: offline,
+                offline: available,
+                count: widget.settings
+                    .visualNumber('continuous_count', 5)
+                    .round()
+                    .clamp(1, 100),
+              ),
             );
           }
         : null;
+    final flowSignature =
+        '$offline:${widget.settings.smartFlowEnabled}:${widget.settings.smartFlowMode}';
+    if (flowSignature != flowConfiguration) {
+      flowConfiguration = flowSignature;
+      controller.configureSmartFlow(
+        widget.settings.smartFlowEnabled
+            ? (queue, anchors) async {
+                final mode = widget.settings.smartFlowMode;
+                final available = await availableOffline();
+                final similar = {'artist', 'era'}.contains(mode)
+                    ? await queueSimilarArtists([
+                        for (final i in anchors) queue[i],
+                      ], offline)
+                    : <String, Set<String>>{};
+                return compute(
+                  prepareSmartFlow,
+                  SmartFlowWork(
+                    List.of(tracks),
+                    queue,
+                    anchors,
+                    mode: mode,
+                    similar: similar,
+                    offline: available,
+                    offlineOnly: offline,
+                  ),
+                );
+              }
+            : null,
+      );
+    }
     cacheSignature = '';
     cachePlayback();
+  }
+
+  Future<Map<String, Set<String>>> queueSimilarArtists(
+    List<Track> queue,
+    bool offline, {
+    Set<int> automatic = const {},
+  }) async {
+    final context = QueueContext(queue, automatic: automatic)..analyze();
+    final artists = context.artists.keys.toList()
+      ..sort((a, b) => context.artists[b]!.compareTo(context.artists[a]!));
+    final names = {
+      for (final t in queue)
+        for (final a in t.artistNames) artistNameKey(a): a,
+    };
+    final result = <String, Set<String>>{};
+    // Bound optional network work and use cached data if it is too slow.
+    await Future.wait(
+      artists.take(4).map((key) async {
+        try {
+          result[key] =
+              (await artistSimilarity
+                      .names(names[key]!, offline: offline)
+                      .timeout(const Duration(seconds: 3)))
+                  .toSet();
+        } catch (_) {
+          try {
+            result[key] = (await artistSimilarity.names(
+              names[key]!,
+              offline: true,
+            )).toSet();
+          } catch (_) {
+            result[key] = {};
+          }
+        }
+      }),
+    );
+    return result;
   }
 
   Future<Set<String>> availableOffline() async {
@@ -454,6 +537,14 @@ class _LibraryScreenState extends State<LibraryScreen> {
             jsonDecode(saved) as Map<String, dynamic>,
           );
         }
+        final automation = widget.settings.preferences.getString(
+          'playback.automation',
+        );
+        if (automation != null) {
+          controller.restoreAutomationSnapshot(
+            jsonDecode(automation) as Map<String, dynamic>,
+          );
+        }
       } catch (_) {
         // Older or mismatched snapshots leave the restored visible order intact.
       }
@@ -493,10 +584,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
     final queue = List<Track>.of(controller.queue);
     final shuffle = controller.shuffle;
     final originalOrder = controller.originalQueueOrder;
+    final automation = jsonEncode(controller.automationSnapshot);
     final index = controller.queueIndex;
     final position = controller.position;
     final signature =
-        '${queue.map((track) => track.id).join('|')}:$index:${position.inMilliseconds}:$shuffle:${originalOrder.join(',')}:${controller.repeat.name}:${controller.volume}:${controller.queueTitle}';
+        '${queue.map((track) => track.id).join('|')}:$index:${position.inMilliseconds}:$shuffle:${originalOrder.join(',')}:${controller.repeat.name}:${controller.volume}:${controller.queueTitle}:$automation';
     if (signature == lastSaved) return;
     saving = true;
     try {
@@ -526,6 +618,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
       )) {
         await widget.settings.preferences.remove('playback.shuffle_restore');
       }
+      await widget.settings.preferences.setString(
+        'playback.automation',
+        automation,
+      );
       lastSaved = signature;
     } catch (_) {
       if (mounted) {
@@ -1375,7 +1471,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             subtitle: Text(
-                              controller.queue[index].artist,
+                              '${controller.queue[index].artist}${controller.automaticOrigin(index) == null ? '' : ' · ${ui(context, controller.automaticOrigin(index) == 'flow' ? 'Smart Flow' : 'Fila inteligente')}'}',
                               style: Theme.of(context).textTheme.bodySmall,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

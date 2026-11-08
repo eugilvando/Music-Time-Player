@@ -12,25 +12,25 @@ Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled 
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 2.9.0+63.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 2.10.0+64.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time Home with a fictional demonstration library](docs/images/home.png)
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [Download 2.9.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 2.10.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.10.0-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
 
-Windows **2.9.0** adds Current, Solar and Phosphor icon packs, Filled/Outlined styles, instant previews and saved preferences; Ubuntu **2.9.0** includes the same icon options in a separate final package. Drag tracks or whole albums into the queue, choose Continuous play modes, create genre/mood playlists from your collection, and use automatic crossfade, AutoEQ imports and EQ profiles per output device.
+**2.10.0** splits Continuous play into independent Intelligent queue and Smart Flow controls. Intelligent queue continues from the artists, genres and eras of your whole queue, weighting your choices above automatic suggestions. Smart Flow inserts songs between your choices, with Random, Double shot, Artist fan and Era modes. Both work from the existing playback-bar button and Settings. Saved playlists stay unchanged. Icon packs, automatic crossfade, AutoEQ and output-device EQ profiles remain available.
 
-[Windows release notes](docs/release-2.9.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
+[Windows release notes](docs/release-2.10.0.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
 Use the Windows and Ubuntu download links above for the current packages. Historical source tags and release notes remain available in Git; older installers may be removed during cleanup.
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-2.9.0.exe` from the [2.9.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.9.0).
+1. Download `MusicTime-Setup-2.10.0.exe` from the [2.10.0 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.10.0).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -89,7 +89,7 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 - Queue heading shows the playing playlist or mix when available.
 - Five Now Playing designs: Classic, Vinyl, Minimalist, Cover Only and Lyrics Only, adjustable artwork and optional blurred backgrounds.
 - Player-bar organizer with ordering/visibility of individual controls and three movable optional separators; metadata fields, time/progress and offline/cache/permanent status.
-- Continuous play adds tracks **from your library**, respecting visibility and offline rules. Choose same genre, Shuffle specialist, Double shot, Artist fan or Era enthusiast using the existing player-bar button or Playback settings; configure how many tracks to add.
+- Continuous play now offers independent Intelligent queue and Smart Flow controls. See the [2.10.0 guide](docs/release-2.10.0.md).
 - Artist mixes, including track/album entry points, use global Last.fm popularity for that artist only, with local play-count fallback. Radio keeps its similarity behavior. Artist mix and radio have independent sizes, **40 tracks by default, configurable from 1 to 500**, preview and regeneration.
 - Mixes create and start a **playback queue**. Saving a manual playlist is a separate explicit action.
 - Crossfade: Off, Automatic or Manual; Smooth, Smart fades and Mix only transitions. Automatic selects up to six seconds using track lengths and compatible waveform analysis. Sequential album playback bypasses overlap.
@@ -165,9 +165,9 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Validation and development
 
-Windows 2.9.0 passed 27 targeted regression tests, full static analysis and native integration checks. Six icon pack/style combinations were visually inspected. The full suite was not rerun for this release. See [release notes](docs/release-2.9.0.md) and [the validation manifest](release/validation.json).
+Windows 2.10.0 passed 27 targeted regression tests, full static analysis and native integration checks. Six icon pack/style combinations were visually inspected. The full suite was not rerun for this release. See [release notes](docs/release-2.10.0.md) and [the validation manifest](release/validation.json).
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.9.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-2.10.0.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 

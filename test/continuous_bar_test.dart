@@ -61,7 +61,11 @@ void main() {
       );
       await tester.tap(find.byTooltip('Play contínuo'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Era Enthusiast'));
+      await tester.tap(find.byType(SwitchListTile).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<String>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Era').last);
       await tester.pumpAndSettle();
       expect(settings.visualBool('smart_play', fallback: false), true);
       expect(
@@ -69,6 +73,8 @@ void main() {
             .visualChoice('continuous_mode', 'related'),
         'era',
       );
+      await tester.tap(find.text('Fechar'));
+      await tester.pumpAndSettle();
       final source = tester.getCenter(find.text('source'));
       final target = tester.getCenter(find.byType(DragTarget<List<Track>>));
       await tester.dragFrom(source, target - source);

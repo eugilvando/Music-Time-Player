@@ -1,4 +1,4 @@
-import '../library/smart_play.dart';
+import 'playback_transition_settings.dart';
 import '../domain/track.dart';
 import 'design_icon.dart';
 
@@ -251,7 +251,7 @@ class PlayerBar extends StatelessWidget {
       width: 18,
       child: VerticalDivider(indent: 8, endIndent: 8),
     ),
-    'continuous' => PopupMenuButton<String>(
+    'continuous' => IconButton(
       padding: const EdgeInsets.all(6),
       iconSize: 20,
       style: IconButton.styleFrom(
@@ -262,25 +262,31 @@ class PlayerBar extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       tooltip: ui(context, 'Play contínuo'),
-      initialValue: settings.visualBool('smart_play', fallback: false)
-          ? settings.visualChoice('continuous_mode', 'related')
-          : 'off',
       icon: MtIcon(
         const IconData(0xf6b5, fontFamily: 'Material Symbols Rounded'),
         size: 20,
-        color: settings.visualBool('smart_play', fallback: false)
+        color: settings.intelligentQueueEnabled || settings.smartFlowEnabled
             ? Theme.of(context).colorScheme.primary
             : null,
       ),
-      itemBuilder: (_) => [
-        PopupMenuItem(value: 'off', child: Text(ui(context, 'Desativado'))),
-        for (final mode in continuousModes.entries)
-          PopupMenuItem(value: mode.key, child: Text(ui(context, mode.value))),
-      ],
-      onSelected: (mode) async {
-        if (mode != 'off') await settings.updateVisual('continuous_mode', mode);
-        await settings.updateVisual('smart_play', mode != 'off');
-      },
+      onPressed: () => showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const UiText('Play contínuo'),
+          content: SizedBox(
+            width: 520,
+            child: SingleChildScrollView(
+              child: ContinuousPlaybackSettings(settings: settings),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const UiText('Fechar'),
+            ),
+          ],
+        ),
+      ),
     ),
     'lyrics' => panelToggle(context, 'lyrics'),
     'queue' => DragTarget<List<Track>>(

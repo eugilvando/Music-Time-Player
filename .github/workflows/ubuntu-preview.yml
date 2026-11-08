@@ -52,7 +52,7 @@ jobs:
         run: |
           pulseaudio --start --exit-idle-time=-1
           pactl info
-          flutter test --no-pub --concurrency=1 test/disc_metadata_test.dart test/cloud_metadata_test.dart test/catalog_test.dart test/album_review_test.dart test/memory_artwork_test.dart test/refinements_2_4_test.dart test/refinements_2_4_1_test.dart test/player_bar_organizer_test.dart test/library_visibility_test.dart test/source_removal_test.dart test/onedrive_sync_test.dart test/artist_radio_refinements_test.dart test/catalog_query_test.dart test/home_cache_test.dart test/refinements_2_5_test.dart test/refinements_2_5_2_test.dart test/lastfm_favorite_sync_test.dart test/tray_window_test.dart test/ui_0_7_1_test.dart test/ui_1_1_test.dart test/playback_update_test.dart test/insight_tags_test.dart test/continuous_bar_test.dart test/windows_audio_output_test.dart test/parametric_eq_test.dart test/output_equalizer_test.dart test/album_queue_drag_test.dart test/playback_settings_test.dart test/output_equalizer_panel_test.dart test/artist_update_test.dart test/artist_mix_entry_test.dart test/artist_selection_test.dart test/artist_selection_ui_test.dart test/icon_pack_test.dart
+          flutter test --no-pub --concurrency=1 test/disc_metadata_test.dart test/cloud_metadata_test.dart test/catalog_test.dart test/album_review_test.dart test/memory_artwork_test.dart test/refinements_2_4_test.dart test/refinements_2_4_1_test.dart test/player_bar_organizer_test.dart test/library_visibility_test.dart test/source_removal_test.dart test/onedrive_sync_test.dart test/artist_radio_refinements_test.dart test/catalog_query_test.dart test/home_cache_test.dart test/refinements_2_5_test.dart test/refinements_2_5_2_test.dart test/lastfm_favorite_sync_test.dart test/tray_window_test.dart test/ui_0_7_1_test.dart test/ui_1_1_test.dart test/playback_update_test.dart test/insight_tags_test.dart test/continuous_bar_test.dart test/windows_audio_output_test.dart test/parametric_eq_test.dart test/output_equalizer_test.dart test/album_queue_drag_test.dart test/playback_settings_test.dart test/output_equalizer_panel_test.dart test/artist_update_test.dart test/artist_mix_entry_test.dart test/artist_selection_test.dart test/artist_selection_ui_test.dart test/icon_pack_test.dart test/intelligent_queue_test.dart test/intelligent_playback_test.dart
       - name: Build Linux release
         run: flutter build linux --release --no-pub
       - name: Validate graphical launch and database migration
@@ -72,13 +72,13 @@ jobs:
       - name: Upload VM package
         uses: actions/upload-artifact@v4
         with:
-          name: music-time-ubuntu-24.04-amd64-2.9.0-final
+          name: music-time-ubuntu-24.04-amd64-2.10.0-final
           path: dist/ubuntu/
           retention-days: 14
       - name: Upload Linux validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-2.9.0-final-validation
+          name: ubuntu-2.10.0-final-validation
           path: build/ubuntu-smoke/
           if-no-files-found: ignore

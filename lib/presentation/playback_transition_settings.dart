@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../settings/app_settings.dart';
-import '../library/smart_play.dart';
+import '../library/intelligent_queue.dart';
 import 'ui_language.dart';
 
 class PlaybackSettingField<T> extends StatelessWidget {
@@ -153,7 +153,7 @@ class ContinuousPlaybackSettings extends StatelessWidget {
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: settings,
     builder: (context, _) {
-      final enabled = settings.visualBool('smart_play', fallback: false);
+      final enabled = settings.intelligentQueueEnabled;
       final count = settings
           .visualNumber('continuous_count', 5)
           .round()
@@ -163,9 +163,9 @@ class ContinuousPlaybackSettings extends StatelessWidget {
         children: [
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const UiText('Continuar após o fim da fila'),
+            title: const UiText('Fila inteligente'),
             subtitle: const UiText(
-              'Acrescenta músicas da sua biblioteca conforme o modo escolhido.',
+              'Continua ao terminar a fila, considerando seus artistas, gêneros e épocas. Suas escolhas têm mais peso.',
             ),
             value: enabled,
             onChanged: settings.saving
@@ -174,10 +174,10 @@ class ContinuousPlaybackSettings extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           PlaybackSettingField<String>(
-            label: 'Modo do play contínuo',
-            value: settings.visualChoice('continuous_mode', 'related'),
+            label: 'Modo da fila inteligente',
+            value: settings.intelligentQueueMode,
             items: [
-              for (final mode in continuousModes.entries)
+              for (final mode in intelligentQueueModes.entries)
                 DropdownMenuItem(
                   value: mode.key,
                   child: Text(ui(context, mode.value)),
@@ -210,9 +210,49 @@ class ContinuousPlaybackSettings extends StatelessWidget {
                     }
                   },
           ),
+          const SizedBox(height: 28),
+          const Divider(),
+          const SizedBox(height: 12),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const UiText('Smart Flow'),
+            subtitle: const UiText(
+              'Intercala sugestões entre as músicas da fila. Não altera a playlist salva.',
+            ),
+            value: settings.smartFlowEnabled,
+            onChanged: settings.saving
+                ? null
+                : (value) => settings.updateVisual('smart_flow', value),
+          ),
+          const SizedBox(height: 20),
+          PlaybackSettingField<String>(
+            label: 'Modo do Smart Flow',
+            value: settings.smartFlowMode,
+            items: [
+              for (final mode in smartFlowModes.entries)
+                DropdownMenuItem(
+                  value: mode.key,
+                  child: Text(ui(context, mode.value)),
+                ),
+            ],
+            onChanged: !settings.smartFlowEnabled || settings.saving
+                ? null
+                : (value) {
+                    if (value != null) {
+                      settings.updateVisual('smart_flow_mode', value);
+                    }
+                  },
+          ),
+          const SizedBox(height: 16),
+          UiText(switch (settings.smartFlowMode) {
+            'double' => 'Forma duplas do mesmo artista, preservando as duplas que já existem.',
+            'artist' => 'Prioriza os artistas da fila e artistas semelhantes. Sem similaridade disponível, usa os gêneros locais.',
+            'era' => 'Intercala músicas da mesma década, priorizando artistas semelhantes.',
+            _ => 'Insere uma música aleatória entre as faixas escolhidas por você.',
+          }),
           const SizedBox(height: 16),
           const UiText(
-            'Você também pode trocar o modo pelo botão Play contínuo na barra de reprodução.',
+            'Use os dois recursos juntos ou separadamente. As sugestões usam sua biblioteca e pausam durante a repetição.',
           ),
         ],
       );
