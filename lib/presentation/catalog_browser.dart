@@ -3287,7 +3287,18 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         !widget.home &&
         selectedGroup == null &&
         {'songs', 'favorites', 'offline'}.contains(category);
-    final values = paged ? <Track>[] : filtered();
+    // Home owns its section rankings. Do not sort the complete catalog before
+    // its first frame when no user filter requires a query.
+    final directHome =
+        widget.home &&
+        widget.query.trim().isEmpty &&
+        !filters.active &&
+        !widget.settings.visualBool('offline_only', fallback: false);
+    final values = paged
+        ? <Track>[]
+        : directHome
+        ? widget.tracks
+        : filtered();
     Widget body = favoritesPage && selectedGroup == null
         ? favoriteResults()
         : derivingCatalog && values.isEmpty

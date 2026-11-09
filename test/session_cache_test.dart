@@ -95,6 +95,67 @@ void main() {
   });
 
   testWidgets(
+    'Catalog shell opens unfiltered Home without a full catalog sort',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'visual.home_sections': ['favorite_tracks'],
+        'visual.artist_photos': false,
+      });
+      final settings = AppSettings(await SharedPreferences.getInstance());
+      final store = (await tester.runAsync(
+        () => LibraryStore.open(':memory:'),
+      ))!;
+      final providers = ProviderConnections(
+        settings.preferences,
+        store,
+        vault: MemoryVault(),
+      );
+      final downloads = DownloadManager(store, providers);
+      final tracks = List.generate(
+        1100,
+        (i) => Track(id: '$i', title: 'Demo $i', artist: 'Artist'),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CatalogBrowser(
+              memory: CatalogMemory()
+                ..ready = true
+                ..catalogRevision = 0,
+              tracks: tracks,
+              favorites: {'0'},
+              store: store,
+              settings: settings,
+              downloads: downloads,
+              query: '',
+              home: true,
+              onPlay: (_, _) async {},
+              onAction: (_, _) async {},
+              trackActions: (_) => const SizedBox(),
+              onAddSource: () {},
+              onPlaylist: (_) {},
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Demo 0'), findsWidgets);
+      expect(
+        tester
+            .state<CatalogBrowserState>(find.byType(CatalogBrowser))
+            .derivingCatalog,
+        isFalse,
+      );
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 250));
+      await drainCatalog(tester);
+      downloads.dispose();
+      providers.dispose();
+      settings.dispose();
+      await tester.runAsync(store.close);
+    },
+  );
+
+  testWidgets(
     'Favorites snapshot survives navigation and invalidates after a favorite changes',
     (tester) async {
       SharedPreferences.setMockInitialValues({'visual.artist_photos': false});
