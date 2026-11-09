@@ -12,27 +12,27 @@ Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled 
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Current release: 3.0.1+66.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Current release: 3.0.2+67.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
-![Music Time 3.0 Library with fictional demonstration data](docs/images/library-3.0.1.png)
+![Music Time 3.0 Library with fictional demonstration data](docs/images/library-3.0.2.png)
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [Download 3.0.1 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.1-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 3.0.2 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.2-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
 
-The Library now includes **Card size** with five saved sizes, independent of other pages. Colorful category cards and a tinted collection summary adapt to light/dark themes and smaller windows.
+The Library header now includes **Organize library**: choose between five card sizes and show or hide each category, including **History**. Card visibility is saved independently of the sidebar. Colorful cards and a tinted collection summary adapt to light/dark themes and smaller windows.
 
-**3.0.1** introduces a Library overview with collection totals and shortcuts, a dedicated Songs destination with continuous scrolling, subtle striped rows, and bolder Solar/Phosphor outlines. Pages reuse cached content while refreshing in the background. Linux now exposes an MPRIS media session, including playback controls while the window is hidden. Intelligent queue, Smart Flow, automatic crossfade, AutoEQ and output-device EQ profiles remain available.
+**3.0.2** introduces a Library overview with collection totals and shortcuts, a dedicated Songs destination with continuous scrolling, subtle striped rows, and bolder Solar/Phosphor outlines. Pages reuse cached content while refreshing in the background. Linux now exposes an MPRIS media session, including playback controls while the window is hidden. Intelligent queue, Smart Flow, automatic crossfade, AutoEQ and output-device EQ profiles remain available.
 
-[Windows release notes](docs/release-3.0.1.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
+[Windows release notes](docs/release-3.0.2.md) · [Audio features and usage](docs/release-2.7.0.md) · [Ubuntu installation](docs/ubuntu-preview.md)
 
 Use the Windows and Ubuntu download links above for the current packages. Historical source tags and release notes remain available in Git; older installers may be removed during cleanup.
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-3.0.1.exe` from the [3.0.1 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.1).
+1. Download `MusicTime-Setup-3.0.2.exe` from the [3.0.2 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.2).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.
@@ -91,7 +91,7 @@ Google uses the **restricted** `drive.readonly` scope. Unverified/testing projec
 - Queue heading shows the playing playlist or mix when available.
 - Five Now Playing designs: Classic, Vinyl, Minimalist, Cover Only and Lyrics Only, adjustable artwork and optional blurred backgrounds.
 - Player-bar organizer with ordering/visibility of individual controls and three movable optional separators; metadata fields, time/progress and offline/cache/permanent status.
-- Continuous play now offers independent Intelligent queue and Smart Flow controls. See the [3.0.1 guide](docs/release-3.0.1.md).
+- Continuous play now offers independent Intelligent queue and Smart Flow controls. See the [3.0.2 guide](docs/release-3.0.2.md).
 - Artist mixes, including track/album entry points, use global Last.fm popularity for that artist only, with local play-count fallback. Radio keeps its similarity behavior. Artist mix and radio have independent sizes, **40 tracks by default, configurable from 1 to 500**, preview and regeneration.
 - Mixes create and start a **playback queue**. Saving a manual playlist is a separate explicit action.
 - Crossfade: Off, Automatic or Manual; Smooth, Smart fades and Mix only transitions. Automatic selects up to six seconds using track lengths and compatible waveform analysis. Sequential album playback bypasses overlap.
@@ -167,9 +167,9 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Validation and development
 
-Windows 3.0.1 passed 27 targeted regression tests, full static analysis and native integration checks. Six icon pack/style combinations were visually inspected. The full suite was not rerun for this release. See [release notes](docs/release-3.0.1.md) and [the validation manifest](release/validation.json).
+Windows 3.0.2 passed 27 targeted regression tests, full static analysis and native integration checks. Six icon pack/style combinations were visually inspected. The full suite was not rerun for this release. See [release notes](docs/release-3.0.2.md) and [the validation manifest](release/validation.json).
 
-See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-3.0.1.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [building](docs/building.md), [provider setup](docs/provider-setup.md), [privacy and data](docs/privacy-and-data.md), [release notes](docs/release-3.0.2.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License
 

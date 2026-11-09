@@ -1,20 +1,20 @@
 {
-  "version": "3.0.1+66",
+  "version": "3.0.2+67",
   "platform": "Windows x64",
-  "sourceCommit": "c8bf4c0221789dc9ab2e54086b40f260948d3d6d",
+  "sourceCommit": "6a3f70ff93bc132c7da252554786326670f07a94",
   "installer": {
-    "file": "MusicTime-Setup-3.0.1.exe",
-    "bytes": 46381017,
-    "sha256": "4a81570a717f4c63abad025f4bfd296991ff1a19bf8b04dce5bbc86f75a9decf"
+    "file": "MusicTime-Setup-3.0.2.exe",
+    "bytes": 46381895,
+    "sha256": "152e891037ac70ea3acda9c954e488a6a45b8d1b93730b0733a93dc7d68117b2"
   },
   "checks": {
     "analysis": "passed; complete project",
-    "targetedTests": 5,
+    "targetedTests": 7,
     "additionalVisualTest": "passed; full app navigation at multiple window sizes and text scales; updated captures",
-    "visualReview": "passed; colorful Library cards, Small/Large layouts and Solar/Phosphor outlines inspected using fictional fixtures",
+    "visualReview": "passed; Library header, History and card layouts inspected using fictional fixtures",
     "releaseBuild": "passed",
     "nativeIntegration": "SMTC artwork/play/pause, tray, window placement and clean exit passed",
     "installation": "binary hashes matched; database/preferences/vault unchanged; app left closed"
   },
-  "limits": "Focused 3.0.1 regression checks. Base 3.0.0 passed 54 targeted tests and isolated data-restart checks. Ubuntu validated independently. Real accounts and user Linux desktop acceptance remain separate."
+  "limits": "Focused 3.0.2 regression checks. Ubuntu validated independently. Real accounts and user Linux desktop acceptance remain separate."
 }
