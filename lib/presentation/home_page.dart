@@ -1676,8 +1676,6 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       key: const PageStorageKey('home.content'),
       children: [
-        if (derivedSignature != currentSignature && homeError == null)
-          const LinearProgressIndicator(key: ValueKey('home.refreshing')),
         if (homeError != null)
           TextButton(
             key: const ValueKey('home.retry'),

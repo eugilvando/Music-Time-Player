@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Curated equivalents in the bundled Solar and Phosphor collections.
 final iconCatalog = <IconData, (String, String)>{
+  Icons.category: ('widget-add', 'squares-four'),
   Icons.add: ('add-circle', 'plus'),
   Icons.album: ('vinyl-record', 'vinyl-record'),
   Icons.arrow_back: ('arrow-left', 'arrow-left'),

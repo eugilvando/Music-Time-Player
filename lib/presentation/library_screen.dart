@@ -1,3 +1,4 @@
+import 'library_hub.dart';
 import 'queue_drag_row.dart';
 import '../library/artist_ranking.dart';
 import '../library/insight_artist_templates.dart';
@@ -1455,6 +1456,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                             ),
                           ),
                           child: ListTile(
+                            tileColor: index.isOdd
+                                ? Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: .035)
+                                : null,
                             dense: true,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -1552,6 +1557,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
       .toList();
 
   bool get globalSearch => {
+    AppSection.library,
     AppSection.home,
     AppSection.nowPlaying,
     AppSection.history,
@@ -1562,6 +1568,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
     onChanged: (value) => setState(() => query = value),
   );
 
+  final sectionQueries = <AppSection, String>{};
+
   void openSearchResult(String type, CatalogGroup group) {
     setState(() => query = '');
     widget.onNavigate(
@@ -1569,7 +1577,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ? AppSection.albums
           : {'artists', 'albumArtists'}.contains(type)
           ? AppSection.artists
-          : AppSection.library,
+          : AppSection.songs,
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) catalogKey.currentState?.openGroup(group, type: type);
@@ -1582,7 +1590,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (widget.section != AppSection.settings) settingsDestination = null;
     if (old.navigationReset != widget.navigationReset) {
       settingsDestination = null;
-      query = '';
+      sectionQueries[old.section] = query;
+      query = old.section == widget.section
+          ? ''
+          : sectionQueries[widget.section] ?? '';
       selectedPlaylist = null;
       cachedLibraryPage = null;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1592,6 +1603,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
               ? 'albumArtists'
               : widget.section == AppSection.albums
               ? 'albums'
+              : widget.section == AppSection.years
+              ? 'years'
+              : widget.section == AppSection.genres
+              ? 'genres'
               : widget.section == AppSection.favorites
               ? 'favorites'
               : 'songs',
@@ -2116,7 +2131,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                   Expanded(child: searchField()),
                                   if ({
                                     AppSection.home,
-                                    AppSection.library,
+                                    AppSection.songs,
+                                    AppSection.years,
+                                    AppSection.genres,
                                     AppSection.artists,
                                     AppSection.albums,
                                     AppSection.favorites,
@@ -2158,7 +2175,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                             children: [
                                               if (!{
                                                 AppSection.home,
-                                                AppSection.library,
+                                                AppSection.songs,
+                                                AppSection.years,
+                                                AppSection.genres,
                                                 AppSection.favorites,
                                                 AppSection.artists,
                                                 AppSection.albums,
@@ -2234,9 +2253,25 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                       )
                                                     : switch (widget.section) {
                                                         AppSection.home ||
-                                                        AppSection.library ||
+                                                        AppSection.songs ||
                                                         AppSection.favorites =>
                                                           libraryPage(),
+                                                        AppSection.library =>
+                                                          LibraryHub(
+                                                            tracks: tracks,
+                                                            favorites:
+                                                                favorites,
+                                                            onNavigate: widget
+                                                                .onNavigate,
+                                                          ),
+                                                        AppSection.years =>
+                                                          libraryPage(
+                                                            category: 'years',
+                                                          ),
+                                                        AppSection.genres =>
+                                                          libraryPage(
+                                                            category: 'genres',
+                                                          ),
                                                         AppSection.artists =>
                                                           libraryPage(
                                                             category:

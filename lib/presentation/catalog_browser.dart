@@ -51,6 +51,9 @@ class CatalogPageSnapshot {
 /// Metadata only; retained by the shell while sections are mounted/unmounted.
 class CatalogMemory {
   final pages = <String, CatalogPageSnapshot>{};
+  final pageVersions = <String, String>{};
+  final letters = <String, Map<String, int>>{};
+  final scrollPositions = <String, double>{};
   final derived = <String, CatalogResult>{};
   final home = <String, HomeData>{};
   CatalogIndex? index;
@@ -67,7 +70,11 @@ class CatalogMemory {
     pages.remove(key);
     pages[key] = page;
     while (pages.length > 8) {
-      pages.remove(pages.keys.first);
+      final oldest = pages.keys.first;
+      pages.remove(oldest);
+      pageVersions.remove(oldest);
+      scrollPositions.remove(oldest);
+      letters.remove(oldest);
     }
   }
 }
@@ -268,7 +275,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       selectedGroup == null &&
       activeSort == 'title' &&
       {'songs', 'albums', 'artists', 'albumArtists'}.contains(category);
-  ScrollController? get rootScroll => alphabetEnabled ? alphabetScroll : null;
+  ScrollController get rootScroll => alphabetScroll;
   int pageOffset = 0, pageTotal = 0, pageRequest = 0, dataRevision = 0;
   int loadedOffset = 0;
   bool pageLoading = true;
@@ -300,7 +307,29 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     );
   }
 
-  Future<void> loadPage() async {
+  void loadNearEnd() {
+    if (!mounted ||
+        pageLoading ||
+        pageError != null ||
+        !alphabetScroll.hasClients ||
+        loadedOffset + pageTracks.length >= pageTotal) {
+      return;
+    }
+    if (alphabetScroll.position.extentAfter < 400) loadPage(append: true);
+  }
+
+  Future<void> loadPage({bool append = false, bool prepend = false}) async {
+    final offset = append
+        ? loadedOffset + pageTracks.length
+        : prepend
+        ? (loadedOffset - pageSize).clamp(0, pageTotal)
+        : pageOffset;
+    final previousPixels = alphabetScroll.hasClients
+        ? alphabetScroll.position.pixels
+        : 0.0;
+    final previousExtent = alphabetScroll.hasClients
+        ? alphabetScroll.position.maxScrollExtent
+        : 0.0;
     final request = ++pageRequest;
     if (mounted) {
       setState(() {
@@ -311,8 +340,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     try {
       var result = await widget.store.catalogPage(
         sqlQuery,
-        offset: pageOffset,
-        limit: pageSize,
+        offset: offset,
+        limit: prepend ? loadedOffset - offset : pageSize,
         includeCovers: false,
       );
       if (!mounted || request != pageRequest) return;
@@ -326,6 +355,26 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         );
       }
       if (!mounted || request != pageRequest) return;
+      if (!append &&
+          !prepend &&
+          loadedOffset == offset &&
+          pageTracks.length > pageSize) {
+        final retained = pageTracks.length;
+        final refreshed = List<Track>.of(result.tracks);
+        while (refreshed.length < retained &&
+            offset + refreshed.length < result.total) {
+          final block = await widget.store.catalogPage(
+            sqlQuery,
+            offset: offset + refreshed.length,
+            limit: pageSize,
+            includeCovers: false,
+          );
+          if (!mounted || request != pageRequest) return;
+          if (block.tracks.isEmpty) break;
+          refreshed.addAll(block.tracks);
+        }
+        result.tracks.addAll(refreshed.skip(result.tracks.length));
+      }
       if (alphabetEnabled && alphabetSignature != pageSignature) {
         final query = sqlQuery;
         final letters = await widget.store.database.rawQuery(
@@ -337,19 +386,39 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           for (final row in letters)
             row['letter'] as String: row['position'] as int,
         };
+        memory.letters[pageCriteria] = pageLetters;
         alphabetSignature = pageSignature;
       }
       setState(() {
-        pageTracks = result.tracks;
+        pageTracks = append
+            ? [...pageTracks, ...result.tracks]
+            : prepend
+            ? [...result.tracks, ...pageTracks]
+            : result.tracks;
         pageTotal = result.total;
         pageLoading = false;
         pageHasData = true;
-        loadedOffset = pageOffset;
+        loadedOffset = append ? loadedOffset : result.offset;
+        pageOffset = loadedOffset;
+        memory.pageVersions[pageCriteria] = pageSignature;
         memory.save(
           pageCriteria,
-          CatalogPageSnapshot(List.of(result.tracks), result.total, pageOffset),
+          CatalogPageSnapshot(List.of(pageTracks), result.total, loadedOffset),
         );
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) => loadNearEnd());
+      if (prepend) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && alphabetScroll.hasClients) {
+            alphabetScroll.jumpTo(
+              (previousPixels +
+                      alphabetScroll.position.maxScrollExtent -
+                      previousExtent)
+                  .clamp(0.0, alphabetScroll.position.maxScrollExtent),
+            );
+          }
+        });
+      }
     } catch (_) {
       if (mounted && request == pageRequest) {
         setState(() {
@@ -374,12 +443,16 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     ]);
     final signature = '$criteria:$dataRevision:${widget.revision}';
     if (signature == pageSignature) return;
+    if (pageCriteria.isNotEmpty && alphabetScroll.hasClients) {
+      memory.scrollPositions[pageCriteria] = alphabetScroll.offset;
+    }
     pageSignature = signature;
     if (criteria != pageCriteria) {
       final saved = memory.pages[criteria];
       pageOffset = saved?.offset ?? 0;
       loadedOffset = pageOffset;
-      pageHasData = saved != null || pageHasData;
+      pageHasData = saved != null;
+      if (saved == null) pageTracks = [];
       final visible = saved == null
           ? const <String>{}
           : widget.tracks.map((track) => track.id).toSet();
@@ -401,6 +474,21 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     }
     pageCriteria = criteria;
     pageRequest++;
+    if (memory.pageVersions[criteria] == signature &&
+        memory.pages.containsKey(criteria)) {
+      pageLoading = false;
+      pageLetters = memory.letters[criteria] ?? {};
+      alphabetSignature = signature;
+      final pixels = memory.scrollPositions[criteria] ?? 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && alphabetScroll.hasClients) {
+          alphabetScroll.jumpTo(
+            pixels.clamp(0.0, alphabetScroll.position.maxScrollExtent),
+          );
+        }
+      });
+      return;
+    }
     pageLoading = true;
     Future.microtask(() {
       if (mounted) loadPage();
@@ -433,80 +521,44 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     ensurePage();
     return Column(
       children: [
-        if (pageLoading) const LinearProgressIndicator(),
         if (pageError != null)
-          TextButton(onPressed: loadPage, child: UiText(pageError!)),
+          TextButton(onPressed: () => loadPage(), child: UiText(pageError!)),
         Expanded(
           child: pageLoading && !pageHasData
               ? const Center(child: CircularProgressIndicator())
-              : IgnorePointer(
-                  ignoring: pageLoading,
+              : NotificationListener<ScrollNotification>(
+                  onNotification: (event) {
+                    if (event.depth != 0 ||
+                        event.metrics.axis != Axis.vertical ||
+                        pageLoading ||
+                        pageError != null) {
+                      return false;
+                    }
+                    if (event.metrics.extentAfter < 400 &&
+                        loadedOffset + pageTracks.length < pageTotal) {
+                      loadPage(append: true);
+                    } else if (event is ScrollUpdateNotification &&
+                        (event.scrollDelta ?? 0) < 0 &&
+                        event.metrics.extentBefore < 80 &&
+                        loadedOffset > 0) {
+                      loadPage(prepend: true);
+                    }
+                    return false;
+                  },
                   child: trackList(pageTracks, paged: true),
                 ),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+        SizedBox(
+          height: 28,
           child: Row(
             children: [
-              Text(
-                pageTracks.isEmpty
-                    ? ui(
-                        context,
-                        pageLoading ? 'Carregando músicas…' : '0 músicas',
-                      )
-                    : uiFormat(
-                        context,
-                        '${loadedOffset + 1}–${loadedOffset + pageTracks.length} de $pageTotal',
-                        '${loadedOffset + 1}–${loadedOffset + pageTracks.length} of $pageTotal',
-                      ),
-              ),
-              IconButton(
-                tooltip: ui(context, 'Página anterior'),
-                onPressed:
-                    (pageLoading &&
-                            (!pageHasData || pageOffset != loadedOffset)) ||
-                        pageOffset == 0
-                    ? null
-                    : () {
-                        pageOffset = (pageOffset - pageSize).clamp(
-                          0,
-                          pageTotal,
-                        );
-                        loadPage();
-                      },
-                icon: const MtIcon(Icons.chevron_left),
-              ),
-              IconButton(
-                tooltip: ui(context, 'Próxima página'),
-                onPressed:
-                    (pageLoading &&
-                            (!pageHasData || pageOffset != loadedOffset)) ||
-                        pageOffset + pageSize >= pageTotal
-                    ? null
-                    : () {
-                        pageOffset += pageSize;
-                        loadPage();
-                      },
-                icon: const MtIcon(Icons.chevron_right),
-              ),
-              const UiText('Por página: '),
-              RoundedSelect(
-                child: DropdownButton<int>(
-                  value: pageSize,
-                  items: [50, 100, 200]
-                      .map((n) => DropdownMenuItem(value: n, child: Text('$n')))
-                      .toList(),
-                  onChanged: (n) async {
-                    if (n != null) {
-                      await widget.settings.updateVisual(
-                        'catalog_page_size',
-                        '$n',
-                      );
-                      if (mounted) setState(() {});
-                    }
-                  },
+              Text('$pageTotal músicas'),
+              const Spacer(),
+              if (pageLoading && pageHasData)
+                const SizedBox.square(
+                  dimension: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-              ),
             ],
           ),
         ),
@@ -518,6 +570,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   @override
   void initState() {
     super.initState();
+    alphabetScroll.addListener(loadNearEnd);
     mergeArtists = widget.settings.visualBool('merge_artists', fallback: true);
     mergeAlbums = widget.settings.visualBool('merge_albums', fallback: true);
     if (memory.ready) {
@@ -545,12 +598,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     }
     quick = widget.settings.visualChoice('quick_$category', '');
     quickInput = TextEditingController(text: quick);
-    sort = !widget.home && widget.initialCategory == 'songs'
-        ? 'title'
-        : widget.settings.visualChoice('songs_sort', 'title');
-    descending = !widget.home && widget.initialCategory == 'songs'
-        ? false
-        : widget.settings.visualBool('songs_descending', fallback: false);
+    sort = widget.settings.visualChoice('songs_sort', 'title');
+    descending = widget.settings.visualBool(
+      'songs_descending',
+      fallback: false,
+    );
     if (favoritesPage) {
       pageLoading = false;
       pageHasData = true;
@@ -628,6 +680,9 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     refreshTimer?.cancel();
     inputTimer?.cancel();
     quickInput.dispose();
+    if (pageCriteria.isNotEmpty && alphabetScroll.hasClients) {
+      memory.scrollPositions[pageCriteria] = alphabetScroll.offset;
+    }
     alphabetScroll.dispose();
     widget.downloads.removeListener(scheduleAvailability);
     widget.downloads.cache?.removeListener(scheduleAvailability);
@@ -1242,6 +1297,10 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 paged ? widget.tracks : values,
                 ItemActionRegion(
                   child: ListTile(
+                    tileColor: i.isOdd
+                        ? Theme.of(context).colorScheme.onSurface
+                              .withValues(alpha: .035)
+                        : null,
                     dense: dense,
                     selected: selectedIds.contains(t.id),
                     leading: Row(
@@ -3235,7 +3294,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 if (rank == null) return null;
                 final signature = pageSignature;
                 final target = (rank ~/ pageSize) * pageSize;
-                if (target != loadedOffset) {
+                if (rank < loadedOffset ||
+                    rank >= loadedOffset + pageTracks.length) {
                   setState(() => pageOffset = target);
                   await loadPage();
                 }
@@ -3255,10 +3315,11 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (widget.loading ||
-              refreshing ||
-              derivingCatalog ||
-              preparingFavorites)
+          if (widget.tracks.isEmpty &&
+              (widget.loading ||
+                  refreshing ||
+                  derivingCatalog ||
+                  preparingFavorites))
             const LinearProgressIndicator(),
           if (error != null)
             TextButton(onPressed: refresh, child: UiText(error!)),

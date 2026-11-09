@@ -30,7 +30,8 @@
         "Uses Stroke"
       ],
       "palette": false
-    }
+    },
+    "modifications": "Linear stroke-width increased from 1.5 to 2; containers and runtime colors adapted."
   },
   "ph": {
     "source": "https://github.com/iconify/icon-sets/blob/master/json/ph.json",
@@ -62,6 +63,10 @@
         "Has Padding"
       ],
       "palette": false
-    }
+    },
+    "includedStyles": [
+      "fill",
+      "bold"
+    ]
   }
 }

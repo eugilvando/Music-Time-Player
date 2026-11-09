@@ -199,6 +199,10 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
                   itemCount: widget.tracks.length,
                   itemBuilder: (context, index) => ItemActionRegion(
                     child: ListTile(
+                      tileColor: index.isOdd
+                          ? Theme.of(context).colorScheme.onSurface
+                                .withValues(alpha: .035)
+                          : null,
                       title: Text(widget.tracks[index].title),
                       subtitle: Text(widget.tracks[index].artist),
                       onTap: () => Navigator.pop(context, widget.tracks[index]),
@@ -708,6 +712,10 @@ class _PlaylistsPageState extends State<PlaylistsPage> {
         itemCount: values.length,
         itemBuilder: (context, index) => ItemActionRegion(
           child: ListTile(
+            tileColor: index.isOdd
+                ? Theme.of(context).colorScheme.onSurface
+                      .withValues(alpha: .035)
+                : null,
             dense: view == 'compact',
             leading: SizedBox.square(
               dimension: view == 'detailed' ? 64 : 40,

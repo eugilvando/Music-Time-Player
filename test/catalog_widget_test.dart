@@ -95,139 +95,147 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.runAsync(store.close);
   });
-  testWidgets(
-    'paginação mantém seleção entre páginas e reproduz resultado completo',
-    (tester) async {
-      SharedPreferences.setMockInitialValues({
-        'visual.artist_photos': false,
-        'visual.catalog_page_size': '50',
-      });
-      final settings = AppSettings(await SharedPreferences.getInstance());
-      final store = (await tester.runAsync(
-        () => LibraryStore.open(':memory:'),
-      ))!;
-      final values = List.generate(
-        75,
-        (i) => Track(
-          id: '$i',
-          title: 'Faixa ${i.toString().padLeft(2, '0')}',
-          artist: 'Artista',
-          localPath: 'C:/music/$i.mp3',
-        ),
-      );
-      await tester.runAsync(() => store.addTracks(values));
-      final providers = ProviderConnections(
-        settings.preferences,
-        store,
-        vault: MemoryVault(),
-      );
-      final downloads = DownloadManager(store, providers);
-      int played = 0, start = -1;
-      final revision = ValueNotifier(0);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ValueListenableBuilder<int>(
-              valueListenable: revision,
-              builder: (context, value, _) => CatalogBrowser(
-                revision: value,
-                tracks: values,
-                favorites: {},
-                store: store,
-                settings: settings,
-                downloads: downloads,
-                query: '',
-                onPlay: (tracks, index) async {
-                  played = tracks.length;
-                  start = index;
-                },
-                onAction: (_, tracks) async {},
-                trackActions: (_) => const Icon(Icons.more_horiz),
-                onAddSource: () {},
-                onPlaylist: (_) {},
-              ),
+  testWidgets('rolagem contínua mantém seleção e reproduz resultado completo', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'visual.artist_photos': false,
+      'visual.catalog_page_size': '50',
+    });
+    final settings = AppSettings(await SharedPreferences.getInstance());
+    final store = (await tester.runAsync(() => LibraryStore.open(':memory:')))!;
+    final values = List.generate(
+      75,
+      (i) => Track(
+        id: '$i',
+        title: 'Faixa ${i.toString().padLeft(2, '0')}',
+        artist: 'Artista',
+        localPath: 'C:/music/$i.mp3',
+      ),
+    );
+    await tester.runAsync(() => store.addTracks(values));
+    final providers = ProviderConnections(
+      settings.preferences,
+      store,
+      vault: MemoryVault(),
+    );
+    final downloads = DownloadManager(store, providers);
+    int played = 0, start = -1;
+    final revision = ValueNotifier(0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder<int>(
+            valueListenable: revision,
+            builder: (context, value, _) => CatalogBrowser(
+              revision: value,
+              tracks: values,
+              favorites: {},
+              store: store,
+              settings: settings,
+              downloads: downloads,
+              query: '',
+              onPlay: (tracks, index) async {
+                played = tracks.length;
+                start = index;
+              },
+              onAction: (_, tracks) async {},
+              trackActions: (_) => const Icon(Icons.more_horiz),
+              onAddSource: () {},
+              onPlaylist: (_) {},
             ),
           ),
         ),
-      );
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 350)),
-      );
-      await tester.pump();
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump();
-      await waitForCatalog(
-        tester,
-        () => find.text('1–50 de 75').evaluate().isNotEmpty,
-      );
-      expect(find.text('1–50 de 75'), findsOneWidget);
-      await tester.tap(find.byTooltip('Próxima página'));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump();
-      await waitForCatalog(
-        tester,
-        () => find.text('51–75 de 75').evaluate().isNotEmpty,
-      );
-      expect(find.text('51–75 de 75'), findsOneWidget);
-      await tester.tap(find.text('Faixa 50'));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump();
-      await waitForCatalog(tester, () => played == 75);
-      expect(played, 75);
-      expect(start, 50);
-      await tester.tap(find.text('Selecionar todas'));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump();
-      await waitForCatalog(
-        tester,
-        () => find.text('75 músicas · 75 selecionadas').evaluate().isNotEmpty,
-      );
-      expect(find.text('75 músicas · 75 selecionadas'), findsOneWidget);
-      revision.value++;
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 300)),
-      );
-      await tester.pump();
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump();
-      await waitForCatalog(
-        tester,
-        () => find.text('51–75 de 75').evaluate().isNotEmpty,
-      );
-      expect(find.text('51–75 de 75'), findsOneWidget);
-      expect(find.text('75 músicas · 75 selecionadas'), findsOneWidget);
-      await tester.tap(find.byTooltip('Página anterior'));
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 200)),
-      );
-      await tester.pump();
-      await waitForCatalog(
-        tester,
-        () => find.text('75 músicas · 75 selecionadas').evaluate().isNotEmpty,
-      );
-      expect(find.text('75 músicas · 75 selecionadas'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-      downloads.dispose();
-      revision.dispose();
-      providers.dispose();
-      settings.dispose();
-      await drainCatalog(tester);
-      await tester.runAsync(store.close);
-    },
-  );
+      ),
+    );
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 350)),
+    );
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await waitForCatalog(
+      tester,
+      () => find.text('75 músicas').evaluate().isNotEmpty,
+    );
+    expect(find.text('75 músicas'), findsOneWidget);
+    final state = tester.state<CatalogBrowserState>(
+      find.byType(CatalogBrowser),
+    );
+    expect(state.pageTracks.length, 50);
+    state.alphabetScroll.jumpTo(state.alphabetScroll.position.maxScrollExtent);
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await waitForCatalog(
+      tester,
+      () => find.text('75 músicas').evaluate().isNotEmpty,
+    );
+    expect(find.text('75 músicas'), findsOneWidget);
+    await waitForCatalog(
+      tester,
+      () => state.pageTracks.length == 75 && !state.pageLoading,
+    );
+    expect(state.pageTracks.map((t) => t.id).toSet().length, 75);
+    await tester.runAsync(() => state.selectPaged(values[50]));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await waitForCatalog(tester, () => played == 75);
+    expect(played, 75);
+    expect(start, 50);
+    await tester.tap(find.text('Selecionar todas'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await waitForCatalog(
+      tester,
+      () => find.text('75 músicas · 75 selecionadas').evaluate().isNotEmpty,
+    );
+    expect(find.text('75 músicas · 75 selecionadas'), findsOneWidget);
+    revision.value++;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await waitForCatalog(
+      tester,
+      () => find.text('75 músicas').evaluate().isNotEmpty,
+    );
+    expect(find.text('75 músicas'), findsOneWidget);
+    expect(find.text('75 músicas · 75 selecionadas'), findsOneWidget);
+    expect(find.byTooltip('Página anterior'), findsNothing);
+    state.alphabetScroll.jumpTo(0);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
+    );
+    await tester.pump();
+    await waitForCatalog(
+      tester,
+      () => find.text('75 músicas · 75 selecionadas').evaluate().isNotEmpty,
+    );
+    expect(find.text('75 músicas · 75 selecionadas'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+    downloads.dispose();
+    revision.dispose();
+    providers.dispose();
+    settings.dispose();
+    await drainCatalog(tester);
+    await tester.runAsync(store.close);
+  });
   testWidgets('categorias, seleção em lote e lista detalhada adaptam janela', (
     tester,
   ) async {
@@ -311,7 +319,7 @@ void main() {
     await waitForCatalog(
       tester,
       () =>
-          find.text('1–2 de 2').evaluate().isNotEmpty &&
+          find.text('2 músicas').evaluate().isNotEmpty &&
           !tester
               .state<CatalogBrowserState>(find.byType(CatalogBrowser))
               .pageLoading,

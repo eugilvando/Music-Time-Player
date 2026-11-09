@@ -109,7 +109,7 @@ void main() {
       await tester.pump();
       expect(key.currentState!.derivingCatalog, isTrue);
       expect(identical(key.currentState!.filtered(), prepared), isTrue);
-      expect(find.byType(LinearProgressIndicator), findsWidgets);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
       await tester.tap(find.text('UI livre'));
       expect(taps, 2);
       await waitForCatalog(tester, () => !key.currentState!.derivingCatalog);

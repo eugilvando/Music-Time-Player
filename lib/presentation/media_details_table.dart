@@ -228,7 +228,13 @@ class _MediaDetailsTableState extends State<MediaDetailsTable> {
                   itemBuilder: (_, i) {
                     final cells = widget.rowBuilder(i);
                     return ItemActionRegion(
-                      child: row([for (final index in indices) cells[index]]),
+                      child: Material(
+                        color: i.isOdd
+                            ? Theme.of(context).colorScheme.onSurface
+                                  .withValues(alpha: .035)
+                            : Colors.transparent,
+                        child: row([for (final index in indices) cells[index]]),
+                      ),
                     );
                   },
                 ),

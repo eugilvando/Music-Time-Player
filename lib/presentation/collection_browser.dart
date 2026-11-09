@@ -344,6 +344,10 @@ class _CollectionBrowserState extends State<CollectionBrowser> {
               child: ListView.builder(
                 itemCount: tracks.length,
                 itemBuilder: (context, index) => ListTile(
+                  tileColor: index.isOdd
+                      ? Theme.of(context).colorScheme.onSurface
+                            .withValues(alpha: .035)
+                      : null,
                   leading: Text(tracks[index].trackNumber?.toString() ?? '—'),
                   title: Text(tracks[index].title),
                   subtitle: Text(tracks[index].artist),

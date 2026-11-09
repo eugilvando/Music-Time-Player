@@ -1,4 +1,5 @@
 import 'tray_window.dart';
+import 'linux_media.dart';
 import 'linux_tray_host.dart';
 
 import 'dart:async';
@@ -41,6 +42,7 @@ class WindowsIntegration with WindowListener {
   final Future<void> Function()? prepareExit;
   final void Function()? resumeAfterExit;
   final bool validation;
+  LinuxMedia? linuxMedia;
   final session = media.FlutterMediaSession();
   late final systemAccent = SystemAccentController(settings);
   tray.TrayIcon? icon;
@@ -155,7 +157,19 @@ class WindowsIntegration with WindowListener {
       await log('tray_unavailable');
       onError('Bandeja indisponível; fechar a janela encerrará o aplicativo.');
     }
-    if (Platform.isLinux) return;
+    if (Platform.isLinux) {
+      try {
+        linuxMedia = LinuxMedia(controller, raise: show, quit: exit);
+        await linuxMedia!.initialize();
+        controller.addListener(changed);
+        changed();
+        await log('mpris_ready');
+      } catch (_) {
+        await log('mpris_unavailable');
+        onError('Os controles de mídia do Linux não puderam ser ativados.');
+      }
+      return;
+    }
     try {
       await session.setWindowsAppUserModelId(
         validation ? 'MusicTime.Desktop.Validation' : 'MusicTime.Desktop',
@@ -314,6 +328,7 @@ class WindowsIntegration with WindowListener {
   }
 
   Future<void> _close() async {
+    await linuxMedia?.dispose();
     try {
       await windowManager
           .setPreventClose(false)
@@ -350,7 +365,12 @@ class WindowsIntegration with WindowListener {
   }
 
   void changed() {
-    if (_disposed || _exiting || !_mediaReady) return;
+    if (_disposed || _exiting) return;
+    if (Platform.isLinux) {
+      playItem?.label = controller.playing ? 'Pausar' : 'Reproduzir';
+      return;
+    }
+    if (!_mediaReady) return;
     playItem?.label = controller.playing ? 'Pausar' : 'Reproduzir';
     unawaited(sync());
   }
@@ -445,6 +465,7 @@ class WindowsIntegration with WindowListener {
 
   void dispose() {
     _disposed = true;
+    unawaited(linuxMedia?.dispose());
     systemAccent.dispose();
     _validationTimer?.cancel();
     controller.removeListener(changed);

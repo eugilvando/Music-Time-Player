@@ -170,6 +170,21 @@ class AppSettings extends ChangeNotifier {
   }
 
   Future<void> migrateHomeLayout() async {
+    if (preferences.getBool('visual.library_3') != true) {
+      for (final key in ['sidebar_items', 'sidebar_order']) {
+        final saved = preferences.getStringList('visual.$key');
+        if (saved != null) {
+          final items = List<String>.of(saved);
+          final at = items.indexOf('library');
+          items.insertAll(
+            at < 0 ? items.length : at + 1,
+            ['songs', 'years', 'genres'].where((id) => !items.contains(id)),
+          );
+          await updateVisual(key, items);
+        }
+      }
+      await updateVisual('library_3', true);
+    }
     if (preferences.getBool('visual.artist_radio_1_2') != true) {
       final types = preferences.getStringList('visual.home_mix_types');
       if (types != null && !types.contains('artist_radio')) {

@@ -32,6 +32,10 @@ The generated artwork and fictional catalog used in screenshots were created for
 
 ## Optional interface icon packs
 
-- Solar Icons © 480 Design, licensed under CC BY 4.0: https://solar-icons.dev/ and https://creativecommons.org/licenses/by/4.0/. Included styles: Bold and Linear. A subset is bundled as SVG assets, with SVG containers and runtime colors adapted for Music Time. Full license: assets/icons/licenses/Solar-CC-BY-4.0.txt.
-- Phosphor Icons © Phosphor Icons, MIT: https://phosphoricons.com/ and https://github.com/phosphor-icons/core. Included styles: Fill and Regular. Full license: assets/icons/licenses/Phosphor-MIT.txt.
+- Solar Icons © 480 Design, licensed under CC BY 4.0: https://solar-icons.dev/ and https://creativecommons.org/licenses/by/4.0/. Included styles: Bold and Linear; Linear stroke widths are increased from 1.5 to 2 for legibility. A subset is bundled as SVG assets, with SVG containers and runtime colors adapted for Music Time. Full license: assets/icons/licenses/Solar-CC-BY-4.0.txt.
+- Phosphor Icons © Phosphor Icons, MIT: https://phosphoricons.com/ and https://github.com/phosphor-icons/core. Included styles: Fill and Bold (outlined). Full license: assets/icons/licenses/Phosphor-MIT.txt.
 - SVG data is sourced from the Iconify icon-sets collection, preserving the original icon licenses. Source URLs, input hashes and attribution are recorded in assets/icons/provenance.json. These assets do not require a network connection at runtime.
+
+## Linux media session
+
+The unmodified `dbus` Dart package 0.8.0 by Canonical is included under MPL-2.0. Source and license: https://pub.dev/packages/dbus/versions/0.8.0 and https://github.com/canonical/dbus.dart. Its license is also included in Flutter’s generated notices.

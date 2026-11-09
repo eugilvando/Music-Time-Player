@@ -72,11 +72,13 @@ void main() {
       await tester.pumpAndSettle();
       final saved = memory.values.single;
       await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpWidget(page([a], '1'));
       expect(find.text('Cached track'), findsWidgets);
       expect(find.byKey(const ValueKey('home.refreshing')), findsNothing);
       expect(identical(memory.values.single, saved), isTrue);
       await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 200));
     },
   );
 
@@ -87,10 +89,11 @@ void main() {
       await tester.pumpAndSettle();
       final saved = memory.values.single;
       await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 200));
       await tester.pumpWidget(page([a, b], '2'));
       expect(find.text('Cached track'), findsWidgets);
       expect(find.text('New track'), findsNothing);
-      expect(find.byKey(const ValueKey('home.refreshing')), findsOneWidget);
+      expect(find.byKey(const ValueKey('home.refreshing')), findsNothing);
       expect(identical(memory.values.single, saved), isTrue);
       await waitForCatalog(
         tester,
@@ -99,6 +102,7 @@ void main() {
       expect(find.byKey(const ValueKey('home.refreshing')), findsNothing);
       expect(find.text('New track'), findsWidgets);
       await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 200));
     },
   );
 
@@ -113,7 +117,7 @@ void main() {
     await tester.pumpWidget(page([a, b], '3', offline: {'b'}));
     await waitForCatalog(
       tester,
-      () => find.byKey(const ValueKey('home.refreshing')).evaluate().isEmpty,
+      () => memory.values.any((value) => value.lists['values']?.length == 2),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('home.offline')));
@@ -121,5 +125,6 @@ void main() {
     expect(find.text('Cached track'), findsNothing);
     expect(find.text('New track'), findsWidgets);
     await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 200));
   });
 }
