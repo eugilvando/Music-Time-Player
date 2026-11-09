@@ -1,26 +1,26 @@
 {
-  "debianVersion": "3.0.1-0ubuntu1",
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42645291560",
-  "platform": "Ubuntu Desktop 24.04 amd64",
-  "experimental": false,
-  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
-  "version": "3.0.1+66",
-  "installer": {
-    "file": "music-time-preview_3.0.1-0ubuntu1_amd64.deb",
-    "bytes": 12508988,
-    "sha256": "85341cf8f278094f6121568534239d2170980742151f10630006a6ee6333cdfc"
-  },
+  "commit": "6a3f70ff93bc132c7da252554786326670f07a94",
   "checks": {
-    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
     "linuxReleaseBuild": "passed",
-    "targetedTests": 171,
-    "debInstallation": "passed using apt in Ubuntu CI",
-    "analysis": "passed",
     "binaries": "x64 ELF",
+    "analysis": "passed",
+    "debInstallation": "passed using apt in Ubuntu CI",
+    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
     "graphicalLaunch": "passed in compatibility and software modes; six screenshots inspected",
+    "targetedTests": 173,
     "visualReview": "passed; six screenshots inspected",
-    "mpris": "passed; real session-bus test and native app metadata, play/pause, hidden window, Raise and Quit",
-    "mprisTests": 1
+    "mpris": "passed; native metadata, play/pause, hidden window, Raise and Quit",
+    "mprisTests": "passed; real D-Bus session"
   },
-  "commit": "c8bf4c0221789dc9ab2e54086b40f260948d3d6d"
+  "version": "3.0.2+67",
+  "debianVersion": "3.0.2-0ubuntu1",
+  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
+  "experimental": false,
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42698022292",
+  "platform": "Ubuntu Desktop 24.04 amd64",
+  "installer": {
+    "file": "music-time-preview_3.0.2-0ubuntu1_amd64.deb",
+    "bytes": 12512866,
+    "sha256": "b1f865bfcdcaea72e0f347924c20f11004839afe602b82f37e44e579b3db9a36"
+  }
 }
