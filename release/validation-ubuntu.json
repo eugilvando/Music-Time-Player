@@ -1,24 +1,26 @@
 {
-  "installer": {
-    "sha256": "b291fcee83414ebc634d368c3f816733ec4cdef09272cab4badfc35f2a906c67",
-    "bytes": 12432636,
-    "file": "music-time-preview_2.10.0-0ubuntu1_amd64.deb"
-  },
-  "checks": {
-    "linuxReleaseBuild": "passed",
-    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
-    "analysis": "passed",
-    "debInstallation": "passed using apt in Ubuntu CI",
-    "binaries": "x64 ELF",
-    "targetedTests": 161,
-    "graphicalLaunch": "passed in compatibility and software modes; six screenshots inspected",
-    "visualReview": "passed; six screenshots inspected"
-  },
-  "debianVersion": "2.10.0-0ubuntu1",
-  "version": "2.10.0+64",
+  "debianVersion": "3.0.1-0ubuntu1",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42645291560",
+  "platform": "Ubuntu Desktop 24.04 amd64",
   "experimental": false,
   "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
-  "platform": "Ubuntu Desktop 24.04 amd64",
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42537663607",
-  "commit": "574ba5ea6dee134b5db8228f07025b835b08c525"
+  "version": "3.0.1+66",
+  "installer": {
+    "file": "music-time-preview_3.0.1-0ubuntu1_amd64.deb",
+    "bytes": 12508988,
+    "sha256": "85341cf8f278094f6121568534239d2170980742151f10630006a6ee6333cdfc"
+  },
+  "checks": {
+    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
+    "linuxReleaseBuild": "passed",
+    "targetedTests": 171,
+    "debInstallation": "passed using apt in Ubuntu CI",
+    "analysis": "passed",
+    "binaries": "x64 ELF",
+    "graphicalLaunch": "passed in compatibility and software modes; six screenshots inspected",
+    "visualReview": "passed; six screenshots inspected",
+    "mpris": "passed; real session-bus test and native app metadata, play/pause, hidden window, Raise and Quit",
+    "mprisTests": 1
+  },
+  "commit": "c8bf4c0221789dc9ab2e54086b40f260948d3d6d"
 }
