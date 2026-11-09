@@ -1757,7 +1757,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 const SizedBox.square(
                   dimension: 16,
-                  child: MtIcon(Icons.schedule, size: 16),
+                  child: MtIcon(Icons.history, size: 16),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

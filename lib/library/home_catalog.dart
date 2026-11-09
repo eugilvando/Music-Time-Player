@@ -111,7 +111,9 @@ HomeData prepareHome(
           .toList();
   final artists = groups['artists']!;
   final albumArtists =
-      (!lightweight && wanted('favorite_album_artists')
+      (!lightweight &&
+                  (wanted('favorite_album_artists') ||
+                      wanted('favorite_artists'))
               ? index.groups('albumArtists', values)
               : <CatalogGroup>[])
           .where((g) => g.id != 'unknown')
@@ -135,7 +137,8 @@ HomeData prepareHome(
     'favorite_artists': wanted('favorite_artists')
         ? artists.where(artistFavorite).toList()
         : <CatalogGroup>[],
-    'favorite_album_artists': wanted('favorite_album_artists')
+    'favorite_album_artists':
+        (wanted('favorite_album_artists') || wanted('favorite_artists'))
         ? albumArtists.where(artistFavorite).toList()
         : <CatalogGroup>[],
     'discover_albums': albums.where(unheard).toList()..shuffle(random),
