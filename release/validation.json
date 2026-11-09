@@ -1,20 +1,20 @@
 {
-  "version": "3.0.0+65",
+  "version": "3.0.1+66",
   "platform": "Windows x64",
-  "sourceCommit": "4188e36199715d0a2e3036bf6d51a6aff23377ae",
+  "sourceCommit": "c8bf4c0221789dc9ab2e54086b40f260948d3d6d",
   "installer": {
-    "file": "MusicTime-Setup-3.0.0.exe",
-    "bytes": 46377645,
-    "sha256": "568aaa834f9d22a4d71030f2f3f487bb7cbeee06332f813f14ee687da059d32f"
+    "file": "MusicTime-Setup-3.0.1.exe",
+    "bytes": 46381017,
+    "sha256": "4a81570a717f4c63abad025f4bfd296991ff1a19bf8b04dce5bbc86f75a9decf"
   },
   "checks": {
     "analysis": "passed; complete project",
-    "targetedTests": 54,
-    "visualReview": "passed; full app navigation at multiple window sizes and text scales; Library, Songs, Solar and Phosphor outlines inspected using fictional fixtures",
+    "targetedTests": 5,
+    "additionalVisualTest": "passed; full app navigation at multiple window sizes and text scales; updated captures",
+    "visualReview": "passed; colorful Library cards, Small/Large layouts and Solar/Phosphor outlines inspected using fictional fixtures",
     "releaseBuild": "passed",
     "nativeIntegration": "SMTC artwork/play/pause, tray, window placement and clean exit passed",
-    "restart": "isolated native backup/restore/reset and maintenance restart passed",
     "installation": "binary hashes matched; database/preferences/vault unchanged; app left closed"
   },
-  "limits": "Targeted regression suite, not a full-suite rerun. Ubuntu validated independently. Real accounts and user Linux desktop acceptance remain separate."
+  "limits": "Focused 3.0.1 regression checks. Base 3.0.0 passed 54 targeted tests and isolated data-restart checks. Ubuntu validated independently. Real accounts and user Linux desktop acceptance remain separate."
 }
