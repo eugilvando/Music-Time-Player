@@ -1,22 +1,22 @@
 {
-  "version": "2.9.0+63",
+  "version": "2.10.0+64",
   "platform": "Windows x64",
-  "sourceCommit": "29f6fb57fec852b4d08487946306f6332f5803bd",
+  "sourceCommit": "574ba5ea6dee134b5db8228f07025b835b08c525",
   "installer": {
-    "file": "MusicTime-Setup-2.9.0.exe",
-    "bytes": 46358571,
-    "sha256": "957869d124954fb2793a850416e773b854bbfbad89ed495ee708e412fcb4be69"
+    "file": "MusicTime-Setup-2.10.0.exe",
+    "bytes": 46369251,
+    "sha256": "7a8c040de621712aa7cec332d1907a7e06457edbf9760df7ed72827947122a74"
   },
   "checks": {
     "analysis": "passed; complete project",
-    "targetedTests": 27,
-    "visualReview": "six pack/style combinations rendered and inspected",
-    "icons": "104 semantic action mappings, both SVG variants decoded in tests",
-    "preferences": "legacy defaults, invalid values, restart persistence, reset and live dialog changes passed",
+    "targetedTests": 49,
+    "additionalModalTest": "passed; independent toggles, mode persistence and screenshot review",
+    "visualReview": "wide and narrow playback settings and both-enabled modal inspected using isolated fixtures",
     "releaseBuild": "passed",
     "nativeIntegration": "SMTC artwork/play/pause, tray, placement and clean exit passed",
-    "installation": "binary hashes matched; database/preferences/vault unchanged",
-    "sourceCopies": "608 source/input files matched across private/public/package"
+    "restart": "isolated native backup/restore/reset and maintenance restart passed",
+    "installation": "binary hashes matched; database/preferences/vault unchanged; app left closed",
+    "sourceCopies": "612 code, asset, test and package inputs matched across private/public/package"
   },
-  "limits": "Targeted Windows regression suite, not a full-suite rerun. Ubuntu is validated and published separately. Existing live audio/cloud-account acceptance remains separate."
+  "limits": "Targeted regression suite, not a full-suite rerun. Ubuntu is validated separately. Real Last.fm/cloud-account and Ubuntu desktop acceptance remain separate."
 }
