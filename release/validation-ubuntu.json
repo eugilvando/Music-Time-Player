@@ -1,26 +1,26 @@
 {
-  "commit": "6a3f70ff93bc132c7da252554786326670f07a94",
+  "platform": "Ubuntu Desktop 24.04 amd64",
+  "commit": "7dfdb6ce644089f8d3b599a87dbfe81d780707e4",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42714570125",
+  "experimental": false,
+  "debianVersion": "3.0.3-0ubuntu1",
+  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
   "checks": {
-    "linuxReleaseBuild": "passed",
-    "binaries": "x64 ELF",
-    "analysis": "passed",
     "debInstallation": "passed using apt in Ubuntu CI",
+    "linuxReleaseBuild": "passed",
+    "targetedTests": 201,
+    "analysis": "passed",
     "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
+    "binaries": "x64 ELF",
     "graphicalLaunch": "passed in compatibility and software modes; six screenshots inspected",
-    "targetedTests": 173,
     "visualReview": "passed; six screenshots inspected",
     "mpris": "passed; native metadata, play/pause, hidden window, Raise and Quit",
     "mprisTests": "passed; real D-Bus session"
   },
-  "version": "3.0.2+67",
-  "debianVersion": "3.0.2-0ubuntu1",
-  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
-  "experimental": false,
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42698022292",
-  "platform": "Ubuntu Desktop 24.04 amd64",
+  "version": "3.0.3+68",
   "installer": {
-    "file": "music-time-preview_3.0.2-0ubuntu1_amd64.deb",
-    "bytes": 12512866,
-    "sha256": "b1f865bfcdcaea72e0f347924c20f11004839afe602b82f37e44e579b3db9a36"
+    "sha256": "ff7478ad33d86b5bf298496c56b5ba4abf592d22c87d80539c03407deb4d9234",
+    "file": "music-time-preview_3.0.3-0ubuntu1_amd64.deb",
+    "bytes": 12516662
   }
 }
