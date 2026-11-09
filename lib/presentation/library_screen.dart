@@ -2174,6 +2174,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                 CrossAxisAlignment.stretch,
                                             children: [
                                               if (!{
+                                                AppSection.library,
                                                 AppSection.home,
                                                 AppSection.songs,
                                                 AppSection.years,

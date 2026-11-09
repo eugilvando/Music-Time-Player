@@ -78,13 +78,13 @@ jobs:
       - name: Upload VM package
         uses: actions/upload-artifact@v4
         with:
-          name: music-time-ubuntu-24.04-amd64-3.0.1-final
+          name: music-time-ubuntu-24.04-amd64-3.0.2-final
           path: dist/ubuntu/
           retention-days: 14
       - name: Upload Linux validation evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-3.0.1-final-validation
+          name: ubuntu-3.0.2-final-validation
           path: build/ubuntu-smoke/
           if-no-files-found: ignore

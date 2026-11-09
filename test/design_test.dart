@@ -520,6 +520,11 @@ void main() {
       await tester.runAsync(
         () => settings.updateVisual('library_hub_card_size', 'Medium'),
       );
+      await tester.tap(find.byKey(const ValueKey('library.organize')));
+      await settle();
+      await capture('library-organizer');
+      await tester.tap(find.byKey(const ValueKey('library.organize.close')));
+      await settle();
       await navigate('settings');
       await tester.runAsync(() => settings.setLanguage('en'));
       await settle();

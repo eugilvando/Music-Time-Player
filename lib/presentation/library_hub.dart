@@ -37,7 +37,100 @@ class LibraryHub extends StatelessWidget {
     AppSection.genres: Color(0xFFD8A646),
     AppSection.favorites: Color(0xFFE376A1),
     AppSection.playlists: Color(0xFF838DE5),
+    AppSection.history: Color(0xFF54B8C4),
   };
+
+  List<String> get visibleItems => settings.visualList(
+    'library_hub_items',
+    colors.keys.map((section) => section.name).toList(),
+  );
+
+  Future<void> organize(BuildContext context) => showDialog<void>(
+    context: context,
+    builder: (context) => AnimatedBuilder(
+      animation: settings,
+      builder: (context, _) => AlertDialog(
+        title: Text(
+          uiFormat(context, 'Organizar biblioteca', 'Organize library'),
+        ),
+        content: SizedBox(
+          width: 420,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 8),
+                MediaCardSizePicker(
+                  scope: MediaCardSizeScope(
+                    value:
+                        widths.containsKey(
+                          settings.visualChoice(
+                            'library_hub_card_size',
+                            'Medium',
+                          ),
+                        )
+                        ? settings.visualChoice(
+                            'library_hub_card_size',
+                            'Medium',
+                          )
+                        : 'Medium',
+                    onChanged: (value) =>
+                        settings.updateVisual('library_hub_card_size', value),
+                    child: const SizedBox(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  uiFormat(context, 'Cards visíveis', 'Visible cards'),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  uiFormat(
+                    context,
+                    'Estas escolhas não alteram a sidebar.',
+                    'These choices do not change the sidebar.',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final section in colors.keys)
+                  CheckboxListTile(
+                    key: ValueKey('library.visibility.${section.name}'),
+                    contentPadding: EdgeInsets.zero,
+                    title: UiText(section.label),
+                    secondary: MtIcon(section.icon),
+                    value: visibleItems.contains(section.name),
+                    onChanged: (enabled) {
+                      final selected = visibleItems.toSet();
+                      if (enabled == true) {
+                        selected.add(section.name);
+                      } else {
+                        selected.remove(section.name);
+                      }
+                      settings.updateVisual(
+                        'library_hub_items',
+                        colors.keys
+                            .map((s) => s.name)
+                            .where(selected.contains)
+                            .toList(),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            key: const ValueKey('library.organize.close'),
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(uiFormat(context, 'Concluir', 'Done')),
+          ),
+        ],
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
@@ -58,6 +151,11 @@ class LibraryHub extends StatelessWidget {
       final minutes =
           tracks.fold<int>(0, (sum, t) => sum + t.duration.inSeconds) ~/ 60;
       final counts = <AppSection, String>{
+        AppSection.history: uiFormat(
+          context,
+          'Suas últimas reproduções',
+          'Your recent listening',
+        ),
         AppSection.songs: uiFormat(
           context,
           '${tracks.length} músicas',
@@ -94,16 +192,34 @@ class LibraryHub extends StatelessWidget {
           'Your selections and discoveries',
         ),
       };
-      final scope = MediaCardSizeScope(
-        value: widths.containsKey(choice) ? choice : 'Medium',
-        onChanged: (value) =>
-            settings.updateVisual('library_hub_card_size', value),
-        child: const SizedBox(),
-      );
       return ListView(
         key: const PageStorageKey('library.overview'),
         padding: const EdgeInsets.all(24),
         children: [
+          Row(
+            children: [
+              Expanded(
+                child: UiText(
+                  'Biblioteca',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              IconButton.filledTonal(
+                key: const ValueKey('library.organize'),
+                tooltip: uiFormat(
+                  context,
+                  'Organizar biblioteca',
+                  'Organize library',
+                ),
+                onPressed: () => organize(context),
+                icon: const MtIcon(Icons.tune),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -151,25 +267,19 @@ class LibraryHub extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          LayoutBuilder(
-            builder: (context, constraints) => Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                Text(
-                  uiFormat(context, 'Explorar biblioteca', 'Explore library'),
-                  style: theme.textTheme.titleLarge,
+          if (!colors.keys.any(
+            (section) => visibleItems.contains(section.name),
+          ))
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                uiFormat(
+                  context,
+                  'Nenhum card selecionado. Use Organizar biblioteca para escolher os atalhos.',
+                  'No cards selected. Use Organize library to choose your shortcuts.',
                 ),
-                SizedBox(
-                  width: math.min(220, constraints.maxWidth),
-                  child: MediaCardSizePicker(scope: scope),
-                ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
           LayoutBuilder(
             builder: (context, size) {
               final columns = math.max(
@@ -181,106 +291,110 @@ class LibraryHub extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 16,
                 children: [
-                  for (final entry in counts.entries)
-                    SizedBox(
-                      key: ValueKey('library.card.${entry.key.name}'),
-                      width: cardWidth,
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                        clipBehavior: Clip.antiAlias,
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: colors[entry.key]!.withValues(
-                                alpha: dark ? .32 : .28,
+                  for (final section in colors.keys.where(
+                    (s) => visibleItems.contains(s.name),
+                  ))
+                    for (final entry in [MapEntry(section, counts[section]!)])
+                      SizedBox(
+                        key: ValueKey('library.card.${entry.key.name}'),
+                        width: cardWidth,
+                        child: Material(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                          clipBehavior: Clip.antiAlias,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: colors[entry.key]!.withValues(
+                                  alpha: dark ? .32 : .28,
+                                ),
+                              ),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Color.alphaBlend(
+                                    colors[entry.key]!.withValues(
+                                      alpha: dark ? .30 : .18,
+                                    ),
+                                    theme.colorScheme.surface,
+                                  ),
+                                  Color.alphaBlend(
+                                    colors[entry.key]!.withValues(
+                                      alpha: dark ? .12 : .07,
+                                    ),
+                                    theme.colorScheme.surface,
+                                  ),
+                                ],
                               ),
                             ),
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Color.alphaBlend(
-                                  colors[entry.key]!.withValues(
-                                    alpha: dark ? .30 : .18,
-                                  ),
-                                  theme.colorScheme.surface,
-                                ),
-                                Color.alphaBlend(
-                                  colors[entry.key]!.withValues(
-                                    alpha: dark ? .12 : .07,
-                                  ),
-                                  theme.colorScheme.surface,
-                                ),
-                              ],
-                            ),
-                          ),
-                          child: InkWell(
-                            onTap: () => onNavigate(entry.key),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  right: -12,
-                                  top: -12,
-                                  child: ExcludeSemantics(
-                                    child: MtIcon(
-                                      entry.key.icon,
-                                      size: compact ? 88 : 112,
-                                      color: colors[entry.key]!.withValues(
-                                        alpha: dark ? .10 : .12,
+                            child: InkWell(
+                              onTap: () => onNavigate(entry.key),
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    right: -12,
+                                    top: -12,
+                                    child: ExcludeSemantics(
+                                      child: MtIcon(
+                                        entry.key.icon,
+                                        size: compact ? 88 : 112,
+                                        color: colors[entry.key]!.withValues(
+                                          alpha: dark ? .10 : .12,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(padding),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: colors[entry.key]!.withValues(
-                                            alpha: .16,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: MtIcon(
-                                          entry.key.icon,
-                                          size: compact ? 24 : 32,
-                                          color: Color.lerp(
-                                            colors[entry.key],
-                                            dark ? Colors.white : Colors.black,
-                                            dark ? .25 : .30,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: compact ? 16 : 22),
-                                      UiText(
-                                        entry.key.label,
-                                        style: theme.textTheme.titleLarge
-                                            ?.copyWith(
-                                              fontSize: compact ? 19 : 22,
+                                  Padding(
+                                    padding: EdgeInsets.all(padding),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: colors[entry.key]!
+                                                .withValues(alpha: .16),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
                                             ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        entry.value,
-                                        style: theme.textTheme.bodyMedium,
-                                      ),
-                                    ],
+                                          ),
+                                          child: MtIcon(
+                                            entry.key.icon,
+                                            size: compact ? 24 : 32,
+                                            color: Color.lerp(
+                                              colors[entry.key],
+                                              dark
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              dark ? .25 : .30,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: compact ? 16 : 22),
+                                        UiText(
+                                          entry.key.label,
+                                          style: theme.textTheme.titleLarge
+                                              ?.copyWith(
+                                                fontSize: compact ? 19 : 22,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          entry.value,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
                 ],
               );
             },
