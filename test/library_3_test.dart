@@ -45,11 +45,15 @@ void main() {
     ) async {
       await tester.binding.setSurfaceSize(Size(width, 1000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
+      SharedPreferences.setMockInitialValues({});
+      final settings = AppSettings(await SharedPreferences.getInstance());
+      addTearDown(settings.dispose);
       AppSection? destination;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: LibraryHub(
+              settings: settings,
               tracks: const [
                 Track(
                   id: 'fixture',

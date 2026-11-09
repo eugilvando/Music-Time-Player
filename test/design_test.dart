@@ -510,6 +510,16 @@ void main() {
       await tester.runAsync(
         () => settings.updateVisual('icon_style', 'filled'),
       );
+      for (final size in ['Small', 'Large']) {
+        await tester.runAsync(
+          () => settings.updateVisual('library_hub_card_size', size),
+        );
+        await settle();
+        await capture('library-${size.toLowerCase()}');
+      }
+      await tester.runAsync(
+        () => settings.updateVisual('library_hub_card_size', 'Medium'),
+      );
       await navigate('settings');
       await tester.runAsync(() => settings.setLanguage('en'));
       await settle();

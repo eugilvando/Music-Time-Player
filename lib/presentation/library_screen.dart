@@ -2258,6 +2258,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                           libraryPage(),
                                                         AppSection.library =>
                                                           LibraryHub(
+                                                            settings:
+                                                                widget.settings,
                                                             tracks: tracks,
                                                             favorites:
                                                                 favorites,
