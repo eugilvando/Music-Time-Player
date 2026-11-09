@@ -7,25 +7,25 @@ Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Pr
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 2.10.0+64.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão atual: 3.0.0+65.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
-![Home do Music Time com biblioteca fictícia](docs/images/home.png)
+![Biblioteca do Music Time 3.0 com dados fictícios](docs/images/library-3.0.png)
 
 Design: **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [versão final 2.10.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.10.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
+**Ubuntu 24.04 x64:** [versão final 3.0.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.0-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
 
-A **2.10.0** separa Play contínuo em **Fila inteligente** e **Smart Flow**, com ativação independente pelo botão da barra e pelas configurações. A Fila inteligente considera artistas, gêneros e épocas da fila inteira, dando mais peso às suas escolhas. O Smart Flow intercala sugestões nos modos Aleatório, Dose dupla, Fã do artista e Da era. Playlists salvas são preservadas. Pacotes de ícones, crossfade automático, AutoEQ e perfis de EQ por saída continuam disponíveis.
+A **3.0.0** transforma a Biblioteca em uma central com resumo da coleção e atalhos. Músicas ganha um destino próprio com rolagem contínua; listas recebem linhas alternadas e os contornos Solar/Phosphor ficam mais espessos. As páginas reutilizam conteúdo em cache durante atualizações em segundo plano. No Linux, a sessão MPRIS oferece controles de mídia mesmo com a janela oculta. Fila inteligente, Smart Flow, crossfade automático, AutoEQ e perfis de EQ por saída continuam disponíveis.
 
-[Notas Windows](docs/release-2.10.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
+[Notas Windows](docs/release-3.0.0.md) · [Áudio: uso e limites](docs/release-2.7.0.md) · [Instalação Ubuntu](docs/ubuntu-preview.md)
 
 Use os links de Windows e Ubuntu acima para obter os pacotes atuais. Tags do código e notas históricas permanecem no Git; instaladores antigos podem ser removidos nas limpezas.
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-2.10.0.exe` na [release Windows 2.10.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.10.0).
+1. Baixe `MusicTime-Setup-3.0.0.exe` na [release Windows 3.0.0](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.0).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -70,7 +70,7 @@ O [guia de configuração](docs/provider-setup.md) traz as etapas e links oficia
 - **Fila por arraste:** faixas e álbuns da biblioteca, discografia e Home podem ser arrastados para a fila; álbuns seguem a ordem de disco/faixa. Salve a fila como playlist, preservando ordem e repetições. Ao desligar o shuffle, a ordem original é restaurada.
 - **Player:** controles completos, mudo pelo volume, shuffle, repeat, fila editável com repetições, estado/posição persistidos e restauração pausada. Cinco modelos de Now Playing, capa ampliada e fundos desfocados.
 - **Barra de reprodução:** organizador de ordem e visibilidade de itens, três separadores opcionais, campos de informações, tempos/progresso e status local/cache/permanente.
-- **Mixes e rádio:** mix somente do artista, inclusive ao partir de faixa/álbum, ordenado pelo ranking global Last.fm com fallback por reproduções locais. Rádio mantém a seleção por similaridade. Mix e rádio de artista têm tamanhos independentes, padrão 40 e intervalo 1–500, prévia e regeneração. Iniciam uma fila; salvar playlist é uma ação separada. Play contínuo oferece Fila inteligente e Smart Flow independentes. A continuação considera a fila inteira; o fluxo intercala sugestões. [Modos e funcionamento](docs/release-2.10.0.md).
+- **Mixes e rádio:** mix somente do artista, inclusive ao partir de faixa/álbum, ordenado pelo ranking global Last.fm com fallback por reproduções locais. Rádio mantém a seleção por similaridade. Mix e rádio de artista têm tamanhos independentes, padrão 40 e intervalo 1–500, prévia e regeneração. Iniciam uma fila; salvar playlist é uma ação separada. Play contínuo oferece Fila inteligente e Smart Flow independentes. A continuação considera a fila inteira; o fluxo intercala sugestões. [Modos e funcionamento](docs/release-3.0.0.md).
 - **Crossfade:** desativado, automático ou manual, com transição suave, Smart fades e Mix only. O automático escolhe até seis segundos conforme a duração das faixas e análise compatível. Álbuns em ordem sequencial preservam suas transições.
 - **AutoEQ e perfis de saída:** importe `ParametricEQ.txt`, revise e salve perfis com filtros de pico, graves/agudos e pré-amplificação protetora. Associe um perfil a cada saída padrão do sistema; ao trocar de fone/caixas no Windows ou Ubuntu, o app aplica o perfil salvo. Saídas sem associação ficam sem EQ.
 - **Áudio e letras:** equalizador de cinco bandas com presets/compensação de ganho; letras LRC/TXT ao lado, MP3 embutidas suportadas, recuperação OneDrive e fallback opcional LRCLIB. Rolagem, seek, offset e apresentação configuráveis; palavras sincronizadas apenas com timestamps reais.
@@ -111,10 +111,14 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 - Sem timer, modo ReplayGain configurável, garantia gapless, seletor avançado de saída no app, início com Windows ou sistema completo de atalhos/notificações configuráveis.
 - Backup limitado a 128 MiB descompactados, com capas opcionais até 64 MiB. Credenciais exigem senha; sessões podem expirar. Versões antigas não leem o novo arquivo `.mtbackup`.
 
-Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-2.10.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
+Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/building.md), [release](docs/release-3.0.0.md) e [avisos de terceiros](THIRD_PARTY_NOTICES.md). O código próprio do Music Time usa [MIT](LICENSE); as dependências mantêm suas licenças.
 
 ## Validação
 
-Windows 2.10.0: consulte o [manifesto de validação](release/validation.json) para as regressões direcionadas, análise, compilação e instalação. A suíte completa não foi repetida nesta versão.
+Windows 3.0.0: consulte o [manifesto de validação](release/validation.json) para as regressões direcionadas, análise, compilação e instalação. A suíte completa não foi repetida nesta versão.
 
-[Ubuntu 2.10.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v2.10.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
+[Ubuntu 3.0.0 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.0-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
+
+## Music Time 3.0 — Biblioteca / Songs
+
+![Músicas com rolagem contínua e linhas alternadas; dados fictícios](docs/images/songs-3.0.png)

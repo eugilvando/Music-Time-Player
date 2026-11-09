@@ -1,22 +1,20 @@
 {
-  "version": "2.10.0+64",
+  "version": "3.0.0+65",
   "platform": "Windows x64",
-  "sourceCommit": "574ba5ea6dee134b5db8228f07025b835b08c525",
+  "sourceCommit": "4188e36199715d0a2e3036bf6d51a6aff23377ae",
   "installer": {
-    "file": "MusicTime-Setup-2.10.0.exe",
-    "bytes": 46369251,
-    "sha256": "7a8c040de621712aa7cec332d1907a7e06457edbf9760df7ed72827947122a74"
+    "file": "MusicTime-Setup-3.0.0.exe",
+    "bytes": 46377645,
+    "sha256": "568aaa834f9d22a4d71030f2f3f487bb7cbeee06332f813f14ee687da059d32f"
   },
   "checks": {
     "analysis": "passed; complete project",
-    "targetedTests": 49,
-    "additionalModalTest": "passed; independent toggles, mode persistence and screenshot review",
-    "visualReview": "wide and narrow playback settings and both-enabled modal inspected using isolated fixtures",
+    "targetedTests": 54,
+    "visualReview": "passed; full app navigation at multiple window sizes and text scales; Library, Songs, Solar and Phosphor outlines inspected using fictional fixtures",
     "releaseBuild": "passed",
-    "nativeIntegration": "SMTC artwork/play/pause, tray, placement and clean exit passed",
+    "nativeIntegration": "SMTC artwork/play/pause, tray, window placement and clean exit passed",
     "restart": "isolated native backup/restore/reset and maintenance restart passed",
-    "installation": "binary hashes matched; database/preferences/vault unchanged; app left closed",
-    "sourceCopies": "612 code, asset, test and package inputs matched across private/public/package"
+    "installation": "binary hashes matched; database/preferences/vault unchanged; app left closed"
   },
-  "limits": "Targeted regression suite, not a full-suite rerun. Ubuntu is validated separately. Real Last.fm/cloud-account and Ubuntu desktop acceptance remain separate."
+  "limits": "Targeted regression suite, not a full-suite rerun. Ubuntu validated independently. Real accounts and user Linux desktop acceptance remain separate."
 }

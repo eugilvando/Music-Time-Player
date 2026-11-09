@@ -185,6 +185,7 @@ void main() {
       final wave = (await tester.runAsync(() => demoWave(directory)))!;
       for (final font in {
         'Inter': 'Inter',
+        'Material Symbols Rounded': 'MaterialSymbolsRounded',
         'Bricolage Grotesque': 'BricolageGrotesque',
       }.entries) {
         await tester.runAsync(() async {
@@ -494,6 +495,22 @@ void main() {
         expect(tester.takeException(), isNull);
         await capture(section);
       }
+      await navigate('library');
+      for (final pack in ['solar', 'phosphor']) {
+        await tester.runAsync(() => settings.updateVisual('icon_pack', pack));
+        await tester.runAsync(
+          () => settings.updateVisual('icon_style', 'outlined'),
+        );
+        await settle();
+        await capture('library-$pack-outlined');
+      }
+      await tester.runAsync(
+        () => settings.updateVisual('icon_pack', 'current'),
+      );
+      await tester.runAsync(
+        () => settings.updateVisual('icon_style', 'filled'),
+      );
+      await navigate('settings');
       await tester.runAsync(() => settings.setLanguage('en'));
       await settle();
       expect(find.text('General and appearance'), findsWidgets);
