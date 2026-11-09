@@ -1,24 +1,24 @@
 {
-  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
-  "commit": "29f6fb57fec852b4d08487946306f6332f5803bd",
-  "platform": "Ubuntu Desktop 24.04 amd64",
-  "debianVersion": "2.9.0-0ubuntu1",
-  "version": "2.9.0+63",
   "installer": {
-    "file": "music-time-preview_2.9.0-0ubuntu1_amd64.deb",
-    "sha256": "b6947c80f2a1597f55e446b359cef803d4d79dedd6e7c504e332af1e835e3d1b",
-    "bytes": 12425406
+    "sha256": "b291fcee83414ebc634d368c3f816733ec4cdef09272cab4badfc35f2a906c67",
+    "bytes": 12432636,
+    "file": "music-time-preview_2.10.0-0ubuntu1_amd64.deb"
   },
-  "experimental": false,
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/41654398726",
   "checks": {
-    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
-    "binaries": "x64 ELF",
     "linuxReleaseBuild": "passed",
-    "targetedTests": 152,
+    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
     "analysis": "passed",
     "debInstallation": "passed using apt in Ubuntu CI",
-    "graphicalLaunch": "passed in compatibility and software modes",
+    "binaries": "x64 ELF",
+    "targetedTests": 161,
+    "graphicalLaunch": "passed in compatibility and software modes; six screenshots inspected",
     "visualReview": "passed; six screenshots inspected"
-  }
+  },
+  "debianVersion": "2.10.0-0ubuntu1",
+  "version": "2.10.0+64",
+  "experimental": false,
+  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
+  "platform": "Ubuntu Desktop 24.04 amd64",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42537663607",
+  "commit": "574ba5ea6dee134b5db8228f07025b835b08c525"
 }
