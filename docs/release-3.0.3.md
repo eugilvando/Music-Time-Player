@@ -8,3 +8,9 @@
 Dados, contas, filas e preferências existentes são preservados. Capturas de demonstração usam somente dados fictícios.
 
 Validação Windows: análise completa e 49 testes direcionados aprovados em rodadas. A rapidez percebida na biblioteca real do usuário ainda precisa de conferência após a instalação.
+
+![Capas de gêneros com dados fictícios](images/genres-3.0.3.png)
+
+![Capas de anos com dados fictícios](images/years-3.0.3.png)
+
+![Playlist de demonstração](images/playlists-3.0.3.png)
