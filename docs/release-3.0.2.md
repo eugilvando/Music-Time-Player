@@ -6,3 +6,5 @@
 - Removido o subtítulo “Explorar biblioteca”, deixando o resumo e os cards em destaque.
 
 Atualização preserva biblioteca, histórico, contas e preferências existentes. Nenhum dado pessoal é incluído nas capturas ou na distribuição.
+
+![Organizador da Biblioteca com dados fictícios](images/library-organizer-3.0.2.png)

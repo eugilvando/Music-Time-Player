@@ -522,6 +522,8 @@ void main() {
       );
       await tester.tap(find.byKey(const ValueKey('library.organize')));
       await settle();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byType(AlertDialog), findsOneWidget);
       await capture('library-organizer');
       await tester.tap(find.byKey(const ValueKey('library.organize.close')));
       await settle();
