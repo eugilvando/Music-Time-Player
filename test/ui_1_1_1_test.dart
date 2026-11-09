@@ -306,7 +306,7 @@ void main() {
             ),
           );
         }
-        if (['library', 'artists', 'albums'].contains(section)) {
+        if (['songs', 'artists', 'albums'].contains(section)) {
           final filter = find.byKey(const ValueKey('catalog.quickFavorites'));
           expect(
             find.ancestor(of: filter, matching: find.byType(AppBar)),

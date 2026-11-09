@@ -1,3 +1,4 @@
+import 'category_artwork.dart';
 import 'artist_featured_tracks.dart';
 import '../library/artist_ranking.dart';
 import '../library/insight_artist_templates.dart';
@@ -56,6 +57,7 @@ class CatalogMemory {
   final scrollPositions = <String, double>{};
   final derived = <String, CatalogResult>{};
   final home = <String, HomeData>{};
+  final favorites = <String, FavoriteCatalog>{};
   CatalogIndex? index;
   int indexRevision = -1;
   bool ready = false;
@@ -216,13 +218,29 @@ class CatalogBrowserState extends State<CatalogBrowser> {
   bool preparingFavorites = false;
   int favoriteGeneration = 0;
   void prepareFavorites(List<Track> all) {
-    final signature = '${identityHashCode(all)}:${identityHashCode(index)}';
+    if (derivingCatalog) return;
+    final signature = '$filteredSignature:${identityHashCode(index)}';
     if (favoriteDataKey == signature) return;
     favoriteDataKey = signature;
+    final saved = memory.favorites[signature];
+    if (saved != null) {
+      favoriteGeneration++;
+      favoriteData = saved;
+      preparingFavorites = false;
+      return;
+    }
+    void remember(FavoriteCatalog data) {
+      memory.favorites[signature] = data;
+      while (memory.favorites.length > 8) {
+        memory.favorites.remove(memory.favorites.keys.first);
+      }
+    }
+
     final request = ++favoriteGeneration;
     final work = (index: index, tracks: all);
     if (all.length <= 1000) {
       favoriteData = prepareFavoriteCatalog(work);
+      remember(favoriteData);
       preparingFavorites = false;
       return;
     }
@@ -233,6 +251,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         if (mounted && request == favoriteGeneration) {
           setState(() {
             favoriteData = result;
+            remember(result);
             preparingFavorites = false;
           });
         }
@@ -669,7 +688,10 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         }
       }
       cachedIndex = null;
-      scheduleRefresh();
+      if (oldWidget.revision != widget.revision ||
+          !listEquals(oldWidget.tracks, widget.tracks)) {
+        scheduleRefresh();
+      }
     }
   }
 
@@ -811,6 +833,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       return cachedIndex!;
     }
     memory.derived.clear();
+    memory.favorites.clear();
     memory.indexRevision = widget.revision;
     return memory.index = cachedIndex = CatalogIndex(
       tracks: widget.tracks,
@@ -946,7 +969,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
             if (!mounted || request != catalogWorkGeneration) return;
             setState(() {
               memory.derived[signature] = result;
-              while (memory.derived.length > 3) {
+              while (memory.derived.length > 12) {
                 memory.derived.remove(memory.derived.keys.first);
               }
               filteredSignature = signature;
@@ -1456,6 +1479,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           track:
               g.tracks.where((t) => t.hasArtwork).firstOrNull ?? g.tracks.first,
         )
+      : {'genres', 'years', 'decades'}.contains(type)
+      ? CategoryArtwork(label: g.name, kind: type)
       : MtIcon(switch (type) {
           'genres' => Icons.piano,
           'years' || 'decades' => Icons.calendar_month,

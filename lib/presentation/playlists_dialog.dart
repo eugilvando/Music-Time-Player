@@ -1099,12 +1099,19 @@ class PlaylistArtworkState extends State<PlaylistArtwork> {
                 children: [
                   for (var col = 0; col < 2; col++)
                     Expanded(
-                      child: TrackCover(
-                        key: ValueKey('playlist.tile.${row * 2 + col}'),
-                        indicators: false,
-                        track: row * 2 + col < tracks.length
-                            ? tracks[row * 2 + col]
-                            : null,
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.5),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: TrackCover(
+                            rounded: false,
+                            key: ValueKey('playlist.tile.${row * 2 + col}'),
+                            indicators: false,
+                            track: row * 2 + col < tracks.length
+                                ? tracks[row * 2 + col]
+                                : null,
+                          ),
+                        ),
                       ),
                     ),
                 ],

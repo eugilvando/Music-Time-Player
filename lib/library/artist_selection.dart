@@ -268,8 +268,9 @@ List<String> suggestedMixArtists(CatalogIndex index, List<Track> tracks) {
           ? 1000000
           : 0) +
       g.tracks.where(index.isFavorite).length * 1000;
+  final scores = {for (final group in groups) group.id: score(group)};
   groups.sort((a, b) {
-    final rank = score(b).compareTo(score(a));
+    final rank = scores[b.id]!.compareTo(scores[a.id]!);
     return rank == 0
         ? artistNameKey(a.name).compareTo(artistNameKey(b.name))
         : rank;

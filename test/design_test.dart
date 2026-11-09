@@ -229,6 +229,7 @@ void main() {
             title: 'DEMO · Faixa ${i + 1}',
             artist: 'Artista de teste ${i + 1}',
             album: 'DEMO · Álbum ${i + 1}',
+            genre: ['Rock', 'Jazz', 'Electronic'][i % 3],
             year: 2020 + i,
             localPath: wave.path,
             cover: cover,
@@ -237,6 +238,12 @@ void main() {
         );
       }
       await tester.runAsync(() => store.addTracks(tracks));
+      await tester.runAsync(
+        () => store.importPlaylist(
+          'DEMO · Descobertas',
+          tracks.map((t) => t.id).toList(),
+        ),
+      );
 
       final boundary = GlobalKey();
       tester.view.devicePixelRatio = 1;

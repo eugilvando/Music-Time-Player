@@ -1,5 +1,4 @@
 import 'album_queue_drag.dart';
-import 'home_skeleton.dart';
 import 'rounded_select.dart';
 import 'design_icon.dart';
 import 'mix_artist_picker.dart';
@@ -652,7 +651,11 @@ class _HomePageState extends State<HomePage> {
   Map<String, List<Track>> mixes = {};
   String get dataSignature =>
       '${widget.cacheKey ?? '${identityHashCode(widget.index)}:${identityHashCode(widget.tracks)}'}:${widget.settings.visualNumber('home_mix_size', 20)}:${widget.lastfmMix != null}';
-  String get snapshotScope => jsonEncode([widget.cacheScope, quickFilter]);
+  String get snapshotScope => jsonEncode([
+    widget.cacheScope,
+    quickFilter,
+    selectedHomeSections(widget.settings),
+  ]);
   String get snapshotKey => '$snapshotScope:$dataSignature';
   String? displayedScope;
   String derivedSignature = '';
@@ -1603,7 +1606,10 @@ class _HomePageState extends State<HomePage> {
               } catch (_) {}
             }
             if (!mounted || request != homeGeneration) return;
-            job = compute(prepareHome, work);
+            job = compute(prepareSelectedHome, (
+              work,
+              selectedHomeSections(widget.settings).toSet(),
+            ));
             activeHomeWork = job;
             final result = await job;
             if (!mounted || request != homeGeneration) return;
@@ -1634,16 +1640,18 @@ class _HomePageState extends State<HomePage> {
         });
       }
       if (derivedLists.isEmpty) {
-        return homeError == null
-            ? const HomeSkeleton()
-            : Center(
-                child: TextButton(
-                  onPressed: () => setState(() {
-                    pendingHomeSignature = null;
-                  }),
-                  child: UiText(homeError!),
-                ),
-              );
+        final initial = prepareHome(
+          (
+            index: widget.index,
+            tracks: widget.tracks,
+            quick: quickFilter,
+            limit: widget.settings.visualNumber('home_mix_size', 20).round(),
+            lastfm: widget.lastfmMix != null,
+          ),
+          sections: selectedHomeSections(widget.settings).toSet(),
+          lightweight: true,
+        );
+        derivedLists = initial.lists;
       }
     }
     if (!background && derivedSignature != currentSignature) {
@@ -1653,7 +1661,7 @@ class _HomePageState extends State<HomePage> {
         quick: quickFilter,
         limit: widget.settings.visualNumber('home_mix_size', 20).round(),
         lastfm: widget.lastfmMix != null,
-      ));
+      ), sections: selectedHomeSections(widget.settings).toSet());
       derivedSignature = currentSignature;
       derivedLists = result.lists;
       mixes = result.mixes;
@@ -1742,6 +1750,28 @@ class _HomePageState extends State<HomePage> {
         const UiText('Sua biblioteca reunida em um só lugar'),
         const SizedBox(height: 12),
         if (widget.activeFilters != null) widget.activeFilters!,
+        if (derivedSignature != currentSignature && homeError == null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                const SizedBox.square(
+                  dimension: 16,
+                  child: MtIcon(Icons.schedule, size: 16),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    uiFormat(
+                      context,
+                      'Atualizando seleções da biblioteca…',
+                      'Updating library selections…',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         for (final key in sections)
           MediaCardSizeScope.homeSection(
             widget.settings,

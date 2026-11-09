@@ -162,6 +162,7 @@ class AppData {
     if (key.startsWith('windows.')) return value is bool;
     if (key == 'collections.favorites' ||
         key == 'visual.home_sections' ||
+        key == 'visual.library_hub_items' ||
         key == 'visual.home_sections_before_0_7_3' ||
         key == 'visual.home_mix_types' ||
         key == 'visual.songs_columns' ||
@@ -264,6 +265,7 @@ class AppData {
     }
     const flags = {
       'home_layout_0_7_3',
+      'library_3',
       'artist_radio_1_2',
       'system_accent',
       'eq_enabled',
