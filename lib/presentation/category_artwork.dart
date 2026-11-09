@@ -13,7 +13,7 @@ class CategoryArtwork extends StatelessWidget {
       0,
       (n, c) => (n * 31 + c) & 0x7fffffff,
     );
-    final hue = (hash % 360).toDouble();
+    final hue = ((hash * 137) % 360).toDouble();
     final color = HSLColor.fromAHSL(1, hue, .55, .28).toColor();
     final end = HSLColor.fromAHSL(1, (hue + 35) % 360, .50, .16).toColor();
     return Semantics(
@@ -29,6 +29,15 @@ class CategoryArtwork extends StatelessWidget {
                   size.maxHeight.isFinite ? size.maxHeight : 120,
                 )
                 .toDouble();
+            final longest = label
+                .split(RegExp(r'\s+'))
+                .fold<int>(1, (n, word) => math.max(n, word.runes.length));
+            final fontSize = math
+                .min(
+                  edge * (kind == 'genres' ? .19 : .27),
+                  edge * .8 / (longest * .68),
+                )
+                .clamp(6.0, 64.0);
             return DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -67,8 +76,7 @@ class CategoryArtwork extends StatelessWidget {
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w800,
-                            fontSize: (edge * (kind == 'genres' ? .19 : .27))
-                                .clamp(10, 64),
+                            fontSize: fontSize,
                             height: 1.1,
                           ),
                         ),

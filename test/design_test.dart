@@ -491,6 +491,11 @@ void main() {
         'history',
         'settings',
       ]) {
+        if (section == 'playlists') {
+          await tester.runAsync(
+            () => settings.updateVisual('playlists_view', 'grid'),
+          );
+        }
         await navigate(section);
         expect(
           find.byKey(const ValueKey('app.global-background')),
