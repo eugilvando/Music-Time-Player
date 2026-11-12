@@ -66,7 +66,9 @@ LyricsDocument parseLyrics(String source) {
     }
     final matches = timing.allMatches(value).toList();
     if (matches.isEmpty) {
-      if (value.startsWith('[') || wordTiming.hasMatch(value)) {
+      if ((value.startsWith('[') &&
+              !RegExp(r'^\[[^\]\d:]+\]$').hasMatch(value)) ||
+          wordTiming.hasMatch(value)) {
         throw const FormatException('Timestamp inválido');
       }
       lines.add(LyricLine(value));
@@ -119,6 +121,10 @@ LyricsDocument parseLyrics(String source) {
   return LyricsDocument(
     lines,
     offset: offset,
-    source: source.startsWith('[by:LRCLIB]') ? 'LRCLIB' : null,
+    source: source.startsWith('[by:LRCLIB]')
+        ? 'LRCLIB'
+        : source.startsWith('[by:lyrics.ovh]')
+        ? 'lyrics.ovh'
+        : null,
   );
 }

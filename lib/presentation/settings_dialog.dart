@@ -564,8 +564,8 @@ class _SettingsPageState extends State<SettingsPage> {
     subsection('Letras', [
       visualSwitch(
         'online_lyrics',
-        'Online lyrics fallback · LRCLIB',
-        subtitle: 'Looks up the track title, artist, album and duration when your own lyrics are unavailable. Disabled in offline mode.',
+        'Online lyrics fallback · LRCLIB / lyrics.ovh',
+        subtitle: 'Preloads lyrics for upcoming tracks. Uses LRCLIB, then lyrics.ovh when your own lyrics are unavailable. Sends song metadata only; disabled in offline mode.',
       ),
       visualSwitch('lyrics_auto_scroll', 'Rolagem automática das letras'),
     ]),
@@ -890,8 +890,8 @@ class _SettingsPageState extends State<SettingsPage> {
           subsection('Provedores de letras', [
             visualSwitch(
               'online_lyrics',
-              'Online lyrics fallback · LRCLIB',
-              subtitle: 'Looks up the track title, artist, album and duration when your own lyrics are unavailable. Disabled in offline mode.',
+              'Online lyrics fallback · LRCLIB / lyrics.ovh',
+              subtitle: 'Preloads lyrics for upcoming tracks. Uses LRCLIB, then lyrics.ovh when your own lyrics are unavailable. Sends song metadata only; disabled in offline mode.',
             ),
           ]),
         ]);

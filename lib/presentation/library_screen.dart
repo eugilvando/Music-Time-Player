@@ -446,6 +446,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   void cachePlayback() {
     final track = controller.current;
+    libraryLyrics.prefetch([
+      if (track != null) track,
+      if (track != null) ...controller.upcoming(2),
+    ]);
     if (track == null) {
       mediaCache.pinned = null;
       cacheSignature = '';
@@ -1515,6 +1519,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     cacheTimer?.cancel();
     widget.settings.removeListener(configurePlayback);
     controller.removeListener(cachePlayback);
+    libraryLyrics.dispose();
     downloads.removeListener(scheduleAvailability);
     mediaCache.removeListener(scheduleAvailability);
     mediaCache.dispose();

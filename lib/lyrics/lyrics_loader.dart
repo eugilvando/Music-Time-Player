@@ -56,5 +56,9 @@ Future<LyricsDocument?> loadLocalLyrics(Track track) async {
   }
   final embedded = await compute(readEmbeddedLyrics, local);
   if (embedded == null || embedded.trim().isEmpty) return null;
-  return compute(parseLyrics, embedded);
+  try {
+    return await compute(parseLyrics, embedded);
+  } on FormatException {
+    return null;
+  }
 }

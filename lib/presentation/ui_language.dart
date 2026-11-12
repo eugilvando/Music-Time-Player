@@ -129,6 +129,11 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Atualizar letras': 'Refresh lyrics',
+  'Busca online de letras · LRCLIB / lyrics.ovh':
+      'Online lyrics fallback · LRCLIB / lyrics.ovh',
+  'Prepara as letras das próximas faixas. Consulta LRCLIB e depois lyrics.ovh quando suas letras não estão disponíveis. Envia apenas os metadados da música; desativado no modo offline.': 'Preloads lyrics for upcoming tracks. Uses LRCLIB, then lyrics.ovh when your own lyrics are unavailable. Sends song metadata only; disabled in offline mode.',
+
   "Fila inteligente": "Intelligent queue",
   "Modo da fila inteligente": "Intelligent queue mode",
   "Smart Flow": "Smart Flow",

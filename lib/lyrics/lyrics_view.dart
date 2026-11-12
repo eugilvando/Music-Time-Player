@@ -139,11 +139,17 @@ class _LyricsViewState extends State<LyricsView> {
         final active = lyrics.activeIndex(position, adjustment: offset);
         return Column(
           children: [
-            if (lyrics.source != null)
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text('Lyrics · ${lyrics.source}'),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (lyrics.source != null) Text('Lyrics · ${lyrics.source}'),
+                IconButton(
+                  tooltip: ui(context, 'Atualizar letras'),
+                  onPressed: reload,
+                  icon: const MtIcon(Icons.refresh),
+                ),
+              ],
+            ),
             if (lyrics.synchronized)
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,

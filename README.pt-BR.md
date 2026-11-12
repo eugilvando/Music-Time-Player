@@ -7,7 +7,7 @@ Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Pr
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão atual: 3.0.3+68.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Código: 3.0.4+69. Instaladores publicados: 3.0.3+68.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Biblioteca do Music Time 3.0 com dados fictícios](docs/images/library-3.0.2.png)
 
@@ -16,6 +16,9 @@ Design: **Gilvando Souza**.
 **Ubuntu 24.04 x64:** [versão final 3.0.3](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.3-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
+
+**Letras na 3.0.4:** prioridade para letras locais e embutidas, preparação da faixa atual e das duas próximas, cache entre consultas e sessões, fallback LRCLIB → lyrics.ovh e botão para atualizar a letra. Validação Windows aprovada; esta atualização do código não inclui um novo pacote Ubuntu. [Detalhes e validação](docs/lyrics-3.0.4.md).
+
 
 O início prioriza conteúdo leve e prepara somente as coleções necessárias. Favoritos reaproveita resultados durante a sessão. Playlists têm miniaturas arredondadas e separadas; gêneros e anos ganham capas coloridas geradas localmente.
 
