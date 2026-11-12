@@ -271,6 +271,7 @@ class AppData {
       'eq_enabled',
       'cache_enabled',
       'smart_play',
+      'smart_flow',
       'offline_only',
       'merge_artists',
       'merge_albums',

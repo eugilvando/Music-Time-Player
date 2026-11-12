@@ -482,7 +482,9 @@ class _SettingsPageState extends State<SettingsPage> {
         min: .7,
         max: 2.6,
         divisions: 19,
-        onChanged: widget.settings.saving
+        onChanged:
+            widget.settings.saving ||
+                widget.settings.nowPlayingStyle == 'lyrics_only'
             ? null
             : (value) => widget.settings.updateVisual('cover_scale', value),
       ),

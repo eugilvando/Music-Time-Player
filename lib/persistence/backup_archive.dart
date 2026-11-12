@@ -26,6 +26,11 @@ const backupSections = <String, String>{
   'credentials': 'Credenciais e sessões',
 };
 
+abstract class BackupArtworkSource {
+  Stream<Map<String, Object?>> artworks();
+  Future<Uint8List?> cover(String table, Object id);
+}
+
 /// Archive credentials are only ever written inside authenticated encryption.
 /// Decrypted data is kept in memory and is never staged for a later restart.
 class BackupArchive {
@@ -84,6 +89,8 @@ class BackupArchive {
     SecretVault vault,
     Set<String> sections, {
     String? password,
+    DatabaseExecutor? executor,
+    bool retainArtworkReferences = false,
   }) async {
     if (sections.isEmpty ||
         sections.contains('artwork') &&
@@ -114,7 +121,9 @@ class BackupArchive {
         );
       }
     }
-    final rows = await store.database.transaction((txn) async {
+    Future<Map<String, List<Map<String, Object?>>>> collect(
+      DatabaseExecutor txn,
+    ) async {
       final result = <String, List<Map<String, Object?>>>{};
       for (final table in AppData.tables) {
         final include = switch (table) {
@@ -141,7 +150,10 @@ class BackupArchive {
             column['name'] as String,
         ];
         if (!artwork || table == 'tracks' && !sections.contains('library')) {
-          columns.removeWhere((c) => c == 'cover' || c == 'cover_hash');
+          columns.removeWhere(
+            (c) =>
+                c == 'cover' || c == 'cover_hash' && !retainArtworkReferences,
+          );
         }
         final references = <String>[
           if (sections.contains('playlists'))
@@ -159,7 +171,11 @@ class BackupArchive {
         );
       }
       return result;
-    });
+    }
+
+    final rows = executor == null
+        ? await store.database.transaction(collect)
+        : await collect(executor);
     final config = <String, Object>{
       if (sections.contains('providers'))
         for (final key in prefs.getKeys().where(providerKey))
@@ -433,10 +449,27 @@ class BackupArchive {
             );
           }
         }
+        final images = archive['_images'] as BackupArtworkSource?;
+        if (images != null &&
+            sections.contains('library') &&
+            sections.contains('artwork')) {
+          await for (final row in images.artworks()) {
+            await txn.insert(
+              'artworks',
+              row,
+              conflictAlgorithm: ConflictAlgorithm.ignore,
+            );
+          }
+        }
         var processed = 0;
         for (final original in tables['tracks'] as List) {
           if (++processed % 256 == 0) await Future<void>.delayed(Duration.zero);
           final row = decodeRow(original as Map);
+          if (images != null &&
+              sections.contains('library') &&
+              sections.contains('artwork')) {
+            row['cover'] = await images.cover('tracks', row['id']!);
+          }
           final track = store.trackFromRow(row);
           final matches = byIdentity[_identity(track)] ?? [];
           final target = ids.contains(track.id) && matches.contains(track.id)
@@ -508,6 +541,10 @@ class BackupArchive {
           for (final original in tables['playlists'] as List) {
             final row = decodeRow(original as Map);
             final oldId = row.remove('id') as int;
+            if (images != null && sections.contains('artwork')) {
+              final cover = await images.cover('playlists', oldId);
+              if (cover != null) row['cover'] = cover;
+            }
             if (!sections.contains('artwork')) row.remove('cover');
             final id = await txn.insert('playlists', row);
             playlistMap[oldId] = id;

@@ -12,7 +12,7 @@ Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled 
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Source version: 3.0.4+69. Published installers: 3.0.3+68.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Source version: 3.0.5+70. Published installers: 3.0.3+68.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time 3.0 Library with fictional demonstration data](docs/images/library-3.0.2.png)
 
@@ -21,6 +21,9 @@ Design by **Gilvando Souza**.
 **Ubuntu 24.04 x64:** [Download 3.0.3 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.3-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
+
+**3.0.5 backup and artwork fixes:** Smart Flow preferences now export correctly. Backups with artwork stream referenced images individually, retain password protection and show progress; older backups remain readable. Artwork sizing now responds in cover-only and lyrics layouts as well as Classic, Vinyl and Minimal. New artwork backups require version 3.0.5 or later to restore. [Details and validation](docs/backup-and-artwork-3.0.5.md).
+
 
 **3.0.4 lyrics update:** local and embedded lyrics take priority; the current track and next two queue entries are prepared in the background. Session and disk caching avoid repeated requests, with LRCLIB followed by lyrics.ovh as an online fallback. A refresh button is available in the lyrics panel. Windows validation passed; a new Ubuntu package is not included in this source update. [Scope and validation](docs/lyrics-3.0.4.md).
 

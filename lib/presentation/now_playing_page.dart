@@ -13,6 +13,10 @@ import '../lyrics/lyrics.dart';
 import '../domain/track.dart';
 import 'now_playing_artwork.dart';
 
+// Map the full saved slider range to the available layout, without an early plateau.
+double coverFraction(double value) =>
+    .4 + (value.clamp(.7, 2.6) - .7) / 1.9 * .6;
+
 const nowPlayingStyles = {
   'classic': 'Clássico',
   'vinyl': 'Vinil',
@@ -116,17 +120,16 @@ class NowPlayingPage extends StatelessWidget {
       120.0,
       (height - (horizontal ? 0 : 190 * textScale)) * (vinyl ? 1.4 : 1),
     );
-    final size = math
-        .min(
-          ((horizontal ? width * .46 : width - 48) * scale).clamp(
-            120.0,
-            horizontal
-                ? math.min(width * (vinyl ? .82 : .70), width - 204)
-                : math.min(width, vinyl ? 960.0 : 640.0),
-          ),
-          availableCover,
-        )
-        .toDouble();
+    final maxCover = math.max(
+      1.0,
+      math.min(
+        horizontal
+            ? math.min(width * (vinyl ? .82 : .70), width - 204)
+            : math.min(width, vinyl ? 960.0 : 640.0),
+        availableCover,
+      ),
+    );
+    final size = maxCover * coverFraction(scale);
     final cover = SizedBox(
       width: size,
       height: vinyl ? size / 1.4 : size,
@@ -210,16 +213,31 @@ class NowPlayingPage extends StatelessWidget {
                                 settings: settings,
                               )
                             : style == 'cover_only'
-                            ? Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(24),
-                                  child: AspectRatio(
-                                    aspectRatio: 1,
-                                    child: TrackCover(
-                                      track: controller.current,
+                            ? LayoutBuilder(
+                                builder: (context, area) {
+                                  final size =
+                                      math.max(
+                                        1.0,
+                                        math.min(
+                                              area.maxWidth,
+                                              area.maxHeight,
+                                            ) -
+                                            48,
+                                      ) *
+                                      coverFraction(
+                                        settings.visualNumber('cover_scale', 1),
+                                      );
+                                  return Center(
+                                    child: SizedBox(
+                                      key: const ValueKey(
+                                        'nowPlaying.sizedCover',
+                                      ),
+                                      width: size,
+                                      height: size,
+                                      child: artwork,
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
                               )
                             : style == 'lyrics'
                             ? wide
@@ -236,10 +254,19 @@ class NowPlayingPage extends StatelessWidget {
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  AspectRatio(
-                                                    aspectRatio: 1,
-                                                    child: TrackCover(
-                                                      track: controller.current,
+                                                  FractionallySizedBox(
+                                                    widthFactor: coverFraction(
+                                                      settings.visualNumber(
+                                                        'cover_scale',
+                                                        1,
+                                                      ),
+                                                    ),
+                                                    child: AspectRatio(
+                                                      key: const ValueKey(
+                                                        'nowPlaying.sizedCover',
+                                                      ),
+                                                      aspectRatio: 1,
+                                                      child: artwork,
                                                     ),
                                                   ),
                                                   const SizedBox(height: 16),

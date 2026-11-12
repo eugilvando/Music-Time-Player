@@ -9,6 +9,8 @@ import 'resizable_side_panel.dart';
 import 'design_icon.dart';
 import 'backup_options.dart';
 import '../persistence/backup_archive.dart';
+import '../persistence/backup_file.dart';
+import 'backup_progress.dart';
 import 'design_tokens.dart';
 import '../lyrics/lyrics_view.dart';
 import 'now_playing_artwork.dart';
@@ -711,18 +713,19 @@ class _LibraryScreenState extends State<LibraryScreen> {
         const XTypeGroup(label: 'Backup Music Time', extensions: ['mtbackup']),
       ],
     );
-    if (location == null) return;
-    final content = await BackupArchive.create(
-      widget.store,
-      widget.settings.preferences,
-      providers.vault,
-      options.sections,
-      password: options.password,
+    if (location == null || !mounted) return;
+    await runBackupProgress(
+      context,
+      (progress) => BackupFile.write(
+        File(location.path),
+        widget.store,
+        widget.settings.preferences,
+        providers.vault,
+        options.sections,
+        password: options.password,
+        onProgress: progress,
+      ),
     );
-    await XFile.fromData(
-      content,
-      mimeType: 'application/octet-stream',
-    ).saveTo(location.path);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -744,18 +747,20 @@ class _LibraryScreenState extends State<LibraryScreen> {
       ],
     );
     if (file == null || !mounted) return;
-    if (await file.length() > AppData.maxBytes) {
-      throw const FormatException('Backup maior que 128 MB.');
-    }
-    final bytes = await file.readAsBytes();
+    final input = File(file.path);
     String? password;
-    if (BackupArchive.encrypted(bytes)) {
+    if (await BackupFile.encrypted(input)) {
       if (!mounted) return;
       final options = await showBackupOptions(context, passwordOnly: true);
       if (options == null) return;
       password = options.password;
     }
-    final archive = await BackupArchive.read(bytes, password: password);
+    if (!mounted) return;
+    final archive = await runBackupProgress(
+      context,
+      (progress) =>
+          BackupFile.read(input, password: password, onProgress: progress),
+    );
     if (!mounted) return;
     final options = await showBackupOptions(
       context,
@@ -777,13 +782,17 @@ class _LibraryScreenState extends State<LibraryScreen> {
       if (options.sections.contains('queue')) {
         await controller.player.pause();
       }
-      missing = await BackupArchive.restore(
-        widget.store,
-        widget.settings.preferences,
-        providers.vault,
-        archive,
-        options.sections,
-      );
+      if (!mounted) return;
+      missing = await runBackupProgress(context, (progress) {
+        progress('Restaurando catálogo e capas…');
+        return BackupArchive.restore(
+          widget.store,
+          widget.settings.preferences,
+          providers.vault,
+          archive,
+          options.sections,
+        );
+      });
       widget.settings.refreshFromPreferences();
       favorites = await widget.store.favoriteIds();
       await reloadCatalog();

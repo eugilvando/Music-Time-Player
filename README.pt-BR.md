@@ -7,7 +7,7 @@ Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Pr
 
 [Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Código: 3.0.4+69. Instaladores publicados: 3.0.3+68.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Código: 3.0.5+70. Instaladores publicados: 3.0.3+68.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Biblioteca do Music Time 3.0 com dados fictícios](docs/images/library-3.0.2.png)
 
@@ -16,6 +16,9 @@ Design: **Gilvando Souza**.
 **Ubuntu 24.04 x64:** [versão final 3.0.3](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.3-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
+
+**3.0.5 — Backup e capas:** corrigida a rejeição do Smart Flow. Backups com capas gravam as imagens usadas por partes, preservam a proteção por senha e mostram o andamento. Os formatos antigos continuam legíveis. O tamanho da capa responde também em Somente capa e na composição com letras. Backups novos com capas exigem 3.0.5 ou posterior para restaurar. [Detalhes e validação](docs/backup-and-artwork-3.0.5.md).
+
 
 **Letras na 3.0.4:** prioridade para letras locais e embutidas, preparação da faixa atual e das duas próximas, cache entre consultas e sessões, fallback LRCLIB → lyrics.ovh e botão para atualizar a letra. Validação Windows aprovada; esta atualização do código não inclui um novo pacote Ubuntu. [Detalhes e validação](docs/lyrics-3.0.4.md).
 
