@@ -1,1 +1,1 @@
-44c500d00a8da011ccf519a04dc7214656c2728f74f95e78571a3f0781c78392  music-time-preview_3.0.7-0ubuntu1_amd64.deb
+ad5d808ab170d8ef017244f3f4da0c28517e4ad5b83c653a02bf82d9d88dd085  music-time-preview_3.0.8-0ubuntu1_amd64.deb

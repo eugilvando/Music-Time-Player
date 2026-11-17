@@ -1,24 +1,20 @@
 {
-  "version": "3.0.7+72",
+  "version": "3.0.8+73",
   "platform": "Windows x64",
-  "sourceCommit": "d47950c7d16c7f98c734e083b40a29c2dbc673e2",
+  "sourceCommit": "b13edd0a5c26b7bb2dcb9525326ad705156c11eb",
   "readyToPublish": true,
   "installer": {
-    "file": "MusicTime-Setup-3.0.7.exe",
-    "bytes": 46756734,
-    "sha256": "8c72fc5118a03a247ee8e2d9848ca10785002d7e0c5c4247160005d4cd39aefd"
+    "file": "MusicTime-Setup-3.0.8.exe",
+    "bytes": 46759513,
+    "sha256": "0acdfa994e6f39ccc7728ee716b7dbead018b9976219ac2e85cfe7b47c3bf5e8"
   },
   "checks": {
-    "analysis": "passed; complete project",
-    "fullSuite": "passed with the exact bundled native libraries",
-    "targetedRegressionTests": 52,
-    "visualReview": "passed; fictional fixtures, fullscreen cover/lyrics, queue, settings and multiple sizes/text scales",
-    "releaseBuild": "passed; pinned audio and app-local Vulkan loader",
-    "nativeIntegration": "SMTC artwork/play/pause, tray hide/restore, window placement, clean exit passed",
-    "dataRestart": "backup restore, reset preserving original files, restart and clean exit passed",
-    "installation": "3.0.7+72 verified; binary hashes matched; database/preferences/vault unchanged; app left closed",
-    "testsPassed": 496,
-    "testsSkipped": 1
+    "analysis": "passed",
+    "targetedRegressionTests": 16,
+    "coverage": "single-row queue actions, icon save callback, shared cover/lyrics state, settings override/reset, fullscreen controls, artwork sizing, responsive navigation",
+    "releaseBuild": "passed",
+    "nativeIntegration": "SMTC artwork/play/pause, tray hide/restore, window placement and clean exit passed",
+    "installation": "3.0.8+73 verified; binary hashes matched; database/preferences/vault unchanged; app left closed"
   },
-  "limits": "Synthetic libraries and local Windows validation. Real-world audio glitches were not reproduced; Linux hardware acceptance remains separate."
+  "limits": "Windows playback validation runs on the local desktop; remote CI without physical audio output does not replace native audio acceptance. No new audio-engine behavior in this patch."
 }

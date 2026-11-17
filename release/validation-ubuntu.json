@@ -1,19 +1,19 @@
 {
-  "version": "3.0.7+72",
+  "version": "3.0.8+73",
   "platform": "Ubuntu Desktop 24.04 amd64",
-  "sourceCommit": "8bd514453055304ea37df351e2ef751ad7b55069",
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44155719366",
+  "sourceCommit": "b13edd0a5c26b7bb2dcb9525326ad705156c11eb",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44173357598",
   "readyToPublish": true,
   "experimental": false,
-  "debianVersion": "3.0.7-0ubuntu1",
+  "debianVersion": "3.0.8-0ubuntu1",
   "installer": {
-    "file": "music-time-preview_3.0.7-0ubuntu1_amd64.deb",
-    "bytes": 12565422,
-    "sha256": "44c500d00a8da011ccf519a04dc7214656c2728f74f95e78571a3f0781c78392"
+    "file": "music-time-preview_3.0.8-0ubuntu1_amd64.deb",
+    "bytes": 12566004,
+    "sha256": "ad5d808ab170d8ef017244f3f4da0c28517e4ad5b83c653a02bf82d9d88dd085"
   },
   "checks": {
     "analysis": "passed",
-    "targetedTests": "passed; catalog, UI, audio, queue and backup regressions",
+    "targetedTests": "passed including interface_308_test.dart",
     "mprisTests": "passed; real D-Bus session",
     "linuxReleaseBuild": "passed",
     "graphicalLaunch": "passed in compatibility and software modes under Xvfb",
@@ -21,5 +21,5 @@
     "debInstallation": "passed using apt in Ubuntu CI",
     "desktopIntegration": "desktop entry and installed icon validated"
   },
-  "limits": "Automated Ubuntu validation; acceptance in a real VM/partition with user audio devices remains pending. Windows-only packaging changed after this Linux source commit; Linux app sources match."
+  "limits": "Automated validation; acceptance in a real VM/partition with user audio devices remains separate."
 }

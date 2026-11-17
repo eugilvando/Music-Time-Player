@@ -1,6 +1,6 @@
 # Music Time
 
-**3.0.7:** tela inteira com capa/letras e controles integrados, fila que acompanha a faixa atual, arraste para o final, visualização independente dentro de álbuns e configurações reorganizadas. [Notas da versão](docs/release-3.0.7.md).
+**3.0.8:** ações da fila em uma única linha, com salvar playlist apenas como ícone. O seletor Capa / Apenas letras fica disponível na reprodução normal e em tela cheia, mantendo a mesma escolha. [Notas da versão](docs/release-3.0.8.md).
 
 **3.0.6:** progresso sem reconstruir a biblioteca, preparação limitada do Smart Flow, análise de crossfade fora da interface e verificação manual de atualizações no Sobre. Download e instalação continuam manuais. Veja [validação e limites](docs/playback-and-updates-3.0.6.md).
 
@@ -10,15 +10,15 @@ Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Pr
 
 **Sua música, sua biblioteca, seu tempo.** Player pessoal para Windows e Ubuntu, com arquivos locais, nuvens e servidores de mídia. Flutter/Dart, MediaKit/libmpv e SQLite, sem backend próprio.
 
-[Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.7) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
+[Baixar para Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8) · [English / documentação completa das funcionalidades](README.md) · [Configurar fontes](docs/provider-setup.md)
 
-**Versão: 3.0.7+72 — Windows x64 e Ubuntu 24.04 amd64.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
+**Versão: 3.0.8+73 — Windows x64 e Ubuntu 24.04 amd64.** Este repositório começa com uma cópia da versão atual. Não inclui o histórico do repositório de desenvolvimento, banco pessoal, credenciais, playlists pessoais, backups nem logs internos.
 
 ![Biblioteca do Music Time 3.0 com dados fictícios](docs/images/library-3.0.2.png)
 
 Design: **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [versão final 3.0.7](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.7-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
+**Ubuntu 24.04 x64:** [versão final 3.0.8](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
 
@@ -40,7 +40,7 @@ Use os links de Windows e Ubuntu acima para obter os pacotes atuais. Tags do có
 
 ## Instalação
 
-1. Baixe `MusicTime-Setup-3.0.7.exe` na [release Windows 3.0.7](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.7).
+1. Baixe `MusicTime-Setup-3.0.8.exe` na [release Windows 3.0.8](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8).
 2. Instale no seu usuário do Windows. Não é necessário instalar Flutter/Dart para usar o player.
 3. Em **Settings → Music sources**, adicione arquivos/pastas locais ou configure uma fonte. A reprodução local não exige uma conta.
 4. Sincronize o catálogo e reproduza músicas, álbuns ou playlists.
@@ -132,7 +132,7 @@ Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/bu
 
 Windows 3.0.3: consulte o [manifesto de validação](release/validation.json) para as regressões direcionadas, análise, compilação e instalação. A suíte completa não foi repetida nesta versão.
 
-[Ubuntu 3.0.3 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.7-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
+[Ubuntu 3.0.3 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
 
 ## Music Time 3.0 — Biblioteca / Songs
 
