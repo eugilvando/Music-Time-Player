@@ -84,8 +84,7 @@ class NowPlayingPage extends StatelessWidget {
           ),
         ),
       const SizedBox(height: 12),
-      Row(
-        mainAxisSize: MainAxisSize.min,
+      Wrap(
         children: [
           IconButton(
             tooltip: ui(context, favorite ? 'Remover favorito' : 'Favoritar'),
@@ -147,7 +146,10 @@ class NowPlayingPage extends StatelessWidget {
       children: [
         cover,
         const SizedBox(height: 24),
-        SizedBox(width: size, child: information(context)),
+        SizedBox(
+          width: math.max(size, math.min(width, 240)),
+          child: information(context),
+        ),
       ],
     );
   }

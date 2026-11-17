@@ -1,3 +1,5 @@
+import 'support/native_wait.dart';
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -66,7 +68,11 @@ void main() {
           recommendations++;
           return {};
         });
-        await Future<void>.delayed(const Duration(milliseconds: 700));
+        await waitForNative(
+          () =>
+              controller.position >= const Duration(milliseconds: 250) &&
+              !controller.buffering,
+        );
         final before = events, work = recommendations;
         await Future<void>.delayed(const Duration(milliseconds: 1800));
         expect(ticks, greaterThan(3));

@@ -1,3 +1,5 @@
+import 'support/native_wait.dart';
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -63,12 +65,19 @@ void main() {
               localPath: file.path,
             ),
           ], 0);
-          await Future<void>.delayed(const Duration(milliseconds: 350));
+          await waitForNative(
+            () => controller.playing && controller.position > Duration.zero,
+            reason: '$rate Hz must decode with EQ enabled',
+          );
           expect(controller.playing, isTrue, reason: '$rate Hz');
           expect(controller.error, isNull, reason: '$rate Hz');
           expect(controller.position, greaterThan(Duration.zero));
+          final beforeChange = controller.position;
           await controller.setEqualizer(true, [0, 1, -2, 1, 0]);
-          await Future<void>.delayed(const Duration(milliseconds: 150));
+          await waitForNative(
+            () => controller.position > beforeChange,
+            reason: 'Audio must advance after changing EQ',
+          );
           expect(controller.playing, isTrue);
           await controller.setEqualizer(false, [0, 0, 0, 0, 0]);
           expect(
