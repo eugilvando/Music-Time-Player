@@ -4,7 +4,7 @@ abstract final class SettingsSpacing {
   static const sectionGap = 20.0;
   static const titleGap = 24.0;
   static const controlGap = 16.0;
-  static double inset(double width) => width < 600 ? 16 : 20;
+  static double inset(double width) => width < 600 ? 16 : 24;
 }
 
 /// Shared surface for settings sections, including embedded provider pages.
@@ -21,7 +21,22 @@ class SettingsCard extends StatelessWidget {
         padding: EdgeInsets.all(
           padding == 20 ? SettingsSpacing.inset(size.maxWidth) : padding,
         ),
-        child: child,
+        child: ListTileTheme(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
+          minVerticalPadding: 12,
+          child: ExpansionTileTheme(
+            data: const ExpansionTileThemeData(
+              tilePadding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              childrenPadding: EdgeInsets.fromLTRB(20, 8, 20, 20),
+              shape: Border(),
+              collapsedShape: Border(),
+            ),
+            child: child,
+          ),
+        ),
       ),
     ),
   );

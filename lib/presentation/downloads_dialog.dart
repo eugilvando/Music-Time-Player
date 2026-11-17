@@ -150,18 +150,21 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
     child: ExpansionTile(
       key: PageStorageKey('downloads.files.$key'),
       initiallyExpanded: true,
-      title: Text(title),
+      title: Text(
+        '$title (${rows.length})',
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
       subtitle: Text(subtitle),
       children: [
         if (rows.isEmpty)
           const ListTile(title: UiText('No files'))
         else
           SizedBox(
-            height: (rows.length * 60.0).clamp(60.0, 420.0),
+            height: (rows.length * 76.0).clamp(76.0, 456.0),
             child: ListView.builder(
               key: PageStorageKey('downloads.scroll.$key'),
               primary: false,
-              itemExtent: 60,
+              itemExtent: 76,
               itemCount: rows.length,
               itemBuilder: (_, i) =>
                   cached ? cachedTask(rows[i]) : task(rows[i]),
@@ -173,7 +176,8 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
   Widget task(Map<String, Object?> row) => ListTile(
     dense: true,
     visualDensity: VisualDensity.compact,
-    minVerticalPadding: 0,
+    minVerticalPadding: 8,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
     title: Text(
       row['title'] as String,
       maxLines: 1,
@@ -182,7 +186,13 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
     subtitle: Text(
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      '${row['artist']} • ${row['status']} • ${storageSize(row['received'] as int)}',
+      '${row['artist']} • ${ui(context, switch (row['status']) {
+        'complete' => 'Concluído',
+        'failed' => 'Falhou',
+        'paused' => 'Pausado',
+        'pending' => 'Pendente',
+        _ => 'Baixando',
+      })} • ${storageSize(row['received'] as int)}',
     ),
     trailing: row['status'] == 'downloading'
         ? IconButton(
@@ -226,7 +236,8 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
   Widget cachedTask(Map<String, Object?> row) => ListTile(
     dense: true,
     visualDensity: VisualDensity.compact,
-    minVerticalPadding: 0,
+    minVerticalPadding: 8,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
     title: Text(row['title'] as String),
     subtitle: Text(
       '${row['artist']} • ${storageSize(row['bytes'] as int)} • ${row['last_played'] == null ? 'pré-carregada em' : 'último uso'} ${DateTime.tryParse(row['last_played'] as String? ?? row['cached_at'] as String)?.toLocal()}',
@@ -427,11 +438,11 @@ class _DownloadsDialogState extends State<DownloadsDialog> {
               item is UiText) {
             return item;
           }
-          return SettingsCard(padding: 0, child: item);
+          return SettingsCard(padding: 8, child: item);
         }
         final row = item as Map<String, Object?>;
         return SettingsCard(
-          padding: 0,
+          padding: 8,
           child: row.containsKey('last_played') ? cachedTask(row) : task(row),
         );
       },

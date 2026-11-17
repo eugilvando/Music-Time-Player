@@ -99,10 +99,23 @@ class _LocalSourcesPanelState extends State<LocalSourcesPanel> {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: widget.sync,
-    builder: (context, _) => Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    builder: (context, _) => ExpansionTile(
+      key: const PageStorageKey('sources.local.expanded'),
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsets.only(top: 16),
+      leading: const MtIcon(Icons.folder),
+      title: UiText(
+        'Fontes locais',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      subtitle: Text(
+        uiFormat(
+          context,
+          '${sources.length} fontes neste computador',
+          '${sources.length} sources on this computer',
+        ),
+      ),
       children: [
-        UiText('Fontes locais', style: Theme.of(context).textTheme.titleLarge),
         const UiText('Adicione pastas ou grupos de arquivos deste computador.'),
         if (error != null) UiText(error!),
         if (busy) const LinearProgressIndicator(),
@@ -154,7 +167,7 @@ class _LocalSourcesPanelState extends State<LocalSourcesPanel> {
               ],
             ),
           ),
-        const Divider(height: 40),
+        const SizedBox(height: 8),
       ],
     ),
   );

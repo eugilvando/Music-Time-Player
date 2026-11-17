@@ -129,6 +129,45 @@ class UiText extends StatelessWidget {
 }
 
 const englishLabels = <String, String>{
+  'Abrir download e notas': 'Open download and release notes',
+  'Não foi possível verificar. Confira sua conexão e tente novamente.':
+      'Could not check for updates. Check your connection and try again.',
+  'Você já usa a versão mais recente disponível para este sistema.':
+      'You are using the latest release available for this system.',
+  'Nenhuma versão compatível encontrada.': 'No compatible release found.',
+  'Consulta as releases públicas no GitHub. O download e a instalação são manuais.':
+      'Checks public GitHub releases. Download and installation are manual.',
+  'Verificar atualização': 'Check for updates',
+  'Verificando…': 'Checking…',
+  'Versão indisponível': 'Version unavailable',
+  'Versão e atualizações': 'Version and updates',
+  'Opções das letras': 'Lyrics options',
+  'Como funciona esta fonte': 'How this source works',
+  'Sua fila': 'Your queue',
+  'Ir para a faixa atual': 'Go to current track',
+  'Salvar playlist': 'Save playlist',
+  'Opções da playlist': 'Playlist options',
+  'Solte aqui para adicionar ao final': 'Drop here to append to queue',
+  'Pausado': 'Paused',
+  'Falhou': 'Failed',
+  'Pendente': 'Pending',
+  'Baixando': 'Downloading',
+  'Apenas letras': 'Lyrics only',
+  'Sair da tela inteira': 'Exit full screen',
+  'Sua música, do seu jeito.': 'Your music, your way.',
+  'Licenças, privacidade e informações técnicas':
+      'Licenses, privacy and technical information',
+  'Conta OneDrive conectada': 'OneDrive account connected',
+  'Faixas no catálogo': 'Tracks in catalog',
+  'Faixas processadas': 'Tracks processed',
+  'Com capa': 'With artwork',
+  'Sem capa': 'Without artwork',
+  'Detalhes dos metadados': 'Metadata details',
+  'Tags embutidas': 'Embedded tags',
+  'Metadados do serviço ou catálogo': 'Service or catalog metadata',
+  'Sem artista identificado': 'Without an identified artist',
+  'Sem álbum informado': 'Without an album',
+
   'Atualizar letras': 'Refresh lyrics',
   'Busca online de letras · LRCLIB / lyrics.ovh':
       'Online lyrics fallback · LRCLIB / lyrics.ovh',

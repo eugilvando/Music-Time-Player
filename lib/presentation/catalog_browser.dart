@@ -847,18 +847,37 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     );
   }
 
-  String get viewCategory =>
-      selectedGroup != null &&
-          artistTab == 'albums' &&
-          {'artists', 'albumArtists'}.contains(category)
+  String get viewCategory => selectedGroup != null && category == 'albums'
+      ? 'album_tracks'
+      : selectedGroup != null &&
+            artistTab == 'albums' &&
+            {'artists', 'albumArtists'}.contains(category)
       ? 'albums'
       : category;
   String get view => widget.settings.visualChoice(
     '${viewCategory}_view',
     widget.settings.visualChoice('songs_view', 'compact'),
   );
-  bool get dense =>
-      widget.settings.visualBool('catalog_dense', fallback: false);
+  String get densityKey =>
+      viewCategory == 'album_tracks' ? 'album_tracks_dense' : 'catalog_dense';
+  String get cardSizeKey => viewCategory == 'album_tracks'
+      ? 'album_tracks_card_size'
+      : 'media_card_size';
+  MediaCardSizeScope get cardSizes =>
+      viewCategory != 'album_tracks' && MediaCardSizeScope.of(context) != null
+      ? MediaCardSizeScope.of(context)!
+      : MediaCardSizeScope(
+          value: widget.settings.visualChoice(cardSizeKey, 'Medium'),
+          settings: widget.settings,
+          contextKey: viewCategory,
+          onChanged: (value) =>
+              widget.settings.updateVisual(cardSizeKey, value),
+          child: const SizedBox(),
+        );
+  double get cardHeight =>
+      (cardSizes.compactArtwork + 16) *
+      MediaQuery.textScalerOf(context).scale(1);
+  bool get dense => widget.settings.visualBool(densityKey, fallback: false);
   List<String> get columns =>
       (widget.settings.preferences.getStringList('visual.songs_columns') ??
               ['artist', 'album', 'duration', 'source', 'offline'])
@@ -1288,8 +1307,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       return GridView.builder(
         controller: rootScroll,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
-          mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
+          maxCrossAxisExtent: cardSizes.compactWidth,
+          mainAxisExtent: cardHeight,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -1572,8 +1591,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       return GridView.builder(
         controller: rootScroll,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
-          mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
+          maxCrossAxisExtent: cardSizes.compactWidth,
+          mainAxisExtent: cardHeight,
           mainAxisSpacing: 12,
           crossAxisSpacing: 12,
         ),
@@ -1582,7 +1601,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
       );
     }
     final grid = widget.settings.visualBool('${type}_grid');
-    final size = smallCards ? 120.0 : MediaCardSizeScope.cardWidth(context);
+    final size = smallCards ? 120.0 : cardSizes.gridWidth;
     final scale = MediaQuery.textScalerOf(context).scale(1);
     if (!grid) {
       return ListView.builder(
@@ -1807,9 +1826,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         widget.settings.visualChoice('${type}_view', '') == 'compact_card';
     final grid =
         compact || smallCards || widget.settings.visualBool('${type}_grid');
-    final size = compact || smallCards
-        ? 140.0
-        : MediaCardSizeScope.cardWidth(context);
+    final size = compact || smallCards ? 140.0 : cardSizes.gridWidth;
     Widget tile(int i) {
       final group = values[i];
       if (smallCards) return compactGroup(group, type);
@@ -1918,10 +1935,10 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         ? SliverGrid.builder(
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: smallCards
-                  ? MediaCardSizeScope.horizontalWidth(context)
+                  ? cardSizes.compactWidth
                   : size + 40,
               mainAxisExtent: smallCards
-                  ? MediaCardSizeScope.horizontalHeight(context)
+                  ? cardHeight
                   : size + 90 * MediaQuery.textScalerOf(context).scale(1),
               crossAxisSpacing: 24,
               mainAxisSpacing: 24,
@@ -2006,7 +2023,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                       ),
                     ),
                   SizedBox.square(
-                    dimension: MediaCardSizeScope.horizontalArtwork(context),
+                    dimension: cardSizes.compactArtwork,
                     child: TrackCover(track: t),
                   ),
                   const SizedBox(width: 12),
@@ -2091,8 +2108,8 @@ class CatalogBrowserState extends State<CatalogBrowser> {
     else if (view == 'compact_card')
       SliverGrid.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: MediaCardSizeScope.horizontalWidth(context),
-          mainAxisExtent: MediaCardSizeScope.horizontalHeight(context),
+          maxCrossAxisExtent: cardSizes.compactWidth,
+          mainAxisExtent: cardHeight,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
@@ -2968,7 +2985,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         ? !{'songs', 'favorites', 'offline'}.contains(category)
         : {'artists', 'albumArtists'}.contains(category) &&
               artistTab == 'albums';
-    final cover = MediaCardSizeScope.cardWidth(context);
+    final cover = cardSizes.gridWidth;
     final selectedView = view == 'compact_card'
         ? view
         : collections && widget.settings.visualBool('${viewCategory}_grid')
@@ -3050,6 +3067,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
           ),
           ViewStyleButton(
             key: const ValueKey('catalog.view'),
+            sizeScope: viewCategory == 'album_tracks' ? cardSizes : null,
             value: selectedView,
             actions: {
               'columns': 'Escolher colunas',
@@ -3076,7 +3094,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 return;
               }
               if (value == 'dense') {
-                widget.settings.updateVisual('catalog_dense', !dense);
+                widget.settings.updateVisual(densityKey, !dense);
                 return;
               }
               final grid = value.startsWith('grid:');
@@ -3093,11 +3111,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                 final label = mediaCardSizes.entries
                     .firstWhere((e) => (e.value * 196 - size).abs() < .1)
                     .key;
-                MediaCardSizeScope.change(
-                  widget.settings,
-                  'media_card_size',
-                  label,
-                );
+                MediaCardSizeScope.change(widget.settings, cardSizeKey, label);
                 widget.settings.updateVisual(
                   'catalog_cover_size',
                   double.parse(value.split(':').last),
@@ -3243,14 +3257,14 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         if (i < artistCount) {
           if (i == 0) return heading('Artistas');
           return SizedBox(
-            height: MediaCardSizeScope.horizontalHeight(context),
+            height: cardHeight,
             child: compactGroup(artists[i - 1], 'artists'),
           );
         }
         i -= artistCount;
         if (i == 0) return heading('Álbuns');
         return SizedBox(
-          height: MediaCardSizeScope.horizontalHeight(context),
+          height: cardHeight,
           child: compactGroup(albums[i - 1], 'albums'),
         );
       },
@@ -3312,6 +3326,15 @@ class CatalogBrowserState extends State<CatalogBrowser> {
         : category == 'folders'
         ? folders(values)
         : groups(catalogGroups(values), category);
+    if (viewCategory == 'album_tracks') {
+      body = MediaCardSizeScope(
+        value: cardSizes.value,
+        onChanged: cardSizes.onChanged,
+        settings: widget.settings,
+        contextKey: viewCategory,
+        child: body,
+      );
+    }
     if (alphabetEnabled) {
       final names = paged
           ? pageTracks.map((t) => t.title).toList()

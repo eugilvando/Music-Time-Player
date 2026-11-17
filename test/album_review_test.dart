@@ -17,6 +17,8 @@ import 'package:music_time/offline/download_manager.dart';
 import 'package:music_time/settings/app_settings.dart';
 import 'package:music_time/sources/provider_connections.dart';
 
+import 'package:music_time/presentation/view_style_selector.dart';
+
 import 'catalog_widget_test.dart' show drainCatalog;
 
 void main() {
@@ -104,6 +106,24 @@ void main() {
       );
       state.openTrackCollection(tracks.first, true);
       await tester.pump();
+      await settings.updateVisual('albums_view', 'grid');
+      await settings.updateVisual('albums_grid', true);
+      expect(state.viewCategory, 'album_tracks');
+      final organizer = tester.widget<ViewStyleButton>(
+        find.byKey(const ValueKey('catalog.view')),
+      );
+      organizer.onChanged('detailed');
+      organizer.sizeScope!.onChanged('Extra Large');
+      await tester.pump();
+      expect(settings.visualChoice('album_tracks_view', ''), 'detailed');
+      expect(settings.visualChoice('albums_view', ''), 'grid');
+      expect(settings.visualBool('albums_grid'), isTrue);
+      expect(
+        settings.visualChoice('album_tracks_card_size', ''),
+        'Extra Large',
+      );
+      expect(settings.visualChoice('media_card_size', 'Medium'), 'Medium');
+
       await tester.runAsync(
         () => store.setUserMetadata(
           ['a', 'b'],

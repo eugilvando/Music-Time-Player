@@ -1,5 +1,7 @@
 import 'support/flutter_sdk.dart';
 
+import 'package:package_info_plus/package_info_plus.dart';
+
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -33,6 +35,13 @@ void main() {
       });
       MediaKit.ensureInitialized(
         libmpv: Platform.environment['MUSIC_TIME_LIBMPV'],
+      );
+      PackageInfo.setMockInitialValues(
+        appName: 'Music Time',
+        packageName: 'music_time',
+        version: '3.0.7',
+        buildNumber: '72',
+        buildSignature: '',
       );
       SharedPreferences.setMockInitialValues({});
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -141,6 +150,7 @@ void main() {
       await settle();
       for (final section in [
         'library',
+        'songs',
         'artists',
         'albums',
         'favorites',
@@ -156,7 +166,7 @@ void main() {
         );
         expect(identical(player, state.controller.player), true);
         await capture(section);
-        if (section == 'library') {
+        if (section == 'songs') {
           await tester.tap(
             find.byKey(const ValueKey('catalog.controls.toggle')),
           );

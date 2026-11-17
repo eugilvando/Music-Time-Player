@@ -17,7 +17,9 @@ class LyricsView extends StatefulWidget {
     required this.controller,
     required this.settings,
     this.loader,
+    this.immersive = false,
   });
+  final bool immersive;
   final PlayerController controller;
   final AppSettings settings;
   final Future<LyricsDocument?> Function(Track, bool)? loader;
@@ -78,10 +80,8 @@ class _LyricsViewState extends State<LyricsView> {
     if (index < 0) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !scroll.hasClients) return;
-      final target = (index * extent - height * .30).clamp(
-        0.0,
-        scroll.position.maxScrollExtent,
-      );
+      final target = (index * extent - (widget.immersive ? 0 : height * .30))
+          .clamp(0.0, scroll.position.maxScrollExtent);
       if (widget.settings.visualBool('reduce_motion', fallback: false) ||
           MediaQuery.disableAnimationsOf(context)) {
         scroll.jumpTo(target);
@@ -147,18 +147,60 @@ class _LyricsViewState extends State<LyricsView> {
         final active = lyrics.activeIndex(position, adjustment: offset);
         return Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (lyrics.source != null) Text('Lyrics · ${lyrics.source}'),
-                IconButton(
-                  tooltip: ui(context, 'Atualizar letras'),
-                  onPressed: reload,
-                  icon: const MtIcon(Icons.refresh),
+            if (widget.immersive)
+              Align(
+                alignment: Alignment.centerRight,
+                child: PopupMenuButton<String>(
+                  tooltip: ui(context, 'Opções das letras'),
+                  icon: const MtIcon(Icons.more_horiz),
+                  onSelected: (action) {
+                    if (action == 'refresh') {
+                      reload();
+                      return;
+                    }
+                    widget.settings.setLyricsOffset(
+                      widget.controller.current!.id,
+                      action == 'reset'
+                          ? 0
+                          : offset.inMilliseconds +
+                                (action == 'earlier' ? -250 : 250),
+                    );
+                  },
+                  itemBuilder: (_) => [
+                    const PopupMenuItem(
+                      value: 'refresh',
+                      child: UiText('Atualizar letras'),
+                    ),
+                    if (lyrics.synchronized) ...[
+                      const PopupMenuItem(
+                        value: 'earlier',
+                        child: UiText('Adiantar letra em 250 ms'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'later',
+                        child: UiText('Atrasar letra em 250 ms'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'reset',
+                        child: UiText('Zerar ajuste'),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ),
-            if (lyrics.synchronized)
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (lyrics.source != null) Text('Lyrics · ${lyrics.source}'),
+                  IconButton(
+                    tooltip: ui(context, 'Atualizar letras'),
+                    onPressed: reload,
+                    icon: const MtIcon(Icons.refresh),
+                  ),
+                ],
+              ),
+            if (!widget.immersive && lyrics.synchronized)
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 4,
@@ -189,7 +231,7 @@ class _LyricsViewState extends State<LyricsView> {
                   ),
                 ],
               )
-            else
+            else if (!widget.immersive)
               const Padding(
                 padding: EdgeInsets.all(8),
                 child: UiText('Letra sem sincronização'),
@@ -213,8 +255,8 @@ class _LyricsViewState extends State<LyricsView> {
                                 'lyrics_spacing',
                                 1.25,
                               ) *
-                              2 +
-                          48) *
+                              (widget.immersive ? 1.5 : 2) +
+                          (widget.immersive ? 24 : 48)) *
                       MediaQuery.textScalerOf(context).scale(1);
                   if (active != lastActive &&
                       !exploring &&
@@ -232,6 +274,11 @@ class _LyricsViewState extends State<LyricsView> {
                     },
                     child: ListView.builder(
                       controller: scroll,
+                      padding: widget.immersive
+                          ? EdgeInsets.symmetric(
+                              vertical: constraints.maxHeight * .35,
+                            )
+                          : null,
                       itemExtent: lyrics.synchronized ? extent : null,
                       itemCount: lyrics.lines.length,
                       itemBuilder: (context, index) {
@@ -269,10 +316,15 @@ class _LyricsViewState extends State<LyricsView> {
                                       .clamp(2.0, 24.0),
                             ),
                             child: Align(
-                              alignment: Alignment.centerLeft,
+                              alignment: widget.immersive
+                                  ? Alignment.center
+                                  : Alignment.centerLeft,
                               child: line.words.isEmpty
                                   ? Text(
                                       line.text.isEmpty ? '♪' : line.text,
+                                      textAlign: widget.immersive
+                                          ? TextAlign.center
+                                          : TextAlign.start,
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -322,6 +374,9 @@ class _LyricsViewState extends State<LyricsView> {
                                             ),
                                         ],
                                       ),
+                                      textAlign: widget.immersive
+                                          ? TextAlign.center
+                                          : TextAlign.start,
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(

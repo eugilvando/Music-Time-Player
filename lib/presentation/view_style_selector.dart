@@ -14,7 +14,9 @@ class ViewStyleButton extends StatelessWidget {
     required this.families,
     required this.onChanged,
     this.actions = const {},
+    this.sizeScope,
   });
+  final MediaCardSizeScope? sizeScope;
   final String value;
   final Map<String, Map<String, String>> families;
   final Map<String, String> actions;
@@ -24,7 +26,7 @@ class ViewStyleButton extends StatelessWidget {
     tooltip: ui(context, 'Visualização'),
     icon: const MtIcon(Icons.view_module_outlined),
     onPressed: () async {
-      final sizes = MediaCardSizeScope.of(context);
+      final sizes = sizeScope ?? MediaCardSizeScope.of(context);
       final result = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(

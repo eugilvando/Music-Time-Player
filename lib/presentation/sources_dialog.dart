@@ -276,13 +276,16 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         UiText(
-          'Conecte seu OneDrive pessoal',
+          p.microsoftConnected
+              ? 'Conta OneDrive conectada'
+              : 'Conecte seu OneDrive pessoal',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 12),
-        const UiText(
-          'Entre na sua conta Microsoft pelo navegador e autorize o acesso às músicas. Depois, escolha a pasta musical. A conexão será concluída automaticamente no Music Time.',
-        ),
+        if (!p.microsoftConnected)
+          const UiText(
+            'Entre na sua conta Microsoft pelo navegador e autorize o acesso às músicas. Depois, escolha a pasta musical. A conexão será concluída automaticamente no Music Time.',
+          ),
         if (!p.microsoftConfigured)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
@@ -369,7 +372,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
               ? 'Aguardando autorização no navegador…'
               : 'OneDrive desconectado',
         ),
-        const Divider(height: 32),
+        const Divider(height: 40),
         UiText('Pasta musical', style: Theme.of(context).textTheme.titleMedium),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
@@ -385,7 +388,9 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                   widget.onImported();
                 }),
         ),
-        Text(uiSourceFolder(context, p.selectedFolderLabel)),
+        const SizedBox(height: 12),
+        SelectableText(uiSourceFolder(context, p.selectedFolderLabel)),
+        const SizedBox(height: 16),
         Wrap(
           spacing: 8,
           children: [
@@ -424,11 +429,18 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             Text(syncDate(p.microsoftCheckedAt!.toIso8601String())),
           const SizedBox(height: 12),
         ],
-        const UiText(
-          'Desconectar remove apenas a sessão desta conta. Catálogo e downloads locais são preservados.',
-        ),
-        const UiText(
-          'Inclui todas as subpastas. Lê tags e capas MP3/FLAC em trechos limitados da nuvem, sem baixar músicas inteiras.',
+        const SizedBox(height: 16),
+        const ExpansionTile(
+          title: UiText('Como funciona esta fonte'),
+          children: [
+            UiText(
+              'Desconectar remove apenas a sessão desta conta. Catálogo e downloads locais são preservados.',
+            ),
+            SizedBox(height: 12),
+            UiText(
+              'Inclui todas as subpastas. Lê tags e capas MP3/FLAC em trechos limitados da nuvem, sem baixar músicas inteiras.',
+            ),
+          ],
         ),
         if (p.syncingMicrosoft) ...[
           const LinearProgressIndicator(),
@@ -468,46 +480,85 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             'Sincronização cancelada. Algumas páginas podem ter sido catalogadas; execute novamente para concluir.',
           ),
         if (p.syncSummary case final summary?) ...[
-          const SizedBox(height: 12),
+          const Divider(height: 40),
           Text(
             uiFormat(
               context,
-              'Última sincronização concluída — ${summary['folder']}',
-              'Last completed synchronization — ${summary['folder']}',
+              'Última sincronização concluída',
+              'Last completed synchronization',
             ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
-          Text(
-            uiFormat(
-              context,
-              '${summary['total']} músicas disponíveis no catálogo; ${summary['processed']} processadas nessa sincronização.',
-              '${summary['total']} tracks available in the catalog; ${summary['processed']} processed in this synchronization.',
-            ),
+          const SizedBox(height: 8),
+          Text('${summary['folder']} · ${syncDate(summary['completedAt'])}'),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
+              for (final entry in <String, Object?>{
+                'Faixas no catálogo': summary['total'],
+                'Faixas processadas': summary['processed'],
+                'Com capa': summary['covers'],
+                'Sem capa': summary['covers'] is int
+                    ? (summary['total'] as int) - (summary['covers'] as int)
+                    : null,
+              }.entries)
+                if (entry.value != null)
+                  SizedBox(
+                    width: 180,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${entry.value}',
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primary,
+                                  ),
+                            ),
+                            const SizedBox(height: 8),
+                            UiText(entry.key),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+            ],
           ),
-          Text(syncDate(summary['completedAt'])),
-          if (summary['covers'] is int)
-            Text(
-              uiFormat(
-                context,
-                '${summary['covers']} músicas com capa; ${(summary['total'] as int) - (summary['covers'] as int)} sem capa disponibilizada.',
-                '${summary['covers']} tracks with artwork; ${(summary['total'] as int) - (summary['covers'] as int)} without available artwork.',
+          const SizedBox(height: 16),
+          ExpansionTile(
+            title: const UiText('Detalhes dos metadados'),
+            children: [
+              ListTile(
+                title: const UiText('Tags embutidas'),
+                trailing: Text('${summary['tagsRead'] ?? '—'}'),
               ),
-            ),
-          if (summary['tagsRead'] is int)
-            Text(
-              uiFormat(
-                context,
-                '${summary['tagsRead']} faixas com tags embutidas lidas ou reutilizadas; ${summary['tagsSkipped']} usando informações do serviço ou do catálogo.',
-                '${summary['tagsRead']} tracks with embedded tags read or reused; ${summary['tagsSkipped']} using service or catalog metadata.',
+              ListTile(
+                title: const UiText('Metadados do serviço ou catálogo'),
+                trailing: Text('${summary['tagsSkipped'] ?? '—'}'),
               ),
-            ),
-          if (summary['unknownArtists'] is int)
-            Text(
-              uiFormat(
-                context,
-                '${summary['unknownArtists']} sem artista identificado; ${summary['unknownAlbums']} sem álbum informado.',
-                '${summary['unknownArtists']} without an identified artist; ${summary['unknownAlbums']} without an album.',
+              ListTile(
+                title: const UiText('Sem artista identificado'),
+                trailing: Text('${summary['unknownArtists'] ?? '—'}'),
               ),
-            ),
+              ListTile(
+                title: const UiText('Sem álbum informado'),
+                trailing: Text('${summary['unknownAlbums'] ?? '—'}'),
+              ),
+            ],
+          ),
         ],
         const SizedBox(height: 24),
       ],
@@ -648,7 +699,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
           },
         ),
         UiText(p.favoriteSync.status),
-        const Divider(height: 32),
+        const Divider(height: 40),
         UiText(
           'Dados do perfil',
           style: Theme.of(context).textTheme.titleMedium,
@@ -662,7 +713,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             labelText: ui(context, 'Usuário Last.fm'),
           ),
         ),
-        const Divider(height: 32),
+        const Divider(height: 40),
         UiText(
           'Sincronização e índices',
           style: Theme.of(context).textTheme.titleMedium
@@ -741,7 +792,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                   if (p.error == null) await p.profileIndex.refresh();
                 },
         ),
-        const Divider(height: 32),
+        const Divider(height: 40),
         UiText(
           'Importação',
           style: Theme.of(context).textTheme.titleMedium
@@ -760,7 +811,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             ),
           ],
         ),
-        const Divider(height: 32),
+        const Divider(height: 40),
         UiText(
           'Scrobbling',
           style: Theme.of(context).textTheme.titleMedium
@@ -789,7 +840,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                   await p.preferences.setBool('lastfm.scrobbling', value);
                 }),
         ),
-        const Divider(height: 32),
+        const Divider(height: 40),
         UiText(
           'Pendências',
           style: Theme.of(context).textTheme.titleMedium
@@ -808,7 +859,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
             ),
           ],
         ),
-        const Divider(height: 32),
+        const Divider(height: 40),
         ExpansionTile(
           title: const UiText('Avançado'),
           childrenPadding: const EdgeInsets.all(16),
@@ -1036,7 +1087,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                         initiallyExpanded: false,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(24),
                             child: ProviderSettingsPage(
                               providers: source,
                               onImported: widget.onImported,

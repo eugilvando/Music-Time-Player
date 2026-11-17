@@ -315,11 +315,8 @@ void main() {
       await tester.tap(find.text('Avançado'));
       await tester.pumpAndSettle();
       expect(find.text('Client ID público do Music Time'), findsOneWidget);
-      expect(
-        find.text('Última sincronização concluída — Música'),
-        findsOneWidget,
-      );
-      expect(find.text('13/10/2026 às 12:00'), findsOneWidget);
+      expect(find.text('Última sincronização concluída'), findsOneWidget);
+      expect(find.text('Música · 13/10/2026 às 12:00'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
       providers.dispose();
       await tester.runAsync(store.close);

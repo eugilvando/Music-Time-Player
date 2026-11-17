@@ -8,6 +8,7 @@ import '../application/update_check.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'settings_card.dart';
+import 'design_icon.dart';
 import 'ui_language.dart';
 
 const musicTimeRepository = 'https://github.com/eugilvando/Music-Time-Player';
@@ -24,7 +25,7 @@ class _MusicTimeAboutState extends State<MusicTimeAbout> {
   String? result;
   AppRelease? update;
   String get installedVersion => info == null
-      ? 'Versão indisponível'
+      ? ui(context, 'Versão indisponível')
       : '${info!.version}${info!.buildNumber.isEmpty ? '' : '+${info!.buildNumber}'}';
 
   @override
@@ -59,7 +60,11 @@ class _MusicTimeAboutState extends State<MusicTimeAbout> {
           result = 'Nenhuma versão compatível encontrada.';
         } else if (compareVersions(release.version, installed.version) > 0) {
           update = release;
-          result = 'Nova versão disponível: ${release.version}';
+          result = uiFormat(
+            context,
+            'Nova versão disponível: ${release.version}',
+            'New version available: ${release.version}',
+          );
         } else {
           result =
               'Você já usa a versão mais recente disponível para este sistema.';
@@ -102,12 +107,49 @@ class _MusicTimeAboutState extends State<MusicTimeAbout> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Music Time',
-              style: Theme.of(context).textTheme.headlineMedium
+            Row(
+              children: [
+                Image.asset('assets/branding/icon.png', width: 72, height: 72),
+                const SizedBox(width: 20),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Music Time',
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      const UiText('Sua música, do seu jeito.'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const UiText(
+              'Player pessoal para arquivos locais, nuvens e servidores de mídia.',
+            ),
+            const SizedBox(height: 16),
+            const UiText('Design e desenvolvimento: Gilvando Souza'),
+            const SizedBox(height: 8),
+            const UiText(
+              'Projeto pessoal desenvolvido com design engineering e assistência de IA.',
+            ),
+          ],
+        ),
+      ),
+      SettingsCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            UiText(
+              'Versão e atualizações',
+              style: Theme.of(context).textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             SelectableText(installedVersion, key: ValueKey('about.version')),
             const SizedBox(height: 16),
             Wrap(
@@ -135,21 +177,11 @@ class _MusicTimeAboutState extends State<MusicTimeAbout> {
             if (result != null)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Text(result!, semanticsLabel: result),
+                child: UiText(result!),
               ),
             const SizedBox(height: 8),
             const UiText(
               'Consulta as releases públicas no GitHub. O download e a instalação são manuais.',
-            ),
-            const SizedBox(height: 16),
-            const UiText(
-              'Player pessoal para arquivos locais, nuvens e servidores de mídia.',
-            ),
-            const SizedBox(height: 12),
-            const UiText('Design e desenvolvimento: Gilvando Souza'),
-            const SizedBox(height: 8),
-            const UiText(
-              'Projeto pessoal desenvolvido com design engineering e assistência de IA.',
             ),
           ],
         ),
@@ -170,17 +202,20 @@ class _MusicTimeAboutState extends State<MusicTimeAbout> {
               spacing: 12,
               runSpacing: 8,
               children: [
-                OutlinedButton(
+                OutlinedButton.icon(
+                  icon: const MtIcon(Icons.open_in_new, size: 18),
                   onPressed: () => open(context, ''),
-                  child: const UiText('Código no GitHub'),
+                  label: const UiText('Código no GitHub'),
                 ),
-                OutlinedButton(
+                OutlinedButton.icon(
+                  icon: const MtIcon(Icons.open_in_new, size: 18),
                   onPressed: () => open(context, '/releases'),
-                  child: const UiText('Versões e notas'),
+                  label: const UiText('Versões e notas'),
                 ),
-                OutlinedButton(
+                OutlinedButton.icon(
+                  icon: const MtIcon(Icons.open_in_new, size: 18),
                   onPressed: () => open(context, '/issues'),
-                  child: const UiText('Relatar um problema'),
+                  label: const UiText('Relatar um problema'),
                 ),
               ],
             ),
@@ -188,8 +223,8 @@ class _MusicTimeAboutState extends State<MusicTimeAbout> {
         ),
       ),
       SettingsCard(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ExpansionTile(
+          title: const UiText('Licenças, privacidade e informações técnicas'),
           children: [
             const UiText(
               'Licença MIT · componentes de terceiros possuem suas próprias licenças.',

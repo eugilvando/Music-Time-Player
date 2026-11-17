@@ -1,5 +1,6 @@
 import 'library_hub.dart';
-import 'queue_drag_row.dart';
+import 'queue_panel.dart';
+import 'fullscreen_now_playing.dart';
 import '../library/artist_ranking.dart';
 import '../library/insight_artist_templates.dart';
 import '../platform/output_equalizer.dart';
@@ -13,7 +14,6 @@ import '../persistence/backup_file.dart';
 import 'backup_progress.dart';
 import 'design_tokens.dart';
 import '../lyrics/lyrics_view.dart';
-import 'now_playing_artwork.dart';
 import 'exit_confirmation.dart';
 import '../library/catalog.dart' show CatalogGroup;
 import 'global_library_search.dart';
@@ -1352,176 +1352,65 @@ class _LibraryScreenState extends State<LibraryScreen> {
         )
       : queueSidebar(drawer: drawer);
 
-  Widget queueSidebar({bool drawer = false}) => Material(
-    key: const ValueKey("queue.surface"),
-    color: Theme.of(context).colorScheme.surfaceContainerHigh
-        .withValues(alpha: .82),
-    child: SafeArea(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      UiText(
-                        'Fila de reprodução',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      if (controller.queueTitle != null)
-                        Text(
-                          controller.queueTitle!,
-                          key: const ValueKey('queue.context'),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                    ],
-                  ),
-                ),
-                PopupMenuButton<String>(
-                  key: const ValueKey('queue.actions'),
-                  tooltip: ui(context, 'Ações'),
-                  icon: const MtIcon(Icons.more_horiz),
-                  onSelected: (action) async {
-                    if (action == 'save') {
-                      final snapshot = List<Track>.of(controller.queue);
-                      final saved = await saveSelection(snapshot);
-                      if (saved && mounted) await reloadCatalog();
-                    } else if (action == 'clear') {
-                      await controller.clearQueue();
-                      await save();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      key: const ValueKey('queue.save-playlist'),
-                      value: 'save',
-                      enabled: controller.queue.isNotEmpty,
-                      child: const UiText('Save queue as playlist'),
-                    ),
-                    PopupMenuItem(
-                      key: const ValueKey('queue.clear'),
-                      value: 'clear',
-                      enabled:
-                          !controller.opening && controller.queue.isNotEmpty,
-                      child: const UiText('Limpar fila'),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  tooltip: ui(context, 'Fechar fila'),
-                  icon: const MtIcon(Icons.close),
-                  onPressed: () {
-                    if (drawer) {
-                      queueScaffoldKey.currentState?.closeEndDrawer();
-                    } else {
-                      widget.settings.updateVisual('show_queue', false);
-                    }
-                  },
-                ),
-              ],
+  Widget queueSidebar({bool drawer = false, VoidCallback? close}) => QueuePanel(
+    controller: controller,
+    onClose:
+        close ??
+        () {
+          if (drawer) {
+            queueScaffoldKey.currentState?.closeEndDrawer();
+          } else {
+            widget.settings.updateVisual('show_queue', false);
+          }
+        },
+    onSave: save,
+    onSavePlaylist: () async {
+      final saved = await saveSelection(List<Track>.of(controller.queue));
+      if (saved && mounted) await reloadCatalog();
+    },
+    onPlay: (index) =>
+        play(List.of(controller.queue), index, title: controller.queueTitle),
+    trackActions: (track, index) => trackActions(track, queueIndex: index),
+  );
+
+  Future<void> openFullscreen() async {
+    final wasFullscreen =
+        widget.nativeIntegration && await windowManager.isFullScreen();
+    if (!mounted) return;
+    try {
+      if (widget.nativeIntegration && !wasFullscreen) {
+        await windowManager.setFullScreen(true);
+      }
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        useSafeArea: false,
+        barrierDismissible: false,
+        builder: (routeContext) => FullscreenNowPlaying(
+          controller: controller,
+          settings: widget.settings,
+          controls: (refresh) => reviewPlayerBar(onFavoriteChanged: refresh),
+          loadLyrics: libraryLyrics.load,
+          onExit: () => Navigator.pop(routeContext),
+          onQueue: () => showDialog<void>(
+            context: routeContext,
+            builder: (queueContext) => Dialog(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                width: 380,
+                child: queueSidebar(close: () => Navigator.pop(queueContext)),
+              ),
             ),
           ),
-          Expanded(
-            child: controller.queue.isEmpty
-                ? DragTarget<List<Track>>(
-                    onWillAcceptWithDetails: (_) => !controller.opening,
-                    onAcceptWithDetails: (d) async {
-                      await controller.insertTracks(d.data, 0);
-                      await save();
-                    },
-                    builder: (_, over, _) => ColoredBox(
-                      color: over.isEmpty
-                          ? Colors.transparent
-                          : Theme.of(context).colorScheme.primaryContainer,
-                      child: const Center(
-                        child: UiText('Arraste faixas para a fila.'),
-                      ),
-                    ),
-                  )
-                : ReorderableListView.builder(
-                    buildDefaultDragHandles: false,
-                    itemCount: controller.queue.length,
-                    onReorderItem: (oldIndex, newIndex) {
-                      controller.reorderQueue(oldIndex, newIndex);
-                      save();
-                    },
-                    itemBuilder: (context, index) => DragTarget<List<Track>>(
-                      key: ValueKey(controller.queueKeys[index]),
-                      onWillAcceptWithDetails: (_) => !controller.opening,
-                      onAcceptWithDetails: (details) async {
-                        await controller.insertTracks(details.data, index);
-                        await save();
-                      },
-                      builder: (_, over, _) => QueueDragRow(
-                        index: index,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                width: 2,
-                                color: over.isEmpty
-                                    ? Colors.transparent
-                                    : Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                          child: ListTile(
-                            tileColor: index.isOdd
-                                ? Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: .035)
-                                : null,
-                            dense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                            ),
-                            leading: SizedBox.square(
-                              dimension: 32,
-                              child: TrackCover(track: controller.queue[index]),
-                            ),
-                            key: ValueKey(controller.queueKeys[index]),
-                            title: Text(
-                              controller.queue[index].title,
-                              style: Theme.of(context).textTheme.titleSmall,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            subtitle: Text(
-                              '${controller.queue[index].artist}${controller.automaticOrigin(index) == null ? '' : ' · ${ui(context, controller.automaticOrigin(index) == 'flow' ? 'Smart Flow' : 'Fila inteligente')}'}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            selected: index == controller.queueIndex,
-                            onTap: controller.opening
-                                ? null
-                                : () => play(
-                                    List.of(controller.queue),
-                                    index,
-                                    title: controller.queueTitle,
-                                  ),
-                            trailing: Padding(
-                              padding: const EdgeInsets.only(right: 4),
-                              child: trackActions(
-                                controller.queue[index],
-                                queueIndex: index,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-          ),
-        ],
-      ),
-    ),
-  );
+        ),
+      );
+    } finally {
+      if (widget.nativeIntegration && !wasFullscreen) {
+        await windowManager.setFullScreen(false);
+      }
+    }
+  }
+
   @override
   void dispose() {
     widget.store.beforeSourceRemoval = null;
@@ -1966,7 +1855,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     trackActions: trackActions,
   );
 
-  Widget reviewPlayerBar() => PlayerBar(
+  PlayerBar reviewPlayerBar({VoidCallback? onFavoriteChanged}) => PlayerBar(
     onQueueEdited: save,
     availability: TrackAvailabilityButton(
       track: controller.current,
@@ -2002,9 +1891,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     controller: controller,
     settings: widget.settings,
     favorite: favorites.contains(controller.current?.id),
-    onFavorite: () {
+    onFavorite: () async {
       if (controller.current != null) {
-        favorite(controller.current!);
+        await favorite(controller.current!);
+        onFavoriteChanged?.call();
       }
     },
     onDetails: () {
@@ -2303,70 +2193,62 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                           libraryPage(
                                                             category: 'albums',
                                                           ),
-                                                        AppSection.nowPlaying => NowPlayingPage(
-                                                          loadLyrics:
-                                                              libraryLyrics
-                                                                  .load,
-                                                          showLyrics: false,
-                                                          onArtist: () =>
-                                                              controller
-                                                                      .current ==
-                                                                  null
-                                                              ? null
-                                                              : openCollection(
+                                                        AppSection.nowPlaying =>
+                                                          NowPlayingPage(
+                                                            loadLyrics:
+                                                                libraryLyrics
+                                                                    .load,
+                                                            showLyrics: false,
+                                                            onArtist: () =>
+                                                                controller
+                                                                        .current ==
+                                                                    null
+                                                                ? null
+                                                                : openCollection(
+                                                                    controller
+                                                                        .current!,
+                                                                    false,
+                                                                  ),
+                                                            onAlbum: () =>
+                                                                controller
+                                                                        .current ==
+                                                                    null
+                                                                ? null
+                                                                : openCollection(
+                                                                    controller
+                                                                        .current!,
+                                                                    true,
+                                                                  ),
+                                                            controller:
+                                                                controller,
+                                                            settings:
+                                                                widget.settings,
+                                                            favorite: favorites
+                                                                .contains(
+                                                                  controller
+                                                                      .current
+                                                                      ?.id,
+                                                                ),
+                                                            onFavorite: () {
+                                                              if (controller
+                                                                      .current !=
+                                                                  null) {
+                                                                favorite(
                                                                   controller
                                                                       .current!,
-                                                                  false,
-                                                                ),
-                                                          onAlbum: () =>
-                                                              controller
-                                                                      .current ==
-                                                                  null
-                                                              ? null
-                                                              : openCollection(
-                                                                  controller
-                                                                      .current!,
-                                                                  true,
-                                                                ),
-                                                          controller:
-                                                              controller,
-                                                          settings:
-                                                              widget.settings,
-                                                          favorite: favorites
-                                                              .contains(
-                                                                controller
-                                                                    .current
-                                                                    ?.id,
-                                                              ),
-                                                          onFavorite: () {
-                                                            if (controller
-                                                                    .current !=
-                                                                null) {
-                                                              favorite(
-                                                                controller
-                                                                    .current!,
-                                                              );
-                                                            }
-                                                          },
-                                                          onDetails: () {
-                                                            if (controller
-                                                                    .current !=
-                                                                null) {
-                                                              showCurrentActions();
-                                                            }
-                                                          },
-                                                          onFullscreen:
-                                                              widget
-                                                                  .nativeIntegration
-                                                              ? () async {
-                                                                  await windowManager
-                                                                      .setFullScreen(
-                                                                        !await windowManager
-                                                                            .isFullScreen(),
-                                                                      );
-                                                                }
-                                                              : null,
-                                                        ),
+                                                                );
+                                                              }
+                                                            },
+                                                            onDetails: () {
+                                                              if (controller
+                                                                      .current !=
+                                                                  null) {
+                                                                showCurrentActions();
+                                                              }
+                                                            },
+                                                            onFullscreen:
+                                                                openFullscreen,
+                                                          ),
                                                         AppSection.playlists =>
                                                           PlaylistsPage(
                                                             key: ValueKey(
