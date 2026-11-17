@@ -98,7 +98,9 @@ void main() {
     );
     await waitForCatalog(
       tester,
-      () => find.text('1–2 de 2').evaluate().isNotEmpty,
+      () =>
+          !key.currentState!.pageLoading &&
+          key.currentState!.pageTracks.length == 2,
     );
     expect(find.byType(Checkbox), findsNothing);
     final filters = key.currentState!.editFilters();
@@ -112,7 +114,9 @@ void main() {
     await tester.pump();
     await waitForCatalog(
       tester,
-      () => find.text('1–1 de 1').evaluate().isNotEmpty,
+      () =>
+          !key.currentState!.pageLoading &&
+          key.currentState!.pageTracks.length == 1,
     );
     expect(find.text('Presente'), findsOneWidget);
     expect(find.text('Somente nuvem'), findsNothing);

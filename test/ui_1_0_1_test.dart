@@ -506,13 +506,13 @@ void main() {
       await drainCatalog(tester);
       expect(
         tester.widget<LibraryScreen>(find.byType(LibraryScreen)).section,
-        AppSection.library,
+        AppSection.songs,
       );
       expect(
         (state.catalogKey.currentState as CatalogBrowserState).selectedGroup,
         isNotNull,
       );
-      await tester.tap(find.byKey(const ValueKey('navigation.library')));
+      await tester.tap(find.byKey(const ValueKey('navigation.songs')));
       await drainCatalog(tester);
       final catalog = state.catalogKey.currentState as CatalogBrowserState;
       expect(catalog.selectedGroup, isNull);

@@ -259,7 +259,7 @@ void main() {
       await drainCatalog(tester);
       await tester.pumpAndSettle();
       for (final style in ['compact_card', 'compact', 'detailed']) {
-        await settings.updateVisual('albums_view', style);
+        await settings.updateVisual('album_tracks_view', style);
         await drainCatalog(tester);
         await tester.pumpAndSettle();
         expect(find.text('7'), findsOneWidget);

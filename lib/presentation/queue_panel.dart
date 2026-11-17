@@ -205,14 +205,15 @@ class _QueuePanelState extends State<QueuePanel> {
                 padding: const EdgeInsets.fromLTRB(16, 4, 12, 12),
                 child: Row(
                   children: [
-                    TextButton.icon(
-                      onPressed: player.queue.isEmpty
-                          ? null
-                          : widget.onSavePlaylist,
-                      icon: const MtIcon(Icons.playlist_add, size: 20),
-                      label: const UiText('Salvar playlist'),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: player.queue.isEmpty
+                            ? null
+                            : widget.onSavePlaylist,
+                        icon: const MtIcon(Icons.playlist_add, size: 20),
+                        label: const UiText('Salvar playlist'),
+                      ),
                     ),
-                    const Spacer(),
                     PopupMenuButton<String>(
                       key: const ValueKey('queue.actions'),
                       tooltip: ui(context, 'Opções da playlist'),

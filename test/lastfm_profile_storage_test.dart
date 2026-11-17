@@ -88,7 +88,10 @@ void main() {
         300,
         scrollable: find.byType(Scrollable).first,
       );
-      await tester.tap(find.text('Avançado'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Avançado'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Avançado').hitTestable());
       await tester.pumpAndSettle();
       expect(find.text('Obter chave da API Last.fm'), findsOneWidget);
       final button = find.widgetWithText(OutlinedButton, 'Importar favoritos');
