@@ -155,193 +155,242 @@ class NowPlayingPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, constraints) {
-      final selectedStyle =
-          nowPlayingStyles.containsKey(settings.nowPlayingStyle)
-          ? settings.nowPlayingStyle
-          : 'classic';
-      final style = selectedStyle == 'lyrics_only'
-          ? selectedStyle
-          : showLyrics == true
-          ? 'lyrics'
-          : showLyrics == false && selectedStyle == 'lyrics'
-          ? 'classic'
-          : selectedStyle;
-      final wide = constraints.maxWidth >= 740;
-      final artwork = NowPlayingArtwork(
-        style: style,
-        track: controller.current,
-        coverShape: settings.visualChoice('cover_shape', 'rounded'),
-        playing:
-            controller.playing && !controller.buffering && !controller.opening,
-        reduceMotion:
-            settings.visualBool('reduce_motion', fallback: false) ||
-            !settings.visualBool('animations'),
-      );
-      return GestureDetector(
-        onSecondaryTapDown: controller.current == null
-            ? null
-            : (_) => onDetails(),
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    children: [
-                      const Spacer(),
-                      if (onFullscreen != null)
-                        IconButton(
-                          tooltip: ui(context, 'Alternar tela cheia'),
-                          onPressed: onFullscreen,
-                          icon: const MtIcon(Icons.fullscreen),
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: settings,
+    builder: (context, _) => LayoutBuilder(
+      builder: (context, constraints) {
+        final selectedStyle =
+            nowPlayingStyles.containsKey(settings.nowPlayingStyle)
+            ? settings.nowPlayingStyle
+            : 'classic';
+        final content = settings.visualChoice('now_playing_content', '');
+        final style = content == 'lyrics'
+            ? 'lyrics_only'
+            : content == 'cover'
+            ? (selectedStyle == 'lyrics_only' ? 'classic' : selectedStyle)
+            : selectedStyle == 'lyrics_only'
+            ? selectedStyle
+            : showLyrics == true
+            ? 'lyrics'
+            : showLyrics == false && selectedStyle == 'lyrics'
+            ? 'classic'
+            : selectedStyle;
+        final wide = constraints.maxWidth >= 740;
+        final artwork = NowPlayingArtwork(
+          style: style,
+          track: controller.current,
+          coverShape: settings.visualChoice('cover_shape', 'rounded'),
+          playing:
+              controller.playing &&
+              !controller.buffering &&
+              !controller.opening,
+          reduceMotion:
+              settings.visualBool('reduce_motion', fallback: false) ||
+              !settings.visualBool('animations'),
+        );
+        return GestureDetector(
+          onSecondaryTapDown: controller.current == null
+              ? null
+              : (_) => onDetails(),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        const Spacer(),
+                        SegmentedButton<bool>(
+                          key: const ValueKey('nowPlaying.mode'),
+                          showSelectedIcon: false,
+                          segments: [
+                            ButtonSegment(
+                              value: false,
+                              icon: const MtIcon(Icons.album),
+                              label: constraints.maxWidth < 700
+                                  ? null
+                                  : const UiText('Capa'),
+                              tooltip: ui(context, 'Capa'),
+                            ),
+                            ButtonSegment(
+                              value: true,
+                              icon: const MtIcon(Icons.lyrics),
+                              label: constraints.maxWidth < 700
+                                  ? null
+                                  : const UiText('Apenas letras'),
+                              tooltip: ui(context, 'Apenas letras'),
+                            ),
+                          ],
+                          selected: {
+                            style == 'lyrics_only' || style == 'lyrics',
+                          },
+                          onSelectionChanged: (value) => settings.updateVisual(
+                            'now_playing_content',
+                            value.single ? 'lyrics' : 'cover',
+                          ),
                         ),
-                    ],
+                        const SizedBox(width: 8),
+                        if (onFullscreen != null)
+                          IconButton(
+                            tooltip: ui(context, 'Alternar tela cheia'),
+                            onPressed: onFullscreen,
+                            icon: const MtIcon(Icons.fullscreen),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: style == 'lyrics_only'
-                            ? LyricsView(
-                                loader: loadLyrics,
-                                controller: controller,
-                                settings: settings,
-                              )
-                            : style == 'cover_only'
-                            ? LayoutBuilder(
-                                builder: (context, area) {
-                                  final size =
-                                      math.max(
-                                        1.0,
-                                        math.min(
-                                              area.maxWidth,
-                                              area.maxHeight,
-                                            ) -
-                                            48,
-                                      ) *
-                                      coverFraction(
-                                        settings.visualNumber('cover_scale', 1),
-                                      );
-                                  return Center(
-                                    child: SizedBox(
-                                      key: const ValueKey(
-                                        'nowPlaying.sizedCover',
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: style == 'lyrics_only'
+                              ? LyricsView(
+                                  loader: loadLyrics,
+                                  controller: controller,
+                                  settings: settings,
+                                )
+                              : style == 'cover_only'
+                              ? LayoutBuilder(
+                                  builder: (context, area) {
+                                    final size =
+                                        math.max(
+                                          1.0,
+                                          math.min(
+                                                area.maxWidth,
+                                                area.maxHeight,
+                                              ) -
+                                              48,
+                                        ) *
+                                        coverFraction(
+                                          settings.visualNumber(
+                                            'cover_scale',
+                                            1,
+                                          ),
+                                        );
+                                    return Center(
+                                      child: SizedBox(
+                                        key: const ValueKey(
+                                          'nowPlaying.sizedCover',
+                                        ),
+                                        width: size,
+                                        height: size,
+                                        child: artwork,
                                       ),
-                                      width: size,
-                                      height: size,
-                                      child: artwork,
-                                    ),
-                                  );
-                                },
-                              )
-                            : style == 'lyrics'
-                            ? wide
-                                  ? Row(
-                                      children: [
-                                        SizedBox(
-                                          key: const ValueKey(
-                                            'nowPlaying.lyricsInformation',
-                                          ),
-                                          width: constraints.maxWidth * .25,
-                                          child: Center(
-                                            child: SingleChildScrollView(
-                                              padding: const EdgeInsets.all(24),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  FractionallySizedBox(
-                                                    widthFactor: coverFraction(
-                                                      settings.visualNumber(
-                                                        'cover_scale',
-                                                        1,
-                                                      ),
-                                                    ),
-                                                    child: AspectRatio(
-                                                      key: const ValueKey(
-                                                        'nowPlaying.sizedCover',
-                                                      ),
-                                                      aspectRatio: 1,
-                                                      child: artwork,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 16),
-                                                  information(context),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: LyricsView(
-                                            loader: loadLyrics,
-                                            controller: controller,
-                                            settings: settings,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : LyricsView(
-                                      loader: loadLyrics,
-                                      controller: controller,
-                                      settings: settings,
-                                    )
-                            : LayoutBuilder(
-                                builder: (context, space) =>
-                                    SingleChildScrollView(
-                                      child: ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          minHeight: space.maxHeight,
-                                        ),
-                                        child: Center(
-                                          child: ConstrainedBox(
+                                    );
+                                  },
+                                )
+                              : style == 'lyrics'
+                              ? wide
+                                    ? Row(
+                                        children: [
+                                          SizedBox(
                                             key: const ValueKey(
-                                              'nowPlaying.composition',
+                                              'nowPlaying.lyricsInformation',
                                             ),
-                                            constraints: const BoxConstraints(
-                                              maxWidth: 1200,
-                                            ),
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: space.maxWidth < 740
-                                                    ? 24
-                                                    : 48,
-                                                vertical: 24,
+                                            width: constraints.maxWidth * .25,
+                                            child: Center(
+                                              child: SingleChildScrollView(
+                                                padding: const EdgeInsets.all(
+                                                  24,
+                                                ),
+                                                child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    FractionallySizedBox(
+                                                      widthFactor:
+                                                          coverFraction(
+                                                            settings
+                                                                .visualNumber(
+                                                                  'cover_scale',
+                                                                  1,
+                                                                ),
+                                                          ),
+                                                      child: AspectRatio(
+                                                        key: const ValueKey(
+                                                          'nowPlaying.sizedCover',
+                                                        ),
+                                                        aspectRatio: 1,
+                                                        child: artwork,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    information(context),
+                                                  ],
+                                                ),
                                               ),
-                                              child: composition(
-                                                context,
-                                                artwork,
-                                                (space.maxWidth -
-                                                        (space.maxWidth < 740
-                                                            ? 48
-                                                            : 96))
-                                                    .clamp(120.0, 1120.0),
-                                                math.max(
-                                                  120,
-                                                  space.maxHeight - 48,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: LyricsView(
+                                              loader: loadLyrics,
+                                              controller: controller,
+                                              settings: settings,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    : LyricsView(
+                                        loader: loadLyrics,
+                                        controller: controller,
+                                        settings: settings,
+                                      )
+                              : LayoutBuilder(
+                                  builder: (context, space) =>
+                                      SingleChildScrollView(
+                                        child: ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            minHeight: space.maxHeight,
+                                          ),
+                                          child: Center(
+                                            child: ConstrainedBox(
+                                              key: const ValueKey(
+                                                'nowPlaying.composition',
+                                              ),
+                                              constraints: const BoxConstraints(
+                                                maxWidth: 1200,
+                                              ),
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal:
+                                                      space.maxWidth < 740
+                                                      ? 24
+                                                      : 48,
+                                                  vertical: 24,
+                                                ),
+                                                child: composition(
+                                                  context,
+                                                  artwork,
+                                                  (space.maxWidth -
+                                                          (space.maxWidth < 740
+                                                              ? 48
+                                                              : 96))
+                                                      .clamp(120.0, 1120.0),
+                                                  math.max(
+                                                    120,
+                                                    space.maxHeight - 48,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                              ),
-                      ),
-                    ],
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    },
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    ),
   );
 }

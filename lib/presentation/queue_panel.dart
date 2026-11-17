@@ -154,8 +154,9 @@ class _QueuePanelState extends State<QueuePanel> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
                 child: Row(
+                  key: const ValueKey('queue.toolbar'),
                   children: [
                     IconButton(
                       key: const ValueKey('queue.current'),
@@ -193,25 +194,21 @@ class _QueuePanelState extends State<QueuePanel> {
                       },
                       icon: const MtIcon(Icons.shuffle),
                     ),
-                    const Spacer(),
-                    Text(
-                      '${player.queue.length}',
-                      style: Theme.of(context).textTheme.labelLarge,
+                    IconButton(
+                      key: const ValueKey('queue.save'),
+                      tooltip: ui(context, 'Salvar playlist'),
+                      onPressed: player.queue.isEmpty
+                          ? null
+                          : widget.onSavePlaylist,
+                      icon: const MtIcon(Icons.playlist_add),
                     ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 12, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextButton.icon(
-                        onPressed: player.queue.isEmpty
-                            ? null
-                            : widget.onSavePlaylist,
-                        icon: const MtIcon(Icons.playlist_add, size: 20),
-                        label: const UiText('Salvar playlist'),
+                    const Spacer(),
+                    Flexible(
+                      child: Text(
+                        '${player.queue.length}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelLarge,
                       ),
                     ),
                     PopupMenuButton<String>(

@@ -155,8 +155,14 @@ class AppSettings extends ChangeNotifier {
   int lyricsOffset(String trackId) =>
       preferences.getInt('lyrics.offset.$trackId') ?? 0;
 
-  Future<void> updateVisual(String key, Object value) =>
-      persist('visual.$key', value);
+  Future<void> updateVisual(String key, Object value) async {
+    if (key == 'style') {
+      await persist('visual.now_playing_content', '');
+      await persist('visual.fullscreen_lyrics', false);
+    }
+    await persist('visual.$key', value);
+  }
+
   int artistSelectionSize({bool radio = false}) => visualNumber(
     radio ? 'artist_radio_size' : 'artist_mix_size',
     40,
@@ -276,6 +282,8 @@ class AppSettings extends ChangeNotifier {
 
   Future<void> resetNowPlaying() => resetVisualKeys({
     'style',
+    'now_playing_content',
+    'fullscreen_lyrics',
     'cover_shape',
     'cover_position',
     'cover_scale',
@@ -302,6 +310,8 @@ class AppSettings extends ChangeNotifier {
     'primary_font_family',
     'secondary_font_family',
     'style',
+    'now_playing_content',
+    'fullscreen_lyrics',
     'cover_shape',
     'cover_position',
     'cover_scale',

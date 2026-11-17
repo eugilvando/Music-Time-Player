@@ -34,10 +34,13 @@ class FullscreenNowPlaying extends StatefulWidget {
 }
 
 class _FullscreenNowPlayingState extends State<FullscreenNowPlaying> {
-  late bool lyrics = widget.settings.visualBool(
-    'fullscreen_lyrics',
-    fallback: false,
-  );
+  bool get lyrics {
+    final content = widget.settings.visualChoice('now_playing_content', '');
+    if (content.isNotEmpty) return content == 'lyrics';
+    return widget.settings.visualBool('fullscreen_lyrics', fallback: false) ||
+        widget.settings.nowPlayingStyle == 'lyrics_only';
+  }
+
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: Listenable.merge([widget.controller, widget.settings]),
@@ -194,10 +197,9 @@ class _FullscreenNowPlayingState extends State<FullscreenNowPlaying> {
                                     ],
                                     selected: {lyrics},
                                     onSelectionChanged: (value) {
-                                      setState(() => lyrics = value.single);
                                       widget.settings.updateVisual(
-                                        'fullscreen_lyrics',
-                                        lyrics,
+                                        'now_playing_content',
+                                        value.single ? 'lyrics' : 'cover',
                                       );
                                     },
                                   ),
