@@ -24,11 +24,14 @@ try {
     # Deploy portable native-asset references instead of build-machine paths.
     $nativeManifest = Join-Path $bundle 'data/flutter_assets/NativeAssetsManifest.json'
     Copy-Item -LiteralPath $nativeManifest -Destination (Join-Path $bundle 'native_assets.json') -Force
+    $previousPath = $env:PATH
     $previousLibmpv = [Environment]::GetEnvironmentVariable('MUSIC_TIME_LIBMPV', 'Process')
     try {
         $env:MUSIC_TIME_LIBMPV = Join-Path $bundle 'libmpv-2.dll'
+        $env:PATH = $bundle + ';' + $env:PATH
         Invoke-CheckedFlutter @('test', '--concurrency=1')
     } finally {
+        $env:PATH = $previousPath
         [Environment]::SetEnvironmentVariable('MUSIC_TIME_LIBMPV', $previousLibmpv, 'Process')
     }
     & (Join-Path $PSScriptRoot 'test-windows-integration.ps1') -Executable (Join-Path $bundle 'music_time.exe')

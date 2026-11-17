@@ -1,26 +1,25 @@
 {
+  "version": "3.0.7+72",
   "platform": "Ubuntu Desktop 24.04 amd64",
-  "commit": "7dfdb6ce644089f8d3b599a87dbfe81d780707e4",
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/42714570125",
+  "sourceCommit": "8bd514453055304ea37df351e2ef751ad7b55069",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44155719366",
+  "readyToPublish": true,
   "experimental": false,
-  "debianVersion": "3.0.3-0ubuntu1",
-  "limits": "Final Ubuntu release requested by owner. Real VM/audio/cloud acceptance remains pending. Existing package identifier retained for upgrades.",
-  "checks": {
-    "debInstallation": "passed using apt in Ubuntu CI",
-    "linuxReleaseBuild": "passed",
-    "targetedTests": 201,
-    "analysis": "passed",
-    "renderer": "Impeller disabled; compatibility uses Mesa CPU GL and X11",
-    "binaries": "x64 ELF",
-    "graphicalLaunch": "passed in compatibility and software modes; six screenshots inspected",
-    "visualReview": "passed; six screenshots inspected",
-    "mpris": "passed; native metadata, play/pause, hidden window, Raise and Quit",
-    "mprisTests": "passed; real D-Bus session"
-  },
-  "version": "3.0.3+68",
+  "debianVersion": "3.0.7-0ubuntu1",
   "installer": {
-    "sha256": "ff7478ad33d86b5bf298496c56b5ba4abf592d22c87d80539c03407deb4d9234",
-    "file": "music-time-preview_3.0.3-0ubuntu1_amd64.deb",
-    "bytes": 12516662
-  }
+    "file": "music-time-preview_3.0.7-0ubuntu1_amd64.deb",
+    "bytes": 12565422,
+    "sha256": "44c500d00a8da011ccf519a04dc7214656c2728f74f95e78571a3f0781c78392"
+  },
+  "checks": {
+    "analysis": "passed",
+    "targetedTests": "passed; catalog, UI, audio, queue and backup regressions",
+    "mprisTests": "passed; real D-Bus session",
+    "linuxReleaseBuild": "passed",
+    "graphicalLaunch": "passed in compatibility and software modes under Xvfb",
+    "mpris": "passed; metadata, play/pause, hidden window, Raise and Quit",
+    "debInstallation": "passed using apt in Ubuntu CI",
+    "desktopIntegration": "desktop entry and installed icon validated"
+  },
+  "limits": "Automated Ubuntu validation; acceptance in a real VM/partition with user audio devices remains pending. Windows-only packaging changed after this Linux source commit; Linux app sources match."
 }

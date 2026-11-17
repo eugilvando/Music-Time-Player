@@ -1,6 +1,6 @@
 # Music Time 3.0.7 — Ubuntu
 
-Pacote final para Ubuntu Desktop 24.04 amd64. Inclui o mesmo conjunto de funcionalidades da [versão 3.0.7](release-3.0.7.md).
+Pacote final para Ubuntu Desktop 24.04 amd64. Inclui o mesmo conjunto de funcionalidades da [versão 3.0.7](https://github.com/eugilvando/Music-Time-Player/blob/main/docs/release-3.0.7.md).
 
 ```bash
 sudo apt install ./music-time-preview_3.0.7-0ubuntu1_amd64.deb

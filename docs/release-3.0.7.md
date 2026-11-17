@@ -9,6 +9,8 @@
 - Faixa atual com fundo, borda e texto em destaque. Arrastar faixas ou álbuns permite soltar depois da última faixa, inclusive no espaço vazio abaixo da lista.
 - Visualização, tamanho e densidade das faixas dentro de um álbum são independentes das miniaturas de álbuns no artista e no catálogo.
 
+- O instalador Windows inclui a dependência Vulkan do motor de áudio, evitando depender da instalação prévia pelos drivers gráficos.
+
 ## Configurações
 
 - Espaçamentos internos padronizados nos cards, listas e seções expansíveis das Configurações.
