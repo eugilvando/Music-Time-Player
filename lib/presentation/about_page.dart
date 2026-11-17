@@ -1,14 +1,80 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+import '../application/update_check.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import 'settings_card.dart';
 import 'ui_language.dart';
 
-const musicTimeVersion = '3.0.3+68';
 const musicTimeRepository = 'https://github.com/eugilvando/Music-Time-Player';
 
-class MusicTimeAbout extends StatelessWidget {
+class MusicTimeAbout extends StatefulWidget {
   const MusicTimeAbout({super.key});
+  @override
+  State<MusicTimeAbout> createState() => _MusicTimeAboutState();
+}
+
+class _MusicTimeAboutState extends State<MusicTimeAbout> {
+  PackageInfo? info;
+  bool checking = false;
+  String? result;
+  AppRelease? update;
+  String get installedVersion => info == null
+      ? 'Versão indisponível'
+      : '${info!.version}${info!.buildNumber.isEmpty ? '' : '+${info!.buildNumber}'}';
+
+  @override
+  void initState() {
+    super.initState();
+    loadVersion();
+  }
+
+  Future<void> loadVersion() async {
+    try {
+      final value = await PackageInfo.fromPlatform();
+      if (mounted) setState(() => info = value);
+    } catch (_) {
+      // Do not display a guessed or hardcoded version.
+    }
+  }
+
+  Future<void> check() async {
+    if (checking) return;
+    setState(() {
+      checking = true;
+      result = null;
+      update = null;
+    });
+    try {
+      final installed = info ?? await PackageInfo.fromPlatform();
+      final release = await checkForUpdate(Platform.operatingSystem);
+      if (!mounted) return;
+      setState(() {
+        info = installed;
+        if (release == null) {
+          result = 'Nenhuma versão compatível encontrada.';
+        } else if (compareVersions(release.version, installed.version) > 0) {
+          update = release;
+          result = 'Nova versão disponível: ${release.version}';
+        } else {
+          result =
+              'Você já usa a versão mais recente disponível para este sistema.';
+        }
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => result = 'Não foi possível verificar. Confira sua conexão e tente novamente.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => checking = false);
+    }
+  }
 
   Future<void> open(BuildContext context, String path) async {
     try {
@@ -42,9 +108,38 @@ class MusicTimeAbout extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const SelectableText(
-              musicTimeVersion,
-              key: ValueKey('about.version'),
+            SelectableText(installedVersion, key: ValueKey('about.version')),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                OutlinedButton(
+                  onPressed: checking ? null : check,
+                  child: UiText(
+                    checking ? 'Verificando…' : 'Verificar atualização',
+                  ),
+                ),
+                if (update != null)
+                  FilledButton(
+                    onPressed: () => open(
+                      context,
+                      update!.page.toString().substring(
+                        musicTimeRepository.length,
+                      ),
+                    ),
+                    child: const UiText('Abrir download e notas'),
+                  ),
+              ],
+            ),
+            if (result != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(result!, semanticsLabel: result),
+              ),
+            const SizedBox(height: 8),
+            const UiText(
+              'Consulta as releases públicas no GitHub. O download e a instalação são manuais.',
             ),
             const SizedBox(height: 16),
             const UiText(
@@ -124,7 +219,7 @@ class MusicTimeAbout extends StatelessWidget {
                   onPressed: () => showLicensePage(
                     context: context,
                     applicationName: 'Music Time',
-                    applicationVersion: musicTimeVersion,
+                    applicationVersion: installedVersion,
                   ),
                   child: const UiText('Licenças de terceiros'),
                 ),

@@ -96,7 +96,15 @@ class _LyricsViewState extends State<LyricsView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: Listenable.merge([
+      widget.controller,
+      widget.controller.progress,
+    ]),
+    builder: (context, _) => buildLyrics(context),
+  );
+
+  Widget buildLyrics(BuildContext context) {
     updateTrack();
     if (document == null) {
       return const Center(

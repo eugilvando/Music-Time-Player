@@ -1,7 +1,7 @@
 name: music_time
 description: Personal music player with local, cloud and media server sources.
 publish_to: none
-version: 3.0.5+70
+version: 3.0.6+71
 environment:
   sdk: '>=3.13.0 <4.0.0'
 dependencies:
@@ -31,6 +31,7 @@ dependencies:
   flutter_media_session: ^3.0.9
   flutter_svg: ^2.3.0
   dbus: ^0.8.0
+  package_info_plus: ^10.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

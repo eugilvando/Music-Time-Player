@@ -133,26 +133,28 @@ class _NowPlayingArtworkState extends State<NowPlayingArtwork>
 
   Widget disc({required double size, bool label = true}) => SizedBox.square(
     dimension: size,
-    child: RotationTransition(
-      turns: rotation,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          const Positioned.fill(child: CustomPaint(painter: VinylPainter())),
-          if (label)
-            SizedBox.square(
-              dimension: size * .31,
-              child: TrackCover(track: widget.track, circular: true),
+    child: RepaintBoundary(
+      child: RotationTransition(
+        turns: rotation,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Positioned.fill(child: CustomPaint(painter: VinylPainter())),
+            if (label)
+              SizedBox.square(
+                dimension: size * .31,
+                child: TrackCover(track: widget.track, circular: true),
+              ),
+            Container(
+              width: size * .035,
+              height: size * .035,
+              decoration: const BoxDecoration(
+                color: Color(0xff111314),
+                shape: BoxShape.circle,
+              ),
             ),
-          Container(
-            width: size * .035,
-            height: size * .035,
-            decoration: const BoxDecoration(
-              color: Color(0xff111314),
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

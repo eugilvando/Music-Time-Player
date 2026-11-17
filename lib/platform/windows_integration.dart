@@ -59,6 +59,7 @@ class WindowsIntegration with WindowListener {
     resume: () {
       if (_mediaReleased) {
         controller.addListener(changed);
+        controller.progress.addListener(progressChanged);
         _mediaReleased = false;
         if (Platform.isWindows) {
           unawaited(session.activate().catchError((Object _) {}));
@@ -73,6 +74,16 @@ class WindowsIntegration with WindowListener {
   );
   Timer? _validationTimer;
   String lastState = '', lastMetadata = '';
+  Uint8List? _hashedCover;
+  String _artworkHash = 'fallback';
+  int _progressSecond = -1;
+  void progressChanged() {
+    final second = controller.position.inSeconds;
+    if (second == _progressSecond) return;
+    _progressSecond = second;
+    if (Platform.isWindows) changed();
+  }
+
   bool _mediaReleased = false;
 
   Future<void> _logTail = Future.value();
@@ -162,6 +173,7 @@ class WindowsIntegration with WindowListener {
         linuxMedia = LinuxMedia(controller, raise: show, quit: exit);
         await linuxMedia!.initialize();
         controller.addListener(changed);
+        controller.progress.addListener(progressChanged);
         changed();
         await log('mpris_ready');
       } catch (_) {
@@ -251,6 +263,7 @@ class WindowsIntegration with WindowListener {
         });
       }
       controller.addListener(changed);
+      controller.progress.addListener(progressChanged);
       changed();
     } catch (_) {
       await log('smtc_unavailable');
@@ -311,6 +324,7 @@ class WindowsIntegration with WindowListener {
 
   Future<void> _releaseMedia() async {
     controller.removeListener(changed);
+    controller.progress.removeListener(progressChanged);
     _mediaReleased = true;
     try {
       await controller.player.pause().timeout(const Duration(seconds: 2));
@@ -378,9 +392,14 @@ class WindowsIntegration with WindowListener {
   Future<void> sync() async {
     if (_syncing || _disposed) return;
     final track = controller.current;
-    final artworkHash = track?.cover == null
-        ? 'fallback'
-        : sha256.convert(track!.cover!).toString();
+    final coverBytes = track?.cover;
+    if (!identical(coverBytes, _hashedCover)) {
+      _hashedCover = coverBytes;
+      _artworkHash = coverBytes == null
+          ? 'fallback'
+          : sha256.convert(coverBytes).toString();
+    }
+    final artworkHash = _artworkHash;
     final state =
         '${track?.id}|$artworkHash|${controller.playing}|${controller.buffering}|${controller.position.inSeconds}|${controller.duration.inSeconds}|${controller.shuffle}|${controller.repeat}';
     if (state == lastState) return;
@@ -469,6 +488,7 @@ class WindowsIntegration with WindowListener {
     systemAccent.dispose();
     _validationTimer?.cancel();
     controller.removeListener(changed);
+    controller.progress.removeListener(progressChanged);
     windowManager.removeListener(this);
     if (Platform.isWindows) session.clearActionHandler();
     icon?.dispose();

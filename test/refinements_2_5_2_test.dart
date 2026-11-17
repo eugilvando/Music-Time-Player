@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:package_info_plus/package_info_plus.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,11 +85,21 @@ void main() {
     });
     expect(wrong.originalQueueOrder, [0, 1, 2, 3]);
   });
-  test('About version matches the package version', () {
-    expect(
-      File('pubspec.yaml').readAsStringSync(),
-      contains('version: $musicTimeVersion'),
+  testWidgets('About reads installed package version', (tester) async {
+    PackageInfo.setMockInitialValues(
+      appName: 'Music Time',
+      packageName: 'music_time',
+      version: '9.8.7',
+      buildNumber: '123',
+      buildSignature: '',
     );
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: SingleChildScrollView(child: MusicTimeAbout())),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('9.8.7+123'), findsOneWidget);
   });
   for (final language in ['en', 'pt']) {
     testWidgets(

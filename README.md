@@ -5,6 +5,9 @@
 
 # Music Time
 
+**3.0.6:** lighter playback progress updates, bounded Smart Flow preparation, crossfade analysis off the UI thread and manual update checks in About. Downloads and installation remain manual. See [validation and limitations](docs/playback-and-updates-3.0.6.md).
+
+
 Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled or Outlined** styles, under Settings → General and appearance → Icons. Preview changes immediately; preferences persist and the icons work offline.
 
 
@@ -12,7 +15,7 @@ Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled 
 
 [Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/latest) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Source version: 3.0.5+70. Published installers: 3.0.3+68.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Source version: 3.0.6+71. Published installers: 3.0.3+68.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time 3.0 Library with fictional demonstration data](docs/images/library-3.0.2.png)
 

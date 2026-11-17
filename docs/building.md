@@ -6,7 +6,7 @@
 
 - Windows x64.
 - Flutter **3.47.7** / Dart **3.13.5**, the validated baseline. Respect `pubspec.yaml`'s Dart requirement and `pubspec.lock`.
-- Visual Studio 2022 with Desktop development with C++, Windows SDK and the components required by `flutter doctor`.
+- Visual Studio 2022 with Desktop development with C++, Windows SDK, C++ ATL for the selected MSVC toolset (needed by secure storage), and the components required by `flutter doctor`.
 - Inno Setup 6 for the installer.
 - Git and network access to download Flutter/Dart/native build dependencies.
 
@@ -45,7 +45,7 @@ Do not use an active personal profile for reset/restore tests. Do not interpret 
 .\scripts\build-installer.ps1 -FlutterSdk 'C:\path\to\flutter'
 ```
 
-The script checks formatting and analysis, builds Windows, runs tests/native checks, copies the C++ runtime, prepares notices and calls Inno Setup. Output: `dist/MusicTime-Setup-2.8.0.exe`.
+The script checks formatting and analysis, builds Windows, runs tests/native checks, copies the C++ runtime, prepares notices and calls Inno Setup. Output: `dist/MusicTime-Setup-3.0.6.exe`.
 
 Application binaries live in `build/windows/x64/runner/Release/`. Distribute the complete bundle or the installer, not only `music_time.exe`. Keep third-party licenses/notices with the binaries. See [third-party notices](../THIRD_PARTY_NOTICES.md) and `LICENSES/`.
 

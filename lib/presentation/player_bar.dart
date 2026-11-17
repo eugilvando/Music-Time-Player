@@ -103,7 +103,12 @@ class PlayerBar extends StatelessWidget {
   final Widget? availability;
   final VoidCallback? onArtist, onAlbum;
 
-  Widget progress() => Slider(
+  Widget progress() => ValueListenableBuilder<Duration>(
+    valueListenable: controller.progress,
+    builder: (context, _, child) => progressSlider(),
+  );
+
+  Widget progressSlider() => Slider(
     value: controller.position.inMilliseconds.toDouble().clamp(
       0.0,
       controller.duration.inMilliseconds > 0
@@ -230,9 +235,14 @@ class PlayerBar extends StatelessWidget {
       icon: const MtIcon(Icons.more_horiz, size: 20),
     ),
     'lastfm' => lastfmIndicator(context),
-    'elapsed' || 'duration' => Text(
-      playbackTime(id == 'elapsed' ? controller.position : controller.duration),
-      style: TextStyle(fontSize: settings.visualNumber('font_secondary', 11)),
+    'elapsed' || 'duration' => ValueListenableBuilder<Duration>(
+      valueListenable: controller.progress,
+      builder: (context, _, child) => Text(
+        playbackTime(
+          id == 'elapsed' ? controller.position : controller.duration,
+        ),
+        style: TextStyle(fontSize: settings.visualNumber('font_secondary', 11)),
+      ),
     ),
     'progress' => ConstrainedBox(
       key: const ValueKey('player.seekbar'),

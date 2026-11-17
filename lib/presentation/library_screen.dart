@@ -625,10 +625,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
       )) {
         await widget.settings.preferences.remove('playback.shuffle_restore');
       }
-      await widget.settings.preferences.setString(
-        'playback.automation',
-        automation,
-      );
+      if (widget.settings.preferences.getString('playback.automation') !=
+          automation) {
+        await widget.settings.preferences.setString(
+          'playback.automation',
+          automation,
+        );
+      }
       lastSaved = signature;
     } catch (_) {
       if (mounted) {
@@ -2036,22 +2039,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
       children: [
         if (cover != null && background != 'solid')
           Positioned.fill(
-            child: IgnorePointer(
-              child: Opacity(
-                opacity: widget.settings
-                    .visualNumber('background_intensity', .20)
-                    .clamp(.05, .45),
-                child: ImageFiltered(
-                  imageFilter: ui_effects.ImageFilter.blur(
-                    sigmaX: background == 'cover' ? 64 : 32,
-                    sigmaY: background == 'cover' ? 64 : 32,
-                  ),
-                  child: Image.memory(
-                    cover,
-                    cacheWidth: 1280,
-                    fit: BoxFit.cover,
-                    gaplessPlayback: true,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            child: RepaintBoundary(
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: widget.settings
+                      .visualNumber('background_intensity', .20)
+                      .clamp(.05, .45),
+                  child: ImageFiltered(
+                    imageFilter: ui_effects.ImageFilter.blur(
+                      sigmaX: background == 'cover' ? 64 : 32,
+                      sigmaY: background == 'cover' ? 64 : 32,
+                    ),
+                    child: Image.memory(
+                      cover,
+                      cacheWidth: 1280,
+                      fit: BoxFit.cover,
+                      gaplessPlayback: true,
+                      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                    ),
                   ),
                 ),
               ),

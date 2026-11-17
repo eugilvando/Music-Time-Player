@@ -1,6 +1,8 @@
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+
 import 'dart:math';
-import 'dart:typed_data';
 
 // Analyze bounded PCM windows, without decoding an entire library track.
 Future<List<double>?> _peaks(String path, int seconds, bool tail) async {
@@ -66,6 +68,11 @@ Future<int?> smartOverlapMs(
   int seconds, {
   required bool mixOnly,
 }) async {
+  return compute(_analyzeOverlap, (from, to, seconds, mixOnly));
+}
+
+Future<int?> _analyzeOverlap((String, String, int, bool) work) async {
+  final (from, to, seconds, mixOnly) = work;
   final peaks = await Future.wait([
     _peaks(from, seconds, true),
     _peaks(to, seconds, false),

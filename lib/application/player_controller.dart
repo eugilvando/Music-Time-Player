@@ -17,10 +17,11 @@ class PlayerController extends ChangeNotifier {
   PlayerController({this.onListening, this.resolver, this.coverLoader}) {
     _bindPlayer();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _settle();
-      _updateClock();
-      _notify();
-      unawaited(prepareFlow());
+      if (_clock.isRunning) {
+        _settle();
+        _updateClock();
+      }
+      // Listening accounting is independent of visual progress.
     });
   }
 
@@ -29,6 +30,7 @@ class PlayerController extends ChangeNotifier {
     _subscriptions.add(
       player.stream.playing.listen((value) {
         if (_disposed || !identical(player, boundPlayer)) return;
+        if (playing == value) return;
         _settle();
         if (!value) _generation++;
         playing = value;
@@ -40,6 +42,7 @@ class PlayerController extends ChangeNotifier {
     _subscriptions.add(
       player.stream.buffering.listen((value) {
         if (_disposed || !identical(player, boundPlayer)) return;
+        if (buffering == value) return;
         _settle();
         buffering = value;
         _updateClock();
@@ -51,7 +54,7 @@ class PlayerController extends ChangeNotifier {
         if (_disposed || !identical(player, boundPlayer)) return;
         position = value;
         _checkTransition();
-        _notify();
+        progress.value = value;
       }),
     );
     _subscriptions.add(
@@ -89,6 +92,8 @@ class PlayerController extends ChangeNotifier {
     // Lyrics are handled by Music Time, without native sidecar loading.
     await native.setProperty('sub-auto', 'no');
     await native.setProperty('vid', 'no');
+    // MediaCache owns persistent downloads; native read-ahead stays in RAM.
+    await native.setProperty('cache-on-disk', 'no');
     if (Platform.isWindows) {
       // Restrict the backend list (no trailing comma): the bundled OpenAL
       // fallback can pass a null renderer string to strstr and crash the
@@ -224,14 +229,19 @@ class PlayerController extends ChangeNotifier {
         if (original >= 0) _originalQueueKeys.insert(original + 1, key);
       }
       _generation++;
-      _notify();
+      _notify(prepareSuggestions: false);
     } catch (_) {
       // Optional suggestions never interrupt or replace user choices.
     } finally {
       _flowBusy = false;
+      if (_flowAttempt.isEmpty && !_disposed) {
+        scheduleMicrotask(() => unawaited(prepareFlow()));
+      }
     }
   }
 
+  /// Position updates must not rebuild the library or schedule prefetch work.
+  final progress = ValueNotifier<Duration>(Duration.zero);
   Player player = Player();
   int fadeSeconds = 0;
   String fadeMode = 'fixed';
@@ -296,7 +306,7 @@ class PlayerController extends ChangeNotifier {
     }
     final remaining = duration - position;
     if (remaining.inMilliseconds < 400 ||
-        remaining.inSeconds >= _transitionSeconds) {
+        remaining.inMilliseconds >= (_transitionSeconds + 3) * 1000) {
       return;
     }
     final next = queue[queueIndex + 1];
@@ -392,7 +402,8 @@ class PlayerController extends ChangeNotifier {
         }
       }
       if (!valid() || window == 0) return;
-      if (window != null) {
+      window ??= fadeSeconds * 1000;
+      if (window > 0) {
         while (valid() && (duration - position).inMilliseconds > window) {
           await Future<void>.delayed(const Duration(milliseconds: 50));
         }
@@ -445,7 +456,7 @@ class PlayerController extends ChangeNotifier {
           1.0,
         );
         _fadeFraction = fraction;
-        _settleTail();
+        if (_tailClock.elapsed >= const Duration(seconds: 1)) _settleTail();
         if (mode != 'mix') {
           await Future.wait([
             staged.setVolume(volume * fraction),
@@ -607,7 +618,7 @@ class PlayerController extends ChangeNotifier {
   Duration position = Duration.zero, duration = Duration.zero;
   String? error;
 
-  void _notify() {
+  void _notify({bool prepareSuggestions = true}) {
     // History stays history even when shuffle moves it after the current song.
     if (queueIndex >= 0 &&
         queueIndex < queueKeys.length &&
@@ -615,7 +626,15 @@ class PlayerController extends ChangeNotifier {
         automaticEntries[queueKeys[queueIndex]] == 'flow') {
       automaticEntries[queueKeys[queueIndex]] = 'flow_played';
     }
-    if (!_disposed) notifyListeners();
+    if (!_disposed) {
+      notifyListeners();
+      // Queue/state events prepare suggestions, never the playback clock.
+      if (prepareSuggestions) {
+        scheduleMicrotask(() {
+          if (!_disposed) unawaited(prepareFlow());
+        });
+      }
+    }
   }
 
   void _settle() {
@@ -1104,6 +1123,7 @@ class PlayerController extends ChangeNotifier {
       unawaited(subscription.cancel());
     }
     unawaited(player.dispose());
+    progress.dispose();
     super.dispose();
   }
 }
