@@ -25,4 +25,7 @@ jobs:
         shell: pwsh
         run: |
           $env:MUSIC_TIME_LIBMPV = Join-Path $PWD 'build/windows/x64/runner/Release/libmpv-2.dll'
+          $env:PATH = (Split-Path $env:MUSIC_TIME_LIBMPV) + ';' + $env:PATH
+          if (-not (Test-Path $env:MUSIC_TIME_LIBMPV)) { throw 'Missing audio runtime' }
+          if (-not (Test-Path (Join-Path (Split-Path $env:MUSIC_TIME_LIBMPV) 'vulkan-1.dll'))) { throw 'Missing Vulkan loader' }
           flutter test --no-pub --concurrency=1

@@ -10,5 +10,12 @@
   "buildRecipe": "https://github.com/zhongfly/mpv-winbuild/tree/25b58a7",
   "buildRun": "https://github.com/zhongfly/mpv-winbuild/actions/runs/41441239761",
   "variant": "LGPL; not the GPL or x86_64-v3 variants",
-  "dartPackageLicenseCount": 134
+  "dartPackageLicenseCount": 134,
+  "vulkanLoader": {
+    "version": "1.4.363.0",
+    "source": "https://sdk.lunarg.com/sdk/download/1.4.363.0/windows/VulkanRT-X64-1.4.363.0-Components.zip",
+    "archiveSha256": "a25a927aa8b9f0371048f1861cf88ac3b9bc9b1fb332c42d897c8ab32695769a",
+    "dllSha256": "e1fcfc9489beefa6a6d9d11d6c7517f6a2b7f16e0d3fb8f4103bee0210f314a3",
+    "license": "LICENSES/VulkanRT-License.txt"
+  }
 }

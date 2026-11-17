@@ -39,3 +39,7 @@ The generated artwork and fictional catalog used in screenshots were created for
 ## Linux media session
 
 The unmodified `dbus` Dart package 0.8.0 by Canonical is included under MPL-2.0. Source and license: https://pub.dev/packages/dbus/versions/0.8.0 and https://github.com/canonical/dbus.dart. Its license is also included in Flutter’s generated notices.
+
+## Vulkan loader (Windows)
+
+The Windows bundle includes the unmodified x64 Vulkan loader 1.4.363.0 from [LunarG](https://vulkan.lunarg.com/sdk/home), required by libmpv even during audio-only startup. Its MIT/Apache notices are in `LICENSES/VulkanRT-License.txt`; pinned archive and DLL hashes are recorded in `release/native-provenance.json`. This app-local DLL does not install or replace system drivers.
