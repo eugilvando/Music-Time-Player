@@ -419,7 +419,18 @@ void main() {
           find.byKey(const ValueKey('nowPlaying.composition')),
         );
         expect(composition.center.dx, closeTo(size.width / 2, 1));
-        expect(composition.center.dy, closeTo((size.height + 16) / 2, 2));
+        final toolbar = tester.getRect(
+          find
+              .ancestor(
+                of: find.byKey(const ValueKey('nowPlaying.mode')),
+                matching: find.byType(Padding),
+              )
+              .first,
+        );
+        expect(
+          composition.center.dy,
+          closeTo((size.height + toolbar.bottom) / 2, 2),
+        );
         expect(tester.takeException(), isNull);
       }
     }
