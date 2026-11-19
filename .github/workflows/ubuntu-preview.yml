@@ -41,7 +41,7 @@ jobs:
       - name: Resolve packages and analyze
         run: |
           flutter config --enable-linux-desktop
-          flutter pub get
+          flutter pub get --enforce-lockfile
           flutter analyze --no-pub
       - name: Test current catalog and UI refinements
         env:
