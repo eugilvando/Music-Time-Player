@@ -25,9 +25,11 @@ class ListeningPlaylistDialog extends StatefulWidget {
     required this.onPlay,
     required this.onSaved,
     this.offlineOnly = false,
+    this.sourceLabel = 'Last.fm',
     this.artistTemplates,
   });
   final ListeningReport report;
+  final String sourceLabel;
   final List<Track> catalog;
   final LibraryStore store;
   final Set<String> offlineIds;
@@ -43,7 +45,7 @@ class ListeningPlaylistDialog extends StatefulWidget {
 class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
   late final name = TextEditingController(
     text:
-        'Last.fm · ${widget.report.from.toLocal().toIso8601String().substring(0, 10)} — ${widget.report.until.toLocal().toIso8601String().substring(0, 10)}',
+        '${widget.sourceLabel} · ${widget.report.from.toLocal().toIso8601String().substring(0, 10)} — ${widget.report.until.toLocal().toIso8601String().substring(0, 10)}',
   );
   String criterion = 'top', genre = 'rock', mood = 'calm';
   final moods = const {
@@ -114,7 +116,7 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
       preparing = true;
       error = null;
       selection = null;
-      if (automaticName && tagBased) name.text = 'Last.fm · $tag';
+      if (automaticName && tagBased) name.text = '${widget.sourceLabel} · $tag';
       if (automaticName && criterion.startsWith('artist_')) {
         name.text =
             '$artist · ${criterion == 'artist_radio'
@@ -160,8 +162,8 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
         setState(() {
           preparing = false;
           error = t(
-            'Could not prepare the selection. Check Last.fm settings or cached data. Artist radio needs similar artists present in your library.',
-            'Não foi possível preparar a seleção. Confira o Last.fm ou os dados em cache. A rádio exige artistas similares presentes na biblioteca.',
+            'Could not prepare the selection. Check available data. Artist radio needs related artists in your library.',
+            'Não foi possível preparar a seleção. Confira os dados disponíveis. A rádio exige artistas relacionados na biblioteca.',
           );
         });
       }
@@ -227,8 +229,8 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
             children: [
               Text(
                 t(
-                  'From your Last.fm listening · only music in your library',
-                  'A partir do Last.fm · somente músicas da sua biblioteca',
+                  'From ${widget.sourceLabel} · only music in your library',
+                  'A partir de ${widget.sourceLabel} · somente músicas da sua biblioteca',
                 ),
               ),
               const SizedBox(height: 12),
@@ -252,13 +254,29 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
                     DropdownMenuItem(
                       value: 'genre',
                       child: Text(
-                        t('Genre · Last.fm tags', 'Gênero · tags do Last.fm'),
+                        widget.sourceLabel == 'Last.fm'
+                            ? t(
+                                'Genre · Last.fm tags',
+                                'Gênero · tags do Last.fm',
+                              )
+                            : t(
+                                'Genre · library tags',
+                                'Gênero · tags da biblioteca',
+                              ),
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'mood',
                       child: Text(
-                        t('Mood · Last.fm tags', 'Humor · tags do Last.fm'),
+                        widget.sourceLabel == 'Last.fm'
+                            ? t(
+                                'Mood · Last.fm tags',
+                                'Humor · tags do Last.fm',
+                              )
+                            : t(
+                                'Mood · library tags',
+                                'Humor · tags da biblioteca',
+                              ),
                       ),
                     ),
                     DropdownMenuItem(
@@ -279,15 +297,16 @@ class _ListeningPlaylistDialogState extends State<ListeningPlaylistDialog> {
                         ),
                       ),
                     ),
-                    DropdownMenuItem(
-                      value: 'artist_top',
-                      child: Text(
-                        t(
-                          'Artist most popular · Last.fm global',
-                          'Mais populares do artista · Last.fm global',
+                    if (widget.sourceLabel == 'Last.fm')
+                      DropdownMenuItem(
+                        value: 'artist_top',
+                        child: Text(
+                          t(
+                            'Artist most popular · Last.fm global',
+                            'Mais populares do artista · Last.fm global',
+                          ),
                         ),
                       ),
-                    ),
                   ],
                   DropdownMenuItem(
                     value: 'top',

@@ -341,6 +341,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
         barrierDismissible: false,
         builder: (_) => ListeningPlaylistDialog(
           report: report,
+          sourceLabel: widget.sourceLabel,
           catalog: List.of(widget.catalog),
           store: widget.store,
           offlineIds: offlineIds,
@@ -348,6 +349,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
           artistTemplates: InsightArtistTemplates(
             widget.store,
             widget.repository.api,
+            localOnly: widget.repository.source != 'lastfm',
           ),
           onPlay: widget.onPlay,
           onSaved: widget.onSaved,

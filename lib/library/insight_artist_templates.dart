@@ -27,7 +27,8 @@ PlaylistImportReport artistPeriodPlaylist(
 ));
 
 class InsightArtistTemplates {
-  InsightArtistTemplates(this.store, this.api);
+  InsightArtistTemplates(this.store, this.api, {this.localOnly = false});
+  final bool localOnly;
   final LibraryStore store;
   final Future<LastFmClient> Function() api;
   late final similarity = ArtistSimilarity(store, api);
@@ -69,7 +70,8 @@ class InsightArtistTemplates {
         !{'artist_period', 'artist_radio', 'artist_top'}.contains(criterion)) {
       throw ArgumentError('Invalid artist selection');
     }
-    if (criterion == 'artist_period') {
+    if (criterion == 'artist_period' ||
+        localOnly && criterion == 'artist_top') {
       return compute(artistPeriodPlaylist, (report, catalog, artist, limit));
     }
     if (criterion == 'artist_radio') {
@@ -111,7 +113,7 @@ class InsightArtistTemplates {
     required bool genre,
     required bool offline,
   }) async {
-    final local = genre
+    final local = genre || localOnly
         ? catalog
               .where(
                 (t) => t.genreNames.any((g) => searchKey(g) == searchKey(tag)),
@@ -120,7 +122,9 @@ class InsightArtistTemplates {
         : <Track>[];
     List<LastFmTrack> ranking;
     try {
-      ranking = await _loadTopTracks(tag, offline: offline, tag: true);
+      ranking = localOnly
+          ? []
+          : await _loadTopTracks(tag, offline: offline, tag: true);
     } catch (_) {
       if (local.isEmpty) rethrow;
       ranking = [];
