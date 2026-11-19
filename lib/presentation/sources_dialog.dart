@@ -922,32 +922,7 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
     );
   }
 
-  List<Widget> lastfmCards() {
-    final groups = <List<Widget>>[[]];
-    for (final child in (lastfmContent() as Column).children) {
-      if (child is Divider) {
-        groups.add([]);
-      } else {
-        groups.last.add(child);
-      }
-    }
-    if (groups.length != 7) {
-      return settingsSections((lastfmContent() as Column).children);
-    }
-    Widget card(List<Widget> items) => SettingsCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: items,
-      ),
-    );
-    return [
-      card(groups[0]),
-      card([...groups[1], const SizedBox(height: 16), ...groups[3]]),
-      card(groups[2]),
-      card([...groups[4], const SizedBox(height: 16), ...groups[5]]),
-      card(groups[6]),
-    ];
-  }
+  List<Widget> lastfmCards() => [SettingsCard(child: lastfmContent())];
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(

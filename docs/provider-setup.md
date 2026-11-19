@@ -71,3 +71,16 @@ Artist portraits/biographies, similar artists and optional LRCLIB lyrics contact
 ## Folder selection and reconnecting
 
 Google Drive now provides a paginated visual folder browser. Select the folder explicitly before scanning. OneDrive personal hexadecimal drive identifiers are normalized when reconnecting, preserving existing item identity. Disconnecting retains a source definition for reconnection; **Remove source** confirms deletion of its exclusive catalog records and managed downloads/cache, preserving original music and tracks shared with another source.
+
+## ListenBrainz and MusicBrainz (3.0.9)
+
+Open **Settings → Integrations**. ListenBrainz uses your personal user token;
+validation stores it in the operating-system vault. Connecting a new account does
+not enable uploads. Enable current-track announcements and/or scrobbling separately.
+The outbox belongs to the originating account and previous history is not exported.
+
+MusicBrainz requires no account for these read-only artist/genre lookups. Enable it
+separately to supplement missing local relationships. It does not edit music files.
+Local recommendations remain available without either service. The local-data option
+blocks external recommendation/metadata reads; uploads and lyrics have separate controls.
+See [scope, caching and delivery behavior](optional-integrations.md).

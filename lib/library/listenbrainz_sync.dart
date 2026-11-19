@@ -62,17 +62,30 @@ class ListenBrainzSync {
     if (!_disposed) changed();
   }
 
-  Future<void> connect(String token) async {
+  Future<void> connect(String input) async {
+    final token = normalizeListenBrainzToken(input);
     await initialize();
     if (token.trim().isEmpty) {
-      throw StateError('Informe seu token ListenBrainz.');
+      throw const ListenBrainzConnectionFailure(
+        'Informe seu token ListenBrainz.',
+      );
     }
-    if (!allowed()) throw StateError('Saia do modo offline para conectar.');
+    if (!allowed()) {
+      throw const ListenBrainzConnectionFailure(
+        'Saia do modo offline para conectar o ListenBrainz.',
+      );
+    }
     final name = await ListenBrainzClient(transport, token.trim()).validate();
-    await vault.write(
-      'listenbrainz.session',
-      jsonEncode({'user': name, 'token': token.trim()}),
-    );
+    try {
+      await vault.write(
+        'listenbrainz.session',
+        jsonEncode({'user': name, 'token': token}),
+      );
+    } catch (_) {
+      throw const ListenBrainzConnectionFailure(
+        'O token foi validado, mas não foi possível salvar a conexão no cofre do sistema. Tente novamente.',
+      );
+    }
     if (user.toLowerCase() != name.toLowerCase()) {
       await preferences.setBool('listenbrainz.scrobbling', false);
       await preferences.setBool('listenbrainz.now_playing', false);

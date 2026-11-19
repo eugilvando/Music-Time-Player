@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../domain/track.dart';
 import '../infrastructure/lastfm.dart';
+import '../infrastructure/brainz.dart';
 import '../library/catalog.dart';
 import '../library/listening_insights.dart';
 import '../library/m3u8.dart';
@@ -25,9 +26,12 @@ String listeningCsvCell(String text) {
   return '"${safe.replaceAll('"', '""')}"';
 }
 
-String listeningReportCsv(ListeningReport report) =>
+String listeningReportCsv(
+  ListeningReport report, {
+  String source = 'Last.fm',
+}) =>
     '\uFEFF${[
-      ['Last.fm profile', report.user],
+      ['$source profile', report.user],
       ['From (UTC)', report.from.toUtc().toIso8601String()],
       ['Until exclusive (UTC)', report.until.toUtc().toIso8601String()],
       ['Updated (UTC)', report.updatedAt.toIso8601String()],
@@ -41,10 +45,15 @@ String listeningReportCsv(ListeningReport report) =>
       for (final day in report.days.keys.toList()..sort()) [day, '${report.days[day]}'],
     ].map((row) => row.map(listeningCsvCell).join(',')).join('\r\n')}\r\n';
 
+String sourceReportCsv((ListeningReport, String) work) =>
+    listeningReportCsv(work.$1, source: work.$2);
+
 class ListeningInsightsPage extends StatefulWidget {
   const ListeningInsightsPage({
     super.key,
     required this.repository,
+    this.profileUser,
+    this.sourceLabel = 'Last.fm',
     required this.settings,
     required this.store,
     required this.catalog,
@@ -56,6 +65,8 @@ class ListeningInsightsPage extends StatefulWidget {
     required this.onOpen,
   });
   final ListeningInsightsRepository repository;
+  final String? profileUser;
+  final String sourceLabel;
   final AppSettings settings;
   final LibraryStore store;
   final List<Track> catalog;
@@ -86,10 +97,15 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
   DateTimeRange? custom;
   String t(String en, String pt) => insightText(context, en, pt);
   String get currentProfile =>
-      (widget.settings.preferences.getString('lastfm.profile_user') ?? '')
+      (widget.profileUser ??
+              widget.settings.preferences.getString('lastfm.profile_user') ??
+              '')
           .trim();
   bool get currentOffline =>
-      widget.settings.visualBool('offline_only', fallback: false);
+      widget.repository.source != 'local' &&
+      (widget.settings.visualBool('offline_only', fallback: false) ||
+          (widget.settings.preferences.getBool('integrations.local_only') ??
+              false));
   String get cacheKey {
     final now = DateTime.now();
     return custom == null
@@ -287,7 +303,14 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
       if (!mounted || ticket != generation) return;
       setState(() {
         loading = false;
-        error = exception is LastFmException && exception.code == 6
+        error = exception is ListenBrainzConnectionFailure
+            ? exception.message
+            : widget.repository.source != 'lastfm'
+            ? t(
+                'Could not load ${widget.sourceLabel}. Saved data was preserved.',
+                'Não foi possível carregar ${widget.sourceLabel}. Os dados salvos foram preservados.',
+              )
+            : exception is LastFmException && exception.code == 6
             ? t(
                 'Last.fm profile not found. Check your username.',
                 'Perfil Last.fm não encontrado. Confira seu usuário.',
@@ -351,13 +374,16 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
     try {
       final location = await getSaveLocation(
         suggestedName:
-            'MusicTime-Lastfm-${report.from.toIso8601String().substring(0, 10)}.csv',
+            'MusicTime-${widget.sourceLabel}-${report.from.toIso8601String().substring(0, 10)}.csv',
         acceptedTypeGroups: [
           const XTypeGroup(label: 'CSV', extensions: ['csv']),
         ],
       );
       if (location != null) {
-        final text = await compute(listeningReportCsv, report);
+        final text = await compute(sourceReportCsv, (
+          report,
+          widget.sourceLabel,
+        ));
         await XFile.fromData(
           utf8.encode(text),
           mimeType: 'text/csv',
@@ -446,7 +472,8 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
                   '90': t('Last 90 days', 'Últimos 90 dias'),
                   '180': t('Last 180 days', 'Últimos 180 dias'),
                   '365': t('Last 365 days', 'Últimos 365 dias'),
-                  'all': t('All time', 'Todo o período'),
+                  if (widget.repository.source != 'listenbrainz')
+                    'all': t('All time', 'Todo o período'),
                   'custom': t('Custom dates', 'Datas personalizadas'),
                 }.entries)
                   DropdownMenuItem(value: entry.key, child: Text(entry.value)),
@@ -471,7 +498,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
             label: Text(
               profile.isEmpty
                   ? t('Configure Last.fm', 'Configurar Last.fm')
-                  : 'Last.fm · $profile',
+                  : '${widget.sourceLabel} · $profile',
             ),
             onPressed: widget.onConfigure,
           ),
@@ -955,8 +982,8 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
                   ),
                   Text(
                     t(
-                      'Your listening story, powered by Last.fm',
-                      'Sua história de escuta, com dados do Last.fm',
+                      'Your listening story · ${widget.sourceLabel}',
+                      'Sua história de escuta · ${widget.sourceLabel}',
                     ),
                   ),
                 ],
@@ -984,6 +1011,16 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
           ),
           const SizedBox(height: 16),
           reportToolbar(),
+          if (widget.repository.source == 'listenbrainz')
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Text(
+                t(
+                  'ListenBrainz: bounded periods up to 365 days. Loads up to 1,000 listens at a time; use Load more for partial reports. Only tracks in your library can be played.',
+                  'ListenBrainz: períodos de até 365 dias. Carrega até 1.000 reproduções por vez; use Carregar mais em relatórios parciais. Apenas faixas presentes na biblioteca podem ser reproduzidas.',
+                ),
+              ),
+            ),
           if (loading) ...[
             const SizedBox(height: 12),
             const LinearProgressIndicator(),
@@ -992,7 +1029,10 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
                 Expanded(
                   child: Text(
                     totalPages == 0
-                        ? t('Reading Last.fm…', 'Consultando Last.fm…')
+                        ? t(
+                            'Reading ${widget.sourceLabel}…',
+                            'Consultando ${widget.sourceLabel}…',
+                          )
                         : '${t('Page', 'Página')} $currentPage / $totalPages',
                   ),
                 ),
@@ -1035,7 +1075,7 @@ class _ListeningInsightsPageState extends State<ListeningInsightsPage> {
           if (report != null) ...[
             const SizedBox(height: 16),
             Text(
-              '${report.from.millisecondsSinceEpoch == 0 ? t('All time', 'Todo o período') : report.from.toLocal().toString().substring(0, 16)} — ${report.until.toLocal().toString().substring(0, 16)} · ${t('Last.fm data, separate from local history', 'Dados Last.fm, separados do histórico local')}',
+              '${report.from.millisecondsSinceEpoch == 0 ? t('All time', 'Todo o período') : report.from.toLocal().toString().substring(0, 16)} — ${report.until.toLocal().toString().substring(0, 16)} · ${t('Source: ${widget.sourceLabel}', 'Fonte: ${widget.sourceLabel}')}',
             ),
             if (!complete)
               Padding(

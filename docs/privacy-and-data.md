@@ -47,3 +47,16 @@ Listening Insights stores bounded derived reports by Last.fm profile and period 
 ## Artist playlist templates — 2.4.0
 
 Artist names are sent to Last.fm only to request global top tracks or similar artists. Personal-period selections use the already loaded report. Rankings have a seven-day cache and at most 50 global artist payloads. Generated playlists save local catalog references only; suggestions require explicit confirmation. Sidebar preferences are included when exporting preferences; older executables can reject the new preference ranges/lists.
+
+## Optional Brainz services (3.0.9)
+
+ListenBrainz receives artist/title, optional album and duration, and playback start
+time for eligible listens only when the corresponding upload option is enabled.
+Current-track announcements omit the timestamp. The token is kept in the system
+vault and included only in encrypted credential backups. Pending sends are stored
+locally and isolated by account. No existing history is automatically uploaded.
+
+Optional MusicBrainz lookups send the artist name and application identification.
+They cache artist identity and genres without modifying files. Local recommendations
+use catalog genres, playlists, era and favorites without sending the library.
+New Brainz integrations are off by default; Last.fm preferences are preserved.

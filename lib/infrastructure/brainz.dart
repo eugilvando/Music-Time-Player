@@ -40,7 +40,8 @@ class BrainzTransport {
         if (token != null) 'Authorization': 'Token $token',
         if (body != null) 'Content-Type': 'application/json',
       };
-      final uri = Uri.https(host, path, query);
+      final uri = Uri.parse('https://$host$path')
+          .replace(queryParameters: query);
       try {
         final response =
             await (body == null
@@ -82,6 +83,18 @@ class BrainzTransport {
   }
 }
 
+class ListenBrainzConnectionFailure implements Exception {
+  const ListenBrainzConnectionFailure(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
+String normalizeListenBrainzToken(String value) => value
+    .trim()
+    .replaceFirst(RegExp(r'^Token\s+', caseSensitive: false), '')
+    .replaceAll(RegExp(r'[\s\u200B-\u200D\uFEFF]'), '');
+
 class ListenBrainzClient {
   ListenBrainzClient(this.transport, this.token);
   final BrainzTransport transport;
@@ -91,7 +104,9 @@ class ListenBrainzClient {
     if (result['valid'] != true ||
         result['user_name'] is! String ||
         (result['user_name'] as String).isEmpty) {
-      throw const BrainzFailure(401);
+      throw const ListenBrainzConnectionFailure(
+        'O ListenBrainz não reconheceu este token. Copie o User token em listenbrainz.org/settings. Se acabou de criar a conta ou trocar o token, aguarde e tente novamente. Nenhum dado foi enviado.',
+      );
     }
     return result['user_name'] as String;
   }

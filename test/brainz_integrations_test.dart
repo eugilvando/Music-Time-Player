@@ -1,5 +1,10 @@
 import 'dart:convert';
 
+import 'package:music_time/presentation/insights_sources_page.dart';
+
+import 'package:music_time/library/alternative_insights.dart';
+import 'package:music_time/library/listening_insights.dart';
+
 import 'package:flutter/material.dart';
 import 'package:music_time/presentation/brainz_settings.dart';
 import 'package:music_time/sources/provider_connections.dart';
@@ -356,6 +361,159 @@ void main() {
       providers.dispose();
     },
   );
+  test('pasted token prefix and invisible whitespace are normalized', () {
+    expect(
+      normalizeListenBrainzToken(' Token fake-\u200btoken\n'),
+      'fake-token',
+    );
+  });
+  test(
+    'invalid token reports a safe actionable message and never saves a session',
+    () async {
+      final vault = MemoryVault();
+      final providers = ProviderConnections(
+        prefs,
+        store,
+        vault: vault,
+        client: MockClient((request) async {
+          expect(request.headers['Authorization'], 'Token fake-invalid');
+          return http.Response(
+            '{"code":200,"valid":false,"message":"Token invalid."}',
+            200,
+          );
+        }),
+      );
+      await providers.run(
+        () => providers.listenBrainz.connect('Token fake-invalid'),
+      );
+      expect(providers.error, contains('não reconheceu'));
+      expect(providers.error, isNot(contains('fake-invalid')));
+      expect(vault.data.containsKey('listenbrainz.session'), false);
+      providers.dispose();
+    },
+  );
+  test('rate limits are shown separately from invalid tokens', () async {
+    final providers = ProviderConnections(
+      prefs,
+      store,
+      vault: MemoryVault(),
+      client: MockClient((_) async => http.Response('{}', 429)),
+    );
+    await providers.run(() => providers.listenBrainz.connect('fake'));
+    expect(providers.error, contains('limitou'));
+    providers.dispose();
+  });
+  test('ListenBrainz insights aggregate the selected and previous periods and isolate caches', () async {
+    final from = DateTime.utc(2026, 11, 1), until = DateTime.utc(2026, 11, 8);
+    final client = MockClient((request) async {
+      expect(request.url.path, '/1/user/alice/listens');
+      expect(
+        request.url.queryParameters['max_ts'],
+        '${until.millisecondsSinceEpoch ~/ 1000}',
+      );
+      Map<String, Object> event(DateTime at) => {
+        'listened_at': at.millisecondsSinceEpoch ~/ 1000,
+        'track_metadata': {
+          'artist_name': 'Artist A',
+          'track_name': 'Song',
+          'release_name': 'Album',
+        },
+      };
+      return http.Response(
+        jsonEncode({
+          'payload': {
+            'listens': [
+              event(from.add(const Duration(days: 1))),
+              event(from.subtract(const Duration(days: 1))),
+            ],
+          },
+        }),
+        200,
+      );
+    });
+    Future<LastFmClient> api() async =>
+        LastFmClient(client, apiKey: '', apiSecret: '');
+    final repo = AlternativeInsights(
+      store,
+      api,
+      source: 'listenbrainz',
+      transport: BrainzTransport(client, 'api.listenbrainz.org'),
+      allowed: () => true,
+    );
+    final report = await repo.load(
+      user: 'alice',
+      period: '7',
+      from: from,
+      until: until,
+      request: ListeningRequest(),
+    );
+    expect(report.scrobbles, 1);
+    expect(report.previousScrobbles, 1);
+    expect(report.complete, true);
+    expect(report.tracks.single.title, 'Song');
+    expect(
+      await ListeningInsightsRepository(store, api).cached('alice', '7'),
+      isNull,
+    );
+    expect(
+      (await AlternativeInsights(
+        store,
+        api,
+        source: 'listenbrainz',
+      ).cached('alice', '7'))!.scrobbles,
+      1,
+    );
+    await expectLater(
+      repo.load(
+        user: 'alice',
+        period: 'all',
+        from: DateTime.fromMillisecondsSinceEpoch(0),
+        until: until,
+        request: ListeningRequest(),
+      ),
+      throwsA(isA<ListenBrainzConnectionFailure>()),
+    );
+  });
+  test('local insights use local playback history without any HTTP', () async {
+    final started = DateTime.utc(2026, 11, 2);
+    await store.database.insert('history', {
+      'track_id': song.id,
+      'started_at': started.toIso8601String(),
+      'listened_ms': 90000,
+    });
+    final repo = AlternativeInsights(
+      store,
+      () async => throw StateError('No HTTP'),
+      source: 'local',
+    );
+    final report = await repo.load(
+      user: 'Music Time',
+      period: '7',
+      from: DateTime.utc(2026, 11, 1),
+      until: DateTime.utc(2026, 11, 8),
+      request: ListeningRequest(),
+    );
+    expect(report.scrobbles, 1);
+    expect(report.tracks.single.title, 'Song');
+  });
+  test('Insights selector excludes disconnected providers and always offers local data', () {
+    expect(availableInsightSources(lastfm: false, listenbrainz: false).keys, [
+      'local',
+    ]);
+    expect(availableInsightSources(lastfm: true, listenbrainz: false).keys, [
+      'lastfm',
+      'local',
+    ]);
+    expect(availableInsightSources(lastfm: false, listenbrainz: true).keys, [
+      'listenbrainz',
+      'local',
+    ]);
+    expect(availableInsightSources(lastfm: true, listenbrainz: true).keys, [
+      'lastfm',
+      'listenbrainz',
+      'local',
+    ]);
+  });
   test('playing now never includes timestamp', () {
     final payload = ListenBrainzClient.payload(song, null, song.duration);
     expect(payload.containsKey('listened_at'), false);

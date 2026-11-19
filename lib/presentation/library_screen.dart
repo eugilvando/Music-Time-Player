@@ -4,7 +4,7 @@ import 'fullscreen_now_playing.dart';
 import '../library/artist_ranking.dart';
 import '../library/insight_artist_templates.dart';
 import '../platform/output_equalizer.dart';
-import 'listening_insights_page.dart';
+import 'insights_sources_page.dart';
 import '../library/listening_insights.dart';
 import 'resizable_side_panel.dart';
 import 'design_icon.dart';
@@ -2291,7 +2291,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                                 ),
                                                           ),
                                                         AppSection.insights =>
-                                                          ListeningInsightsPage(
+                                                          InsightsSourcesPage(
+                                                            providers:
+                                                                providers,
                                                             repository:
                                                                 listeningInsights,
                                                             settings:

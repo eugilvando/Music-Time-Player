@@ -65,3 +65,13 @@ histórico para evitar reenvio ao restaurar. Reset remove a sessão e os caches.
 
 Pano não foi integrado. Envio de favoritos ao ListenBrainz, importação de histórico
 antigo e recomendações remotas ListenBrainz ficam fora desta primeira integração.
+
+## Insights por fonte (3.0.10)
+
+O seletor oferece somente Last.fm e ListenBrainz conectados, além do histórico
+local. Cada fonte possui cache separado por conta e período. Rankings, comparação,
+CSV e playlists usam apenas a fonte selecionada, sem misturar contagens.
+ListenBrainz permite períodos delimitados de até 365 dias e carrega no máximo
+1.000 registros por ação, incluindo o período anterior para comparação. Relatórios
+parciais oferecem continuidade; todo o histórico exige exportação pelo serviço.
+As sugestões de playlists nessa fonte usam dados locais, sem consultar o Last.fm.

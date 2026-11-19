@@ -214,7 +214,10 @@ ListeningReport decodeListening(String text) =>
 String encodeListening(ListeningReport report) => jsonEncode(report.toJson());
 
 class ListeningInsightsRepository {
-  ListeningInsightsRepository(this.store, this.api);
+  ListeningInsightsRepository(this.store, this.api, {this.source = 'lastfm'});
+  final String source;
+  String get cachePrefix =>
+      source == 'lastfm' ? 'insights.v1' : 'insights.$source.v1';
   final LibraryStore store;
   final Future<LastFmClient> Function() api;
   final _sessionRefreshes = <String>{};
@@ -245,7 +248,7 @@ class ListeningInsightsRepository {
     var rows = await store.database.query(
       'lastfm_profile_cache',
       where: 'user=? AND kind=? AND length(CAST(payload AS BLOB))<=8388608',
-      whereArgs: [user.toLowerCase(), 'insights.v1:$period'],
+      whereArgs: [user.toLowerCase(), '$cachePrefix:$period'],
     );
     if (rows.isEmpty && !period.startsWith('custom:')) {
       rows = await store.database.query(
@@ -254,7 +257,7 @@ class ListeningInsightsRepository {
             'user=? AND kind LIKE ? AND length(CAST(payload AS BLOB))<=8388608',
         whereArgs: [
           user.toLowerCase(),
-          'insights.v1:${period.split(':').first}:%',
+          '$cachePrefix:${period.split(':').first}:%',
         ],
         orderBy: 'updated_at DESC',
         limit: 1,
@@ -412,19 +415,43 @@ class ListeningInsightsRepository {
           'INSERT OR REPLACE INTO lastfm_profile_cache(user,kind,payload,updated_at) VALUES(?,?,?,?)',
           [
             user.toLowerCase(),
-            'insights.v1:$period',
+            '$cachePrefix:$period',
             payload,
             report.updatedAt.toIso8601String(),
           ],
         );
         request.check();
         await txn.rawDelete(
-          "DELETE FROM lastfm_profile_cache WHERE kind LIKE 'insights.v1:%' AND rowid NOT IN (SELECT rowid FROM lastfm_profile_cache WHERE kind LIKE 'insights.v1:%' ORDER BY updated_at DESC LIMIT 6)",
+          "DELETE FROM lastfm_profile_cache WHERE kind LIKE '$cachePrefix:%' AND rowid NOT IN (SELECT rowid FROM lastfm_profile_cache WHERE kind LIKE '$cachePrefix:%' ORDER BY updated_at DESC LIMIT 6)",
         );
         request.check();
       });
     }
     remember(user, period, report);
     return report;
+  }
+
+  Future<void> saveReport(
+    String user,
+    String period,
+    ListeningReport report,
+  ) async {
+    await schema();
+    final payload = await compute(encodeListening, report);
+    if (utf8.encode(payload).length <= 8388608) {
+      await store.database.rawInsert(
+        'INSERT OR REPLACE INTO lastfm_profile_cache(user,kind,payload,updated_at) VALUES(?,?,?,?)',
+        [
+          user.toLowerCase(),
+          '$cachePrefix:$period',
+          payload,
+          report.updatedAt.toIso8601String(),
+        ],
+      );
+    }
+    await store.database.rawDelete(
+      "DELETE FROM lastfm_profile_cache WHERE kind LIKE '$cachePrefix:%' AND rowid NOT IN (SELECT rowid FROM lastfm_profile_cache WHERE kind LIKE '$cachePrefix:%' ORDER BY updated_at DESC LIMIT 6)",
+    );
+    remember(user, period, report);
   }
 }

@@ -495,6 +495,22 @@ class ProviderConnections extends ChangeNotifier
         error =
             'O conteúdo musical não pôde ser lido (HTTP ${failure.status}). Tente novamente para renovar o endereço temporário.';
       }
+    } on ListenBrainzConnectionFailure catch (failure) {
+      errorStage = 'listenbrainz';
+      errorCode = 'connection';
+      error = failure.message;
+    } on BrainzFailure catch (failure) {
+      errorStage = 'brainz';
+      errorCode = 'http_${failure.code}';
+      error = switch (failure.code) {
+        0 =>
+          'A conexão foi pausada pelo modo offline. Desative-o para conectar.',
+        400 || 401 => 'O ListenBrainz recusou a autenticação. Confira o User token em listenbrainz.org/settings.',
+        403 => 'O serviço Brainz negou o acesso (HTTP 403). Tente novamente mais tarde.',
+        429 => 'O serviço Brainz limitou as consultas. Aguarde um minuto e tente novamente.',
+        _ =>
+          'O serviço Brainz está indisponível (HTTP ${failure.code}). Tente novamente mais tarde.',
+      };
     } on LastFmException catch (failure) {
       errorStage = 'lastfm';
       errorCode = '${failure.code}';
