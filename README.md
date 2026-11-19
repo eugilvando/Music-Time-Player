@@ -23,7 +23,7 @@ Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled 
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [Download 3.0.11 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 3.0.11 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Shared release with separate platform installers; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
 

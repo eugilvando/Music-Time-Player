@@ -27,7 +27,7 @@ $env:PATH = (Split-Path $env:MUSIC_TIME_LIBMPV) + ';' + $env:PATH
 flutter test --no-pub --concurrency=1
 ```
 
-The Windows CMake recipe verifies a pinned LGPL libmpv archive and DLL by SHA256. It first checks the unchanged archive attached to Music Time 2.7.1, then the upstream daily release. This preserves reproducibility after upstream archive retention expires. The recipe also verifies and bundles the official x64 Vulkan loader required by libmpv; no system driver installation is needed. Keep the bundle directory on PATH when running native tests outside the application process.
+The Windows CMake recipe verifies a pinned LGPL libmpv archive and DLL by SHA256. It first checks the unchanged archive attached to the unified Music Time 3.0.11 release, then the upstream daily release. This preserves reproducibility after upstream archive retention expires. The recipe also verifies and bundles the official x64 Vulkan loader required by libmpv; no system driver installation is needed. Keep the bundle directory on PATH when running native tests outside the application process.
 
 Current validation results are listed in the release manifest. `MUSIC_TIME_LIBMPV` selects the built playback library for native tests; build it first. Test fixtures use temporary or in-memory data. Material-icon test fonts are resolved from this checkout's active Flutter SDK rather than a developer-specific absolute path.
 

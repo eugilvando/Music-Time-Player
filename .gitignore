@@ -24,3 +24,10 @@ Thumbs.db
 # Local-only private archive and workspace instructions
 /.private/
 /AGENTS.md
+
+# Mobile signing and platform build configuration
+*.keystore
+*.jks
+android/key.properties
+android/local.properties
+macos/Flutter/ephemeral/

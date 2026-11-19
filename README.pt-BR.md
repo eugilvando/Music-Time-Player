@@ -18,7 +18,7 @@ Escolha **Atual (Material Symbols Rounded), Solar ou Phosphor**, com estilo **Pr
 
 Design: **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [versão final 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11-ubuntu). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
+**Ubuntu 24.04 x64:** [versão final 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
 ## Destaques atuais
 
@@ -132,7 +132,7 @@ Consulte [dados e privacidade](docs/privacy-and-data.md), [compilação](docs/bu
 
 Windows 3.0.3: consulte o [manifesto de validação](release/validation.json) para as regressões direcionadas, análise, compilação e instalação. A suíte completa não foi repetida nesta versão.
 
-[Ubuntu 3.0.11 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11-ubuntu) · [Instalação e limites](docs/ubuntu-preview.md).
+[Ubuntu 3.0.11 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11) · [Instalação e limites](docs/ubuntu-preview.md).
 
 ## Music Time 3.0 — Biblioteca / Songs
 
