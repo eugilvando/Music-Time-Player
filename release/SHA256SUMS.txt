@@ -1,1 +1,1 @@
-0acdfa994e6f39ccc7728ee716b7dbead018b9976219ac2e85cfe7b47c3bf5e8  MusicTime-Setup-3.0.8.exe
+0e80c8057babb2b05d4efefda47753d1d021b0e3ddf10285c91e6fa9e70f0bcb  MusicTime-Setup-3.0.10.exe

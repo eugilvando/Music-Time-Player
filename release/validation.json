@@ -1,20 +1,20 @@
 {
-  "version": "3.0.8+73",
+  "version": "3.0.10+75",
   "platform": "Windows x64",
-  "sourceCommit": "b13edd0a5c26b7bb2dcb9525326ad705156c11eb",
+  "sourceCommit": "76aa0dac9a894ad4147760c4473c6b641f1ecadd",
   "readyToPublish": true,
   "installer": {
-    "file": "MusicTime-Setup-3.0.8.exe",
-    "bytes": 46759513,
-    "sha256": "0acdfa994e6f39ccc7728ee716b7dbead018b9976219ac2e85cfe7b47c3bf5e8"
+    "file": "MusicTime-Setup-3.0.10.exe",
+    "bytes": 46774933,
+    "sha256": "0e80c8057babb2b05d4efefda47753d1d021b0e3ddf10285c91e6fa9e70f0bcb"
   },
   "checks": {
     "analysis": "passed",
-    "targetedRegressionTests": 16,
-    "coverage": "single-row queue actions, icon save callback, shared cover/lyrics state, settings override/reset, fullscreen controls, artwork sizing, responsive navigation",
+    "targetedRegressionTests": 41,
+    "coverage": "ListenBrainz token errors, source availability, independent insight caches, local history, Last.fm and ListenBrainz reports, playlist creation UI, CSV, favorites, backup encryption",
     "releaseBuild": "passed",
-    "nativeIntegration": "SMTC artwork/play/pause, tray hide/restore, window placement and clean exit passed",
-    "installation": "3.0.8+73 verified; binary hashes matched; database/preferences/vault unchanged; app left closed"
+    "nativeIntegration": "SMTC artwork/play/pause, tray hide/restore and clean exit passed",
+    "installation": "3.0.10+75 verified; installed hashes matched; database/preferences/vault unchanged"
   },
-  "limits": "Windows playback validation runs on the local desktop; remote CI without physical audio output does not replace native audio acceptance. No new audio-engine behavior in this patch."
+  "limits": "New provider integrations tested with simulated responses, not live account credentials. Remote Windows native audio acceptance is not assumed."
 }
