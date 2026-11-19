@@ -1,0 +1,52 @@
+{
+  "version": "3.0.11+76",
+  "status": "experimental",
+  "sourceCommit": "5f75a901fd1375f0fa4ef561d861b7f61e6fd290",
+  "sourceUrl": "https://github.com/eugilvando/Music-Time-Player/tree/5f75a901fd1375f0fa4ef561d861b7f61e6fd290",
+  "buildRun": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44554160157",
+  "android": {
+    "minimumApi": 24,
+    "architectures": [
+      "arm64-v8a",
+      "x86_64"
+    ],
+    "releaseOptimized": true,
+    "signing": "Android development key, not Play Store identity",
+    "signatureVerified": true,
+    "startupCheck": "Android 15 x86_64 emulator: APK installed, activity launched, process alive after 30 seconds, no matched fatal/native-plugin errors; screenshot manually reviewed",
+    "startupRun": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44557004637"
+  },
+  "macos": {
+    "minimumVersion": "12.0",
+    "architectures": [
+      "x86_64",
+      "arm64"
+    ],
+    "nativeBinariesChecked": 17,
+    "codesignIntegrityVerified": true,
+    "appleDeveloperIdSigned": false,
+    "notarized": false,
+    "startupCheck": "Native CI launch remained alive for 20 seconds without matched unhandled exception or missing native library/symbol errors"
+  },
+  "notValidated": [
+    "Real-device audio playback",
+    "Cloud authentication callbacks",
+    "Platform media controls and output devices",
+    "Android background playback and mobile layout",
+    "macOS persistent sandboxed folder access"
+  ],
+  "packages": {
+    "MusicTime-3.0.11-android-arm64-preview.apk": {
+      "sha256": "b49d1e0fa4f4f6894af26d30bebf189519baf2f5832890a5b0a7635739443137",
+      "bytes": 35924635
+    },
+    "MusicTime-3.0.11-android-x64-preview.apk": {
+      "sha256": "2cc4b5d02b23dbfdb882a390dbff1909782f6b460affb33b949c751b452551e6",
+      "bytes": 38211939
+    },
+    "MusicTime-3.0.11-macos-preview.zip": {
+      "sha256": "4630e1392cad1e8bbf7bab3143ecc4de059d8e48a5505382385deec72bd2edee",
+      "bytes": 36560543
+    }
+  }
+}

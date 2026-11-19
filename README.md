@@ -25,6 +25,8 @@ Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [Download 3.0.11 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Shared release with separate platform installers; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
+**Android and macOS previews:** [download from the same 3.0.11 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Android ARM64 and x86_64 APKs; macOS 12+ universal app for Intel and Apple Silicon. Experimental: real-device audio, integrations and mobile usability still need acceptance. [Installation and limits](docs/platform-previews.md).
+
 ## Current highlights
 
 **3.0.5 backup and artwork fixes:** Smart Flow preferences now export correctly. Backups with artwork stream referenced images individually, retain password protection and show progress; older backups remain readable. Artwork sizing now responds in cover-only and lyrics layouts as well as Classic, Vinyl and Minimal. New artwork backups require version 3.0.5 or later to restore. [Details and validation](docs/backup-and-artwork-3.0.5.md).

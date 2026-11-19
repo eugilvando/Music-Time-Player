@@ -20,6 +20,8 @@ Design: **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [versão final 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
+**Prévias Android e macOS:** [downloads na mesma release 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). APKs Android ARM64 e x86_64; app universal para macOS 12+, Intel e Apple Silicon. Experimentais: áudio, integrações e usabilidade no celular ainda precisam de validação nos aparelhos. [Instalação e limites](docs/platform-previews.md).
+
 ## Destaques atuais
 
 **3.0.5 — Backup e capas:** corrigida a rejeição do Smart Flow. Backups com capas gravam as imagens usadas por partes, preservam a proteção por senha e mostram o andamento. Os formatos antigos continuam legíveis. O tamanho da capa responde também em Somente capa e na composição com letras. Backups novos com capas exigem 3.0.5 ou posterior para restaurar. [Detalhes e validação](docs/backup-and-artwork-3.0.5.md).
