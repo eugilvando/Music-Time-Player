@@ -29,7 +29,10 @@ jobs:
           sudo chmod 666 /dev/kvm
           mkdir -p evidence
           "$ANDROID_HOME/emulator/emulator" -avd music_time_smoke -no-window -no-audio -no-boot-anim -no-snapshot -gpu swiftshader_indirect >evidence/emulator.log 2>&1 &
-          adb wait-for-device
+          EMULATOR_PID=$!
+          sleep 5
+          if ! kill -0 "$EMULATOR_PID"; then cat evidence/emulator.log; exit 1; fi
+          timeout 90 adb wait-for-device
           for attempt in $(seq 1 90); do
             if [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; then break; fi
             sleep 3
