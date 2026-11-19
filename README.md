@@ -191,3 +191,5 @@ Music Time's own source code is released under the [MIT License](LICENSE). Flutt
 ## Music Time 3.0 — Biblioteca / Songs
 
 ![Músicas com rolagem contínua e linhas alternadas; dados fictícios](docs/images/songs-3.0.png)
+
+> Android and macOS experimental builds share this repository. See [preview scope and installation](docs/platform-previews.md). All platform downloads are grouped in the same release.

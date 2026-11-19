@@ -137,3 +137,5 @@ Windows 3.0.3: consulte o [manifesto de validação](release/validation.json) pa
 ## Music Time 3.0 — Biblioteca / Songs
 
 ![Músicas com rolagem contínua e linhas alternadas; dados fictícios](docs/images/songs-3.0.png)
+
+> As builds experimentais Android e macOS usam este mesmo projeto. Veja [escopo e instalação](docs/platform-previews.md). Os downloads de todas as plataformas ficam na mesma release.
