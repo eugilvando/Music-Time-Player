@@ -45,6 +45,11 @@ class BackupArchive {
       key == 'additional_sources' ||
       const {
         'lastfm.profile_user',
+        'lastfm.recommendations',
+        'integrations.local_only',
+        'musicbrainz.enabled',
+        'listenbrainz.scrobbling',
+        'listenbrainz.now_playing',
         'lastfm.now_playing',
         'lastfm.scrobbling',
         'lastfm.index_auto',
@@ -60,6 +65,7 @@ class BackupArchive {
       'lastfm.api_key',
       'lastfm.api_secret',
       'lastfm.session',
+      'listenbrainz.session',
     };
     for (final id in (config['microsoft.sources'] as List?) ?? const []) {
       if (id is String && validMicrosoftSourceId(id)) {

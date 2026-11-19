@@ -5,7 +5,7 @@
 
 # Music Time
 
-**3.0.8:** queue actions fit on one row, with an icon-only Save playlist button. The Cover / Lyrics toggle is available in normal and full-screen playback, sharing the selected mode. [Release notes](docs/release-3.0.8.md).
+**3.0.9:** local recommendations, optional ListenBrainz with account-scoped outbox, and MusicBrainz genre enrichment. Existing Last.fm credentials are preserved. [Integration details](docs/optional-integrations.md) · [Release notes](docs/release-3.0.9.md).
 
 **3.0.6:** lighter playback progress updates, bounded Smart Flow preparation, crossfade analysis off the UI thread and manual update checks in About. Downloads and installation remain manual. See [validation and limitations](docs/playback-and-updates-3.0.6.md).
 
@@ -15,22 +15,22 @@ Choose **Current (Material Symbols Rounded), Solar or Phosphor**, with **Filled 
 
 **Your music, your library, your time.** A personal Windows and Ubuntu music player for local files, cloud libraries and media servers. Built with Flutter, Dart, MediaKit/libmpv and SQLite, without a Music Time backend.
 
-[Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
+[Download for Windows x64](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.9) · [Português brasileiro](README.pt-BR.md) · [Provider setup](docs/provider-setup.md) · [Build from source](docs/building.md)
 
-**Version: 3.0.8+73 — Windows x64 and Ubuntu 24.04 amd64.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
+**Version: 3.0.9+74 — Windows x64 and Ubuntu 24.04 amd64.** This repository starts from the current application snapshot. It does not contain the development repository's history, personal catalog, playlists, credentials, backups or internal operational logs.
 
 ![Music Time 3.0 Library with fictional demonstration data](docs/images/library-3.0.2.png)
 
 Design by **Gilvando Souza**.
 
-**Ubuntu 24.04 x64:** [Download 3.0.8 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
+**Ubuntu 24.04 x64:** [Download 3.0.9 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.9-ubuntu). Separate final package; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
 ## Current highlights
 
 **3.0.5 backup and artwork fixes:** Smart Flow preferences now export correctly. Backups with artwork stream referenced images individually, retain password protection and show progress; older backups remain readable. Artwork sizing now responds in cover-only and lyrics layouts as well as Classic, Vinyl and Minimal. New artwork backups require version 3.0.5 or later to restore. [Details and validation](docs/backup-and-artwork-3.0.5.md).
 
 
-**3.0.4 lyrics update:** local and embedded lyrics take priority; the current track and next two queue entries are prepared in the background. Session and disk caching avoid repeated requests, with LRCLIB followed by lyrics.ovh as an online fallback. A refresh button is available in the lyrics panel. Included in the 3.0.8 Windows and Ubuntu packages. [Scope and validation](docs/lyrics-3.0.4.md).
+**3.0.4 lyrics update:** local and embedded lyrics take priority; the current track and next two queue entries are prepared in the background. Session and disk caching avoid repeated requests, with LRCLIB followed by lyrics.ovh as an online fallback. A refresh button is available in the lyrics panel. Included in the 3.0.9 Windows and Ubuntu packages. [Scope and validation](docs/lyrics-3.0.4.md).
 
 
 The Home page prepares only enabled collections and shows lightweight content first. Favorites reuse session results across navigation. Playlists have separated rounded thumbnails; genres and years have colorful offline artwork.
@@ -45,7 +45,7 @@ Use the Windows and Ubuntu download links above for the current packages. Histor
 
 ## Install and start listening
 
-1. Download `MusicTime-Setup-3.0.8.exe` from the [3.0.8 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.8).
+1. Download `MusicTime-Setup-3.0.9.exe` from the [3.0.9 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.9).
 2. Install for your Windows user. Flutter and Dart SDKs are **not** required to run the installed app.
 3. Open **Settings → Music sources** and add local files or a music folder. Local playback does not require a cloud account.
 4. To connect a cloud or server source, follow the [setup guide](docs/provider-setup.md), then synchronize its catalog.

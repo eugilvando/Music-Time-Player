@@ -23,7 +23,10 @@ class LastFmProfileIndex extends ChangeNotifier {
   Map<String, int> counts = {};
   String get user =>
       (preferences.getString('lastfm.profile_user') ?? '').trim();
-  bool get offline => preferences.getBool('visual.offline_only') ?? false;
+  bool get offline =>
+      (preferences.getBool('visual.offline_only') ?? false) ||
+      (preferences.getBool('integrations.local_only') ?? false) ||
+      !(preferences.getBool('lastfm.recommendations') ?? true);
   bool get automatic => preferences.getBool('lastfm.index_auto') ?? true;
   int get delaySeconds =>
       (preferences.getInt('lastfm.index_delay_seconds') ?? 30).clamp(10, 300);

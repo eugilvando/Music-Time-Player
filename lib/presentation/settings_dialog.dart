@@ -139,7 +139,13 @@ class _SettingsPageState extends State<SettingsPage> {
       'Cache automático',
       'Limpeza',
     ],
-    SettingsCategory.lastfm: ['Last.fm', 'Provedores de letras'],
+    SettingsCategory.lastfm: [
+      'Dados e recomendações',
+      'Last.fm',
+      'ListenBrainz',
+      'MusicBrainz',
+      'Provedores de letras',
+    ],
     SettingsCategory.data: ['Backup e manutenção'],
     SettingsCategory.about: ['Sobre o Music Time'],
   };

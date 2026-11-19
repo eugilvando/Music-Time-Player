@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'design_icon.dart';
 import 'settings_card.dart';
+import 'brainz_settings.dart';
 import 'ui_language.dart';
 import 'additional_source_settings.dart';
 import '../sources/additional_sources.dart';
@@ -1101,8 +1102,11 @@ class _ProviderSettingsPageState extends State<ProviderSettingsPage> {
                 const SizedBox(height: 24),
                 if (!widget.providers.microsoftConnected && addingMicrosoft)
                   SettingsCard(child: microsoftContent()),
-              ] else
+              ] else ...[
+                BrainzSettings(providers: widget.providers, policyOnly: true),
                 ...lastfmCards(),
+                BrainzSettings(providers: widget.providers),
+              ],
             ],
           ),
   );

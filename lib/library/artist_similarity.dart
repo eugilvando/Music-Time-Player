@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../infrastructure/lastfm.dart';
 import '../persistence/library_store.dart';
 import 'catalog.dart';
+import 'local_similarity.dart';
 
 enum SimilarityIssue { none, offline, missingKey, network, noResults }
 
@@ -52,6 +53,24 @@ class ArtistSimilarity {
     bool offline,
     bool refresh,
   ) async {
+    var local = await localSimilarArtists(store, artist);
+    if (local.isNotEmpty) return SimilarityResult(local);
+    if (!offline) {
+      try {
+        final client = await api();
+        final tags = await client.additionalGenres?.call(artist) ?? <String>[];
+        if (tags.isNotEmpty) {
+          local = await localSimilarArtists(
+            store,
+            artist,
+            additionalGenres: tags,
+          );
+        }
+        if (local.isNotEmpty) return SimilarityResult(local);
+      } catch (_) {
+        /* Optional enrichment cannot prevent offline playback. */
+      }
+    }
     final db = store.database;
     await db.execute(
       'CREATE TABLE IF NOT EXISTS artist_similarity_cache(artist TEXT PRIMARY KEY,names TEXT NOT NULL,updated_at TEXT NOT NULL)',

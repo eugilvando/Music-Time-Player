@@ -9,7 +9,7 @@ import '../domain/track.dart';
 class LastFmException implements Exception {
   const LastFmException(this.code);
   final int code;
-  bool get requiresLogin => code == 9;
+  bool get requiresLogin => code == 9 || code == 10 || code == 26;
   bool get retryable => code == 11 || code == 16 || code == 29;
   @override
   String toString() => 'Last.fm: erro $code';
@@ -31,8 +31,12 @@ class LastFmClient implements ScrobbleSink {
     required this.apiKey,
     required this.apiSecret,
     this.sessionKey,
+    this.allowReads,
+    this.additionalGenres,
   });
   final http.Client client;
+  final bool Function()? allowReads;
+  final Future<List<String>> Function(String)? additionalGenres;
   final String apiKey, apiSecret;
   String? sessionKey;
   static final endpoint = Uri.parse('https://ws.audioscrobbler.com/2.0/');
@@ -41,6 +45,7 @@ class LastFmClient implements ScrobbleSink {
     String method,
     Map<String, String> fields,
   ) async {
+    if (allowReads != null && !allowReads!()) throw const LastFmException(10);
     const methods = {
       'artist.getSimilar',
       'artist.getTopTracks',
@@ -111,8 +116,10 @@ class LastFmClient implements ScrobbleSink {
     if (apiKey.trim().isEmpty || user.trim().isEmpty) {
       throw StateError('Informe a chave da API e o usuário Last.fm');
     }
+    if (allowReads != null && !allowReads!()) throw const LastFmException(10);
     final tracks = <LastFmTrack>[];
     for (var page = 1; page <= 100; page++) {
+      if (allowReads != null && !allowReads!()) throw const LastFmException(10);
       final response = await client
           .get(
             endpoint.replace(

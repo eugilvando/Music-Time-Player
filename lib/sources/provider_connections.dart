@@ -15,6 +15,9 @@ import '../domain/ports.dart';
 import '../domain/track.dart';
 import '../infrastructure/onedrive.dart';
 import '../infrastructure/lastfm.dart';
+import '../infrastructure/brainz.dart';
+import '../library/listenbrainz_sync.dart';
+import '../library/musicbrainz_metadata.dart';
 import '../persistence/library_store.dart';
 import 'microsoft_auth.dart';
 import 'onedrive_verification.dart';
@@ -39,6 +42,7 @@ class ProviderConnections extends ChangeNotifier
     _worker = accountRoot == null
         ? Timer.periodic(const Duration(seconds: 30), (_) {
             unawaited(flushScrobbles());
+            unawaited(listenBrainz.flush());
             unawaited(favoriteSync.flush());
           })
         : null;
@@ -53,8 +57,50 @@ class ProviderConnections extends ChangeNotifier
         this.client,
       )..addListener(_notify);
       unawaited(restoreLastfmStatus());
+      unawaited(
+        listenBrainz.initialize().catchError((Object _) {
+          listenBrainz.status = 'Não foi possível abrir a fila ListenBrainz.';
+          _notify();
+        }),
+      );
     }
   }
+  bool get integrationReadsAllowed =>
+      !_disposed &&
+      !suspended &&
+      !(preferences.getBool('visual.offline_only') ?? false) &&
+      !(preferences.getBool('integrations.local_only') ?? false);
+  late final listenBrainz = ListenBrainzSync(
+    store,
+    preferences,
+    vault,
+    BrainzTransport(
+      client,
+      'api.listenbrainz.org',
+      allowed: () =>
+          !_disposed &&
+          !suspended &&
+          !(preferences.getBool('visual.offline_only') ?? false),
+    ),
+    allowed: () =>
+        !_disposed &&
+        !suspended &&
+        !(preferences.getBool('visual.offline_only') ?? false),
+    changed: _notify,
+  );
+  late final musicBrainz = MusicBrainzMetadata(
+    store,
+    BrainzTransport(
+      client,
+      'musicbrainz.org',
+      allowed: () =>
+          integrationReadsAllowed &&
+          (preferences.getBool('musicbrainz.enabled') ?? false),
+    ),
+    () =>
+        integrationReadsAllowed &&
+        (preferences.getBool('musicbrainz.enabled') ?? false),
+  );
   final SharedPreferences preferences;
   AdditionalSources? _additional;
   AdditionalSources get additional => microsoftAccountRoot._additional!;
@@ -1257,6 +1303,10 @@ class ProviderConnections extends ChangeNotifier
     apiKey: await vault.read('lastfm.api_key') ?? '',
     apiSecret: await vault.read('lastfm.api_secret') ?? '',
     sessionKey: await vault.read('lastfm.session'),
+    allowReads: () =>
+        integrationReadsAllowed &&
+        (preferences.getBool('lastfm.recommendations') ?? true),
+    additionalGenres: musicBrainz.artistGenres,
   );
   Future<void> beginLastfm() => run(() async {
     final api = await lastfm();
@@ -1292,6 +1342,7 @@ class ProviderConnections extends ChangeNotifier
         !session.track.hasScrobbleMetadata) {
       return;
     }
+    unawaited(listenBrainz.observe(session));
     final id = '${session.track.id}|${session.startedAt.toIso8601String()}';
     if (!(preferences.getBool('visual.offline_only') ?? false) &&
         (preferences.getBool('lastfm.now_playing') ?? false) &&
@@ -1490,6 +1541,7 @@ class ProviderConnections extends ChangeNotifier
   @override
   void dispose() {
     _disposed = true;
+    if (accountRoot == null) listenBrainz.dispose();
     _profileIndex?.dispose();
     _additional?.dispose();
     _worker?.cancel();

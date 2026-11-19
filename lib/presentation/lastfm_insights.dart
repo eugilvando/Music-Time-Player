@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../sources/provider_connections.dart';
 import '../domain/track.dart';
 import '../library/catalog.dart';
+import '../library/artist_similarity.dart';
 import 'artist_portrait.dart';
 import 'ui_language.dart';
 
@@ -35,17 +36,30 @@ class _LastFmInsightsState extends State<LastFmInsights> {
   }
 
   Future<Map<String, dynamic>> load() async {
-    if (widget.providers.preferences.getBool('visual.offline_only') ?? false) {
-      throw StateError('Offline');
+    if (widget.album == null) {
+      final result =
+          await ArtistSimilarity(
+            widget.providers.store,
+            widget.providers.lastfm,
+          ).lookup(
+            widget.artist,
+            offline: !widget.providers.integrationReadsAllowed,
+          );
+      final display = <String, String>{
+        for (final track in widget.catalog)
+          for (final name in [...track.artistNames, ...track.albumArtistNames])
+            artistNameKey(name): name,
+      };
+      return {
+        'similarartists': {
+          'artist': [
+            for (final name in result.names)
+              {'name': display[artistNameKey(name)] ?? name},
+          ],
+        },
+      };
     }
     final api = await widget.providers.lastfm();
-    if (widget.album == null) {
-      return api.readProfile('artist.getSimilar', {
-        'artist': widget.artist,
-        'limit': '100',
-        'autocorrect': '0',
-      });
-    }
     final album = await api.readProfile('album.getInfo', {
       'artist': widget.artist,
       'album': widget.album!,
@@ -69,7 +83,7 @@ class _LastFmInsightsState extends State<LastFmInsights> {
       initiallyExpanded: widget.album == null,
       title: UiText(
         widget.album == null
-            ? 'Artistas similares · Last.fm'
+            ? 'Artistas relacionados'
             : 'Popularidade do álbum · Last.fm',
         style: Theme.of(context).textTheme.headlineSmall
             ?.copyWith(fontSize: 22, fontWeight: FontWeight.bold),
@@ -85,7 +99,7 @@ class _LastFmInsightsState extends State<LastFmInsights> {
               if (snapshot.hasError) {
                 return ListTile(
                   title: const UiText(
-                    'Dados Last.fm indisponíveis. Confira a chave e a conexão.',
+                    'Não foi possível carregar os dados. Tente novamente.',
                   ),
                   trailing: IconButton(
                     tooltip: ui(context, 'Tentar novamente'),
@@ -141,11 +155,9 @@ class _LastFmInsightsState extends State<LastFmInsights> {
                                           'visual.artist_photos',
                                         ) ??
                                         true,
-                                    cachedOnly:
-                                        widget.providers.preferences.getBool(
-                                          'visual.offline_only',
-                                        ) ??
-                                        false,
+                                    cachedOnly: !widget
+                                        .providers
+                                        .integrationReadsAllowed,
                                   ),
                                 ),
                                 const SizedBox(height: 12),

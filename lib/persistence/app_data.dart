@@ -339,6 +339,8 @@ class AppData {
     try {
       await store.database.transaction((txn) async {
         await txn.execute('DROP TABLE IF EXISTS lastfm_profile_cache');
+        await txn.execute('DROP TABLE IF EXISTS listenbrainz_outbox');
+        await txn.execute('DROP TABLE IF EXISTS musicbrainz_artist_cache');
         await txn.execute('DROP TABLE IF EXISTS artist_similarity_cache');
         for (final table in [...transientTables, ...tables.reversed]) {
           await txn.delete(table);
@@ -476,6 +478,7 @@ class AppData {
                 const <String>[])
           if (validMicrosoftSourceId(id)) microsoftSourceSessionKey(id),
         'lastfm.session',
+        'listenbrainz.session',
         'lastfm.api_key',
         'lastfm.api_secret',
       ]) {
@@ -483,6 +486,8 @@ class AppData {
       }
       await store.database.transaction((txn) async {
         await txn.execute('DROP TABLE IF EXISTS lastfm_profile_cache');
+        await txn.execute('DROP TABLE IF EXISTS listenbrainz_outbox');
+        await txn.execute('DROP TABLE IF EXISTS musicbrainz_artist_cache');
         await txn.execute('DROP TABLE IF EXISTS artist_similarity_cache');
         for (final table in [...transientTables, ...tables.reversed]) {
           await txn.delete(table);
