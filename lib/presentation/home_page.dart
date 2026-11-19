@@ -597,6 +597,7 @@ class HomePage extends StatefulWidget {
     this.activeFilters,
     this.lastfmMix,
     this.memory,
+    this.jobs,
     this.cacheKey,
     this.cacheScope = '',
     this.onSources,
@@ -617,6 +618,7 @@ class HomePage extends StatefulWidget {
   final CatalogIndex index;
   final VoidCallback? onSources;
   final Map<String, HomeData>? memory;
+  final Map<String, Future<HomeData>>? jobs;
   final String? cacheKey;
   final String cacheScope;
   final List<Track> tracks;
@@ -1606,21 +1608,31 @@ class _HomePageState extends State<HomePage> {
               } catch (_) {}
             }
             if (!mounted || request != homeGeneration) return;
-            job = compute(prepareSelectedHome, (
-              work,
-              selectedHomeSections(widget.settings).toSet(),
-            ));
+            final sections = selectedHomeSections(widget.settings).toSet();
+            Future<HomeData> prepare() =>
+                compute(prepareSelectedHome, (work, sections));
+            final shared = widget.jobs;
+            job = shared == null
+                ? prepare()
+                : shared.putIfAbsent(
+                    currentSignature,
+                    () => prepare().whenComplete(() {
+                      shared.remove(currentSignature);
+                    }),
+                  );
             activeHomeWork = job;
             final result = await job;
+            // Navigation may unmount this page, but the completed snapshot is
+            // still reusable under its exact data/filter key on the next visit.
+            final memory = widget.memory;
+            if (memory != null) {
+              memory[currentSignature] = result;
+              while (memory.length > 4) {
+                memory.remove(memory.keys.first);
+              }
+            }
             if (!mounted || request != homeGeneration) return;
             setState(() {
-              final memory = widget.memory;
-              if (memory != null) {
-                memory[currentSignature] = result;
-                while (memory.length > 2) {
-                  memory.remove(memory.keys.first);
-                }
-              }
               derivedSignature = currentSignature;
               derivedLists = result.lists;
               mixes = result.mixes;

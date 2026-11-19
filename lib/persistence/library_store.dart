@@ -276,13 +276,24 @@ class LibraryStore {
     String folder,
     String label,
     bool active,
-  ) => database.insert('cloud_sources', {
-    'id': id,
-    'account': account,
-    'folder': folder.isEmpty ? '/drive/root:' : folder,
-    'label': label,
-    'active': active ? 1 : 0,
-  }, conflictAlgorithm: ConflictAlgorithm.replace);
+  ) => database.rawInsert(
+    '''
+    INSERT INTO cloud_sources(id,account,folder,label,active) VALUES(?,?,?,?,?)
+    ON CONFLICT(id) DO UPDATE SET account=excluded.account,folder=excluded.folder,
+      label=excluded.label,active=excluded.active
+    WHERE cloud_sources.account IS NOT excluded.account
+      OR cloud_sources.folder IS NOT excluded.folder
+      OR cloud_sources.label IS NOT excluded.label
+      OR cloud_sources.active IS NOT excluded.active
+    ''',
+    [
+      id,
+      account,
+      folder.isEmpty ? '/drive/root:' : folder,
+      label,
+      active ? 1 : 0,
+    ],
+  );
   Future<void> removeCloudSource(String id) async {
     final ids = await removableSourceTracks(id);
     await beforeSourceRemoval?.call(ids);

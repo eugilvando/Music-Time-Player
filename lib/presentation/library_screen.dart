@@ -169,6 +169,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
     widget.store,
     providers.lastfm,
   );
+  late final insightSources = InsightsSourceRepositories(
+    widget.store,
+    providers,
+  );
   Widget? cachedLibraryPage;
   String cachedLibraryPageKey = '';
   final queueScaffoldKey = GlobalKey<ScaffoldState>();
@@ -2292,6 +2296,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                                                           ),
                                                         AppSection.insights =>
                                                           InsightsSourcesPage(
+                                                            sources:
+                                                                insightSources,
                                                             providers:
                                                                 providers,
                                                             repository:

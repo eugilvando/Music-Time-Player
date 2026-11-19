@@ -20,11 +20,40 @@ Map<String, String> availableInsightSources({
   'local': 'Local',
 };
 
+class InsightsSourceRepositories {
+  InsightsSourceRepositories(this.store, this.providers);
+  final LibraryStore store;
+  final ProviderConnections providers;
+  Future<LastFmClient> localApi() async => LastFmClient(
+    providers.client,
+    apiKey: '',
+    apiSecret: '',
+    allowReads: () => false,
+  );
+  late final local = AlternativeInsights(store, localApi, source: 'local');
+  late final brainz = AlternativeInsights(
+    store,
+    localApi,
+    source: 'listenbrainz',
+    transport: BrainzTransport(
+      providers.client,
+      'api.listenbrainz.org',
+      allowed: () =>
+          providers.integrationReadsAllowed &&
+          providers.listenBrainz.user.isNotEmpty,
+    ),
+    allowed: () =>
+        providers.integrationReadsAllowed &&
+        providers.listenBrainz.user.isNotEmpty,
+  );
+}
+
 class InsightsSourcesPage extends StatefulWidget {
   const InsightsSourcesPage({
     super.key,
     required this.providers,
     required this.repository,
+    required this.sources,
     required this.settings,
     required this.store,
     required this.catalog,
@@ -37,6 +66,7 @@ class InsightsSourcesPage extends StatefulWidget {
   });
   final ProviderConnections providers;
   final ListeningInsightsRepository repository;
+  final InsightsSourceRepositories sources;
   final AppSettings settings;
   final LibraryStore store;
   final List<Track> catalog;
@@ -57,32 +87,6 @@ class _InsightsSourcesPageState extends State<InsightsSourcesPage> {
     selected = widget.settings.preferences.getString('visual.insights_source');
   }
 
-  Future<LastFmClient> localApi() async => LastFmClient(
-    widget.providers.client,
-    apiKey: '',
-    apiSecret: '',
-    allowReads: () => false,
-  );
-  late final local = AlternativeInsights(
-    widget.store,
-    localApi,
-    source: 'local',
-  );
-  late final brainz = AlternativeInsights(
-    widget.store,
-    localApi,
-    source: 'listenbrainz',
-    transport: BrainzTransport(
-      widget.providers.client,
-      'api.listenbrainz.org',
-      allowed: () =>
-          widget.providers.integrationReadsAllowed &&
-          widget.providers.listenBrainz.user.isNotEmpty,
-    ),
-    allowed: () =>
-        widget.providers.integrationReadsAllowed &&
-        widget.providers.listenBrainz.user.isNotEmpty,
-  );
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: widget.providers,
@@ -105,10 +109,10 @@ class _InsightsSourcesPageState extends State<InsightsSourcesPage> {
           ? lastUser
           : p.listenBrainz.user;
       final repository = source == 'local'
-          ? local
+          ? widget.sources.local
           : source == 'lastfm'
           ? widget.repository
-          : brainz;
+          : widget.sources.brainz;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

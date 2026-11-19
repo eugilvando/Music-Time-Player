@@ -57,6 +57,8 @@ class CatalogMemory {
   final scrollPositions = <String, double>{};
   final derived = <String, CatalogResult>{};
   final home = <String, HomeData>{};
+  final homeJobs = <String, Future<HomeData>>{};
+  final derivedJobs = <String, Future<CatalogResult>>{};
   final favorites = <String, FavoriteCatalog>{};
   CatalogIndex? index;
   int indexRevision = -1;
@@ -982,15 +984,20 @@ class CatalogBrowserState extends State<CatalogBrowser> {
               } catch (_) {}
             }
             if (!mounted || request != catalogWorkGeneration) return;
-            job = compute(prepareCatalog, work);
+            job = memory.derivedJobs.putIfAbsent(
+              signature,
+              () => compute(prepareCatalog, work).whenComplete(() {
+                memory.derivedJobs.remove(signature);
+              }),
+            );
             activeCatalogWork = job;
             final result = await job;
+            memory.derived[signature] = result;
+            while (memory.derived.length > 12) {
+              memory.derived.remove(memory.derived.keys.first);
+            }
             if (!mounted || request != catalogWorkGeneration) return;
             setState(() {
-              memory.derived[signature] = result;
-              while (memory.derived.length > 12) {
-                memory.derived.remove(memory.derived.keys.first);
-              }
               filteredSignature = signature;
               cachedFiltered = result.tracks;
               groupsSignature =
@@ -3504,6 +3511,7 @@ class CatalogBrowserState extends State<CatalogBrowser> {
                             )
                           : null,
                       memory: memory.home,
+                      jobs: memory.homeJobs,
                       cacheScope: jsonEncode([
                         widget.query,
                         filters.toJson(),

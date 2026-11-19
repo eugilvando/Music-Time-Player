@@ -203,13 +203,11 @@ class _QueuePanelState extends State<QueuePanel> {
                       icon: const MtIcon(Icons.playlist_add),
                     ),
                     const Spacer(),
-                    Flexible(
-                      child: Text(
-                        '${player.queue.length}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
+                    Text(
+                      '${player.queue.length}',
+                      key: const ValueKey('queue.count'),
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                     PopupMenuButton<String>(
                       key: const ValueKey('queue.actions'),

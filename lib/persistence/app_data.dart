@@ -342,6 +342,11 @@ class AppData {
         await txn.execute('DROP TABLE IF EXISTS listenbrainz_outbox');
         await txn.execute('DROP TABLE IF EXISTS musicbrainz_artist_cache');
         await txn.execute('DROP TABLE IF EXISTS artist_similarity_cache');
+        if ((await txn.rawQuery(
+          "SELECT 1 FROM sqlite_master WHERE type='table' AND name='local_similarity_results'",
+        )).isNotEmpty) {
+          await txn.delete('local_similarity_results');
+        }
         for (final table in [...transientTables, ...tables.reversed]) {
           await txn.delete(table);
         }
@@ -489,6 +494,11 @@ class AppData {
         await txn.execute('DROP TABLE IF EXISTS listenbrainz_outbox');
         await txn.execute('DROP TABLE IF EXISTS musicbrainz_artist_cache');
         await txn.execute('DROP TABLE IF EXISTS artist_similarity_cache');
+        if ((await txn.rawQuery(
+          "SELECT 1 FROM sqlite_master WHERE type='table' AND name='local_similarity_results'",
+        )).isNotEmpty) {
+          await txn.delete('local_similarity_results');
+        }
         for (final table in [...transientTables, ...tables.reversed]) {
           await txn.delete(table);
         }

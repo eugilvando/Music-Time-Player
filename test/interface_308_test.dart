@@ -55,6 +55,22 @@ void main() {
     final options = find.byKey(const ValueKey('queue.actions'));
     expect(tester.getCenter(save).dy, tester.getCenter(current).dy);
     expect(tester.getCenter(options).dy, tester.getCenter(current).dy);
+    final toolbar = find.byKey(const ValueKey('queue.toolbar'));
+    expect(
+      tester.getRect(options).right,
+      closeTo(tester.getRect(toolbar).right, 1),
+    );
+    await tester.binding.setSurfaceSize(const Size(560, 650));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(options).right,
+      closeTo(tester.getRect(toolbar).right, 1),
+    );
+    expect(
+      tester.getRect(find.byKey(const ValueKey('queue.count'))).left -
+          tester.getRect(save).right,
+      greaterThan(100),
+    );
     expect(tester.widget<IconButton>(save).tooltip, isNotEmpty);
     expect(find.byType(TextButton), findsNothing);
     await tester.tap(save);
