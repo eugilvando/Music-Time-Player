@@ -21,6 +21,8 @@ jobs:
           github-token: ${{ github.token }}
       - name: Prepare Android emulator
         run: |
+          export PATH="$ANDROID_HOME/platform-tools:$PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           "$SDKMANAGER" 'system-images;android-35;google_apis;x86_64' 'emulator' 'platform-tools'
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n music_time_smoke -k 'system-images;android-35;google_apis;x86_64' --device pixel_2
