@@ -25,7 +25,7 @@ Design by **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [Download 3.0.11 final](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Shared release with separate platform installers; real audio, output switching, tray and VM acceptance remain pending. [Install and scope](docs/ubuntu-preview.md).
 
-**Android and macOS previews:** [download from the same 3.0.11 release](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Android ARM64 and x86_64 APKs; macOS 12+ universal app for Intel and Apple Silicon. Experimental: real-device audio, integrations and mobile usability still need acceptance. [Installation and limits](docs/platform-previews.md).
+**macOS preview:** [download the macOS 12+ universal preview from release 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Supports Intel and Apple Silicon; real-device validation is still pending. [Installation and limits](docs/platform-previews.md).
 
 ## Current highlights
 
@@ -166,7 +166,7 @@ These images render actual application widgets using a **fictional, isolated dem
 
 ## Current limits
 
-- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 152 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. Android and macOS are not supplied or validated.
+- Windows x64 and Ubuntu 24.04 x64 packages are available. Ubuntu passed 152 targeted CI tests, apt installation and graphical checks in two rendering modes; real audio, output switching and tray acceptance in the user VM/partition remain pending. macOS is experimental and has not yet completed real-device validation.
 - No streaming subscription, catalog acquisition, bundled songs, DRM bypass or Music Time backend.
 - Source synchronization is currently manual/full within the selected scope. Checkpoints are not a general automatic/incremental sync system. Google Drive includes a paginated visual folder picker.
 - OneDrive personal playback/reopening has user evidence. Google Drive, WebDAV, Jellyfin, Emby, SMB, multiple-account edge cases and live Last.fm delivery still need broader real-account/device validation. Controlled tests do not imply service certification.
@@ -194,4 +194,4 @@ Music Time's own source code is released under the [MIT License](LICENSE). Flutt
 
 ![Músicas com rolagem contínua e linhas alternadas; dados fictícios](docs/images/songs-3.0.png)
 
-> Android and macOS experimental builds share this repository. See [preview scope and installation](docs/platform-previews.md). All platform downloads are grouped in the same release.
+> The experimental macOS desktop build shares this repository. See [preview scope and installation](docs/platform-previews.md). Desktop downloads are grouped in the same release.

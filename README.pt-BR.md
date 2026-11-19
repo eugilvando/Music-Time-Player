@@ -20,7 +20,7 @@ Design: **Gilvando Souza**.
 
 **Ubuntu 24.04 x64:** [versão final 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Validação de áudio, troca de saída e bandeja na VM/partição continua separada.
 
-**Prévias Android e macOS:** [downloads na mesma release 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). APKs Android ARM64 e x86_64; app universal para macOS 12+, Intel e Apple Silicon. Experimentais: áudio, integrações e usabilidade no celular ainda precisam de validação nos aparelhos. [Instalação e limites](docs/platform-previews.md).
+**Prévia macOS:** [download na release 3.0.11](https://github.com/eugilvando/Music-Time-Player/releases/tag/v3.0.11). Aplicativo universal para macOS 12+, Intel e Apple Silicon. Experimental: ainda precisa de validação em um Mac real. [Instalação e limites](docs/platform-previews.md).
 
 ## Destaques atuais
 
@@ -116,7 +116,7 @@ Mais capturas estão no [README em inglês](README.md#screenshots).
 
 ## Limitações atuais
 
-- Pacotes para Windows x64 e Ubuntu 24.04 x64. Ubuntu passou em 152 testes direcionados, instalação apt e abertura gráfica em dois modos; áudio, troca de saída e bandeja reais ainda precisam de aceite na VM/partição. Android e macOS não são entregues/validados.
+- Pacotes para Windows x64 e Ubuntu 24.04 x64. Ubuntu passou em 152 testes direcionados, instalação apt e abertura gráfica em dois modos; áudio, troca de saída e bandeja reais ainda precisam de aceite na VM/partição. macOS permanece experimental, aguardando validação em um Mac real.
 - Google Drive, WebDAV, Jellyfin, Emby, SMB e envios Last.fm têm implementação/testes controlados, mas ainda precisam de aceites reais mais amplos. Testes não equivalem a certificação por serviço.
 - Sincronização manual/completa; não há política geral automática/incremental. Google oferece um seletor visual de pastas. Não há transcodificação Jellyfin/Emby.
 - Agrupamentos de artistas/álbuns ainda não são integralmente paginados em SQL. Coleções grandes exigem medição na máquina real.
@@ -140,4 +140,4 @@ Windows 3.0.3: consulte o [manifesto de validação](release/validation.json) pa
 
 ![Músicas com rolagem contínua e linhas alternadas; dados fictícios](docs/images/songs-3.0.png)
 
-> As builds experimentais Android e macOS usam este mesmo projeto. Veja [escopo e instalação](docs/platform-previews.md). Os downloads de todas as plataformas ficam na mesma release.
+> A build experimental macOS utiliza este mesmo projeto. Veja [escopo e instalação](docs/platform-previews.md). Os downloads desktop ficam na mesma release.
