@@ -470,30 +470,38 @@ void main() {
             find.text('Album A').evaluate().isNotEmpty &&
             !key.currentState!.refreshing,
       );
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       await tester.tap(find.text('Album A').first);
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       expect(key.currentState!.category, 'albums');
       await tester.tap(find.widgetWithText(TextButton, 'Artist A').first);
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       expect(key.currentState!.category, 'albumArtists');
       expect(find.text('Discography'), findsOneWidget);
       await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       await tester.tap(find.text('Album B').first);
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       expect(key.currentState!.category, 'albums');
       expect(key.currentState!.selectedGroup!.name, 'Album B');
       await tester.tap(find.byTooltip('Voltar'));
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       expect(key.currentState!.category, 'albumArtists');
       await tester.tap(find.byTooltip('Voltar'));
-      await tester.pumpAndSettle();
+      await drainCatalog(tester);
+      await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
       expect(key.currentState!.selectedGroup!.name, 'Album A');
       for (final width in [480.0, 800.0, 1280.0]) {
         tester.view.physicalSize = Size(width, 720);
         tester.view.devicePixelRatio = 1;
-        await tester.pumpAndSettle();
+        await drainCatalog(tester);
+        await waitForCatalog(tester, () => !tester.binding.hasScheduledFrame);
         expect(tester.takeException(), isNull);
       }
       tester.view.resetPhysicalSize();
