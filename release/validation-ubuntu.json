@@ -1,25 +1,25 @@
 {
-  "version": "3.0.8+73",
+  "version": "3.0.10+75",
   "platform": "Ubuntu Desktop 24.04 amd64",
-  "sourceCommit": "b13edd0a5c26b7bb2dcb9525326ad705156c11eb",
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44173357598",
+  "sourceCommit": "39ed9904f32ff0747ad6cfd61dcb1ba067747e31",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44527941990",
   "readyToPublish": true,
   "experimental": false,
-  "debianVersion": "3.0.8-0ubuntu1",
+  "debianVersion": "3.0.10-0ubuntu1",
   "installer": {
-    "file": "music-time-preview_3.0.8-0ubuntu1_amd64.deb",
-    "bytes": 12566004,
-    "sha256": "ad5d808ab170d8ef017244f3f4da0c28517e4ad5b83c653a02bf82d9d88dd085"
+    "file": "music-time-preview_3.0.10-0ubuntu1_amd64.deb",
+    "bytes": 12596300,
+    "sha256": "a3045201b9595d22d74d85618fa9f695fa0ed593419a785f1baa0dad6ad52333"
   },
   "checks": {
     "analysis": "passed",
-    "targetedTests": "passed including interface_308_test.dart",
-    "mprisTests": "passed; real D-Bus session",
+    "targetedTests": "passed including brainz_integrations_test.dart",
+    "mprisTests": "passed with real D-Bus session",
     "linuxReleaseBuild": "passed",
-    "graphicalLaunch": "passed in compatibility and software modes under Xvfb",
-    "mpris": "passed; metadata, play/pause, hidden window, Raise and Quit",
-    "debInstallation": "passed using apt in Ubuntu CI",
-    "desktopIntegration": "desktop entry and installed icon validated"
+    "graphicalLaunch": "passed under Xvfb",
+    "mpris": "metadata/play/pause/hidden window/Raise/Quit passed",
+    "debInstallation": "apt install and compatibility/software rendering passed",
+    "desktopIntegration": "desktop entry and icon validated"
   },
-  "limits": "Automated validation; acceptance in a real VM/partition with user audio devices remains separate."
+  "limits": "Automated Ubuntu CI; physical audio device, tray extension and VM/partition user acceptance remain separate. External provider tests use simulated responses."
 }
