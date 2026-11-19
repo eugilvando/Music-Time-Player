@@ -1,19 +1,19 @@
 {
-  "version": "3.0.10+75",
+  "version": "3.0.11+76",
   "platform": "Ubuntu Desktop 24.04 amd64",
-  "sourceCommit": "39ed9904f32ff0747ad6cfd61dcb1ba067747e31",
-  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44527941990",
+  "sourceCommit": "3c6b754a967e9dbe69c0345e00d582d1c74e8b18",
+  "workflow": "https://github.com/eugilvando/Music-Time-Player/actions/runs/44547172751",
   "readyToPublish": true,
   "experimental": false,
-  "debianVersion": "3.0.10-0ubuntu1",
+  "debianVersion": "3.0.11-0ubuntu1",
   "installer": {
-    "file": "music-time-preview_3.0.10-0ubuntu1_amd64.deb",
-    "bytes": 12596300,
-    "sha256": "a3045201b9595d22d74d85618fa9f695fa0ed593419a785f1baa0dad6ad52333"
+    "file": "music-time-preview_3.0.11-0ubuntu1_amd64.deb",
+    "bytes": 12594296,
+    "sha256": "96efd723a22386016c4b1477e8e754be61e98b9e22190175f1c44ddfa883f324"
   },
   "checks": {
     "analysis": "passed",
-    "targetedTests": "passed including brainz_integrations_test.dart",
+    "targetedTests": "passed including navigation_performance_test.dart and brainz_integrations_test.dart",
     "mprisTests": "passed with real D-Bus session",
     "linuxReleaseBuild": "passed",
     "graphicalLaunch": "passed under Xvfb",

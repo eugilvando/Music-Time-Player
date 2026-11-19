@@ -1,20 +1,20 @@
 {
-  "version": "3.0.10+75",
+  "version": "3.0.11+76",
   "platform": "Windows x64",
-  "sourceCommit": "76aa0dac9a894ad4147760c4473c6b641f1ecadd",
+  "sourceCommit": "3c6b754a967e9dbe69c0345e00d582d1c74e8b18",
   "readyToPublish": true,
   "installer": {
-    "file": "MusicTime-Setup-3.0.10.exe",
-    "bytes": 46774933,
-    "sha256": "0e80c8057babb2b05d4efefda47753d1d021b0e3ddf10285c91e6fa9e70f0bcb"
+    "file": "MusicTime-Setup-3.0.11.exe",
+    "bytes": 46786358,
+    "sha256": "7806c8aeba8235216406d0d63982bef9f15be888dc64c6211e10d0031c1c9ffa"
   },
   "checks": {
     "analysis": "passed",
-    "targetedRegressionTests": 41,
-    "coverage": "ListenBrainz token errors, source availability, independent insight caches, local history, Last.fm and ListenBrainz reports, playlist creation UI, CSV, favorites, backup encryption",
+    "targetedRegressionTests": 50,
+    "coverage": "Persistent similarity cache, source registration, Insights navigation, Home and favorites caches, queue toolbar layout, source removal, backup/reset",
     "releaseBuild": "passed",
     "nativeIntegration": "SMTC artwork/play/pause, tray hide/restore and clean exit passed",
-    "installation": "3.0.10+75 verified; installed hashes matched; database/preferences/vault unchanged"
+    "installation": "3.0.11+76 verified; installed hashes matched; database/preferences/vault unchanged"
   },
   "limits": "New provider integrations tested with simulated responses, not live account credentials. Remote Windows native audio acceptance is not assumed."
 }
