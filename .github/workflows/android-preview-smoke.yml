@@ -23,6 +23,9 @@ jobs:
         run: |
           export PATH="$ANDROID_HOME/platform-tools:$PATH"
           echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          export ANDROID_USER_HOME="$RUNNER_TEMP/music-time-android"
+          export ANDROID_AVD_HOME="$ANDROID_USER_HOME/avd"
+          mkdir -p "$ANDROID_AVD_HOME"
           SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
           "$SDKMANAGER" 'system-images;android-35;google_apis;x86_64' 'emulator' 'platform-tools'
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd -n music_time_smoke -k 'system-images;android-35;google_apis;x86_64' --device pixel_2
